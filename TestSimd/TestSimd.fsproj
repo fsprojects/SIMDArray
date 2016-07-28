@@ -83,6 +83,13 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SIMDArray\SIMDArray.fsproj">
+      <Name>SIMDArray</Name>
+      <Project>{aed427e4-ce8c-47fc-8918-2bac5d4d3d35}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
