@@ -194,12 +194,10 @@ module Array =
 
         checkNonNull array
         
-        let len = array.Length
-        
-        let inCount = Vector<(^T)>.Count        
-                           
-        let mutable i = 0
-        
+        let len = array.Length        
+        let inCount = Vector<(^T)>.Count                                   
+
+        let mutable i = 0        
         while i < len - inCount do
             (f (Vector<(^T)>(array,i ))).CopyTo(array,i)
             i <- i + inCount
@@ -220,16 +218,18 @@ module Array =
     /// <param name="f">Takes a Vector<T> and returns true or false to indicate existence</param>
     /// <param name="array"></param>
     let inline SIMDExists (f : Vector<(^T)> -> bool) (array: ^T[]) : bool =
-        let mutable vi = 0
-        let vCount = Vector<(^T)>.Count        
+        
+        let count = Vector<(^T)>.Count        
         let mutable found = false
         let len = array.Length
-        while vi < len - vCount do
+
+        let mutable vi = 0
+        while vi < len - count do
             found <- f (Vector<(^T)>(array,vi))
             if found then 
                 vi <- len
             else 
-                vi <- vi + vCount
+                vi <- vi + count
         
         if not found && vi < len then            
             let leftOverArray = 
@@ -261,11 +261,13 @@ module Array =
     let inline SIMDMax (array :^T[]) : ^T =
         
          checkNonNull array
+
          let len = array.Length
          if len = 0 then invalidArg "array" "empty array"
          let mutable max = array.[0]
-         let mutable vi = 0
          let count = Vector<(^T)>.Count
+
+         let mutable vi = 0
          if len >= count then
             let mutable maxV = Vector<(^T)>(array,0)
             vi <- vi + count            
@@ -276,6 +278,7 @@ module Array =
             
             for i in 0 .. count-1 do          
                 if maxV.[i] > max then max <- maxV.[i]
+         
          while vi < len do
             if array.[vi] > max then max <- array.[vi]
             vi <- vi + 1
@@ -291,8 +294,9 @@ module Array =
          let len = array.Length
          if len = 0 then invalidArg "array" "empty array"
          let mutable min = array.[0]
-         let mutable vi = 0
          let count = Vector<(^T)>.Count
+         
+         let mutable vi = 0         
          if len >= count then
             let mutable minV = Vector<(^T)>(array,0)
             vi <- vi + count            
@@ -303,6 +307,7 @@ module Array =
             
             for i in 0 .. count-1 do          
                 if minV.[i] < min then min <- minV.[i]
+       
          while vi < len do
             if array.[vi] < min then min <- array.[vi]
             vi <- vi + 1
