@@ -129,41 +129,56 @@ module test =
         else 
             true
 
-    let testInt32 (array:int[]) =
-        testMap array &&
-        testFold array &&
-        testMinMax array
-
-    let testInt64 (array:int64[]) =
-        testMap array &&
-        testFold array &&
-        testMinMax array
-
-    let testFloat (array:float[]) =
-        testMap array &&
-        testFold array &&
-        testMinMax array
-
-    let testFloat32 (array:float32[]) =
-        testMap array &&
-        testFold array &&
-        testMinMax array
-
+    let testInt32 f (array:int[]) =
+        f array
+        
+    let testInt64 f (array:int64[]) =
+        f array
+        
+    let testFloat f (array:float[]) =
+        f array
+        
+    let testFloat32 f (array:float32[]) =
+        f array
+        
 
     
     [<EntryPoint>]
     let main argv =              
-              
+
        
         let testCount = 100000
         printf "Test Int32\n"
-        Check.One( {Config.Quick with MaxTest = testCount;}, testInt32)
+        printf "Test Map\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt32 testMap)
+        printf "Test Fold\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt32 testFold)
+        printf "Test MinMax\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt32 testMinMax)
+
         printf "Test Int64\n"
-        Check.One( {Config.Quick with MaxTest = testCount;}, testInt64)
+        printf "Test Map\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt64 testMap)
+        printf "Test Fold\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt64 testFold)
+        printf "Test MinMax\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt64 testMinMax)
+
         printf "Test Float\n"
-        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat)
+        printf "Test Map\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat testMap)
+        printf "Test Fold\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat testFold)
+        printf "Test MinMax\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat testMinMax)
+
         printf "Test Float32\n"
-        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat32)
+        printf "Test Map\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat32 testMap)
+        printf "Test Fold\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat32 testFold)
+        printf "Test MinMax\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat32 testMinMax)
         
 
        
