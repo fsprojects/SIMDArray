@@ -4,9 +4,10 @@
 
 
 open System.Numerics
+open System
 open System.Diagnostics
 open JMott.SIMDArray
-
+open FsCheck
                   
 module test = 
 
@@ -76,81 +77,100 @@ module test =
           s.Stop()
           let time = s.ElapsedTicks    
           match (sum,SIMDSum) with
-          | (Some s, Some simd) when s <> simd -> printf "Sum Error.  SIMDSum: %A  Sum: %A\n" simd s
-          | (Some _, None) -> printf "Sum Error. simd was null sum was not\n"
-          | (None, Some _) ->  printf "Sum Error, sum was null simd was not\n"
+          | (Some s, Some simd) when s <> simd -> printf "Sum Error.  SIMDSum: %A  Sum: %A Array:%A\n" simd s a
+          | (Some _, None) -> printf "Sum Error. simd was null sum was not Array:%A\n" a
+          | (None, Some _) ->  printf "Sum Error, sum was null simd was not Array:%A\n" a
           | _ -> printf "Success. SIMD was %A ticks faster\n" (time-simdTime)
 
-    
-    let inline testFunc x =
-        x * x 
-      
-    let inline SIMDFindFunc (x:Vector<int>) : bool =
-        Vector.EqualsAny(x,Vector<int>(50000))
-    
-    let inline findFunc x =
-        x = 500000
 
-    [<EntryPoint>]
-    let main argv = 
+    let inline arrayComp (a: 'T[]) (b: 'T[]) =
+       Array.fold (&&) true (Array.zip a b |> Array.map (fun (aa,bb) -> aa.Equals(bb) ))
+
+
+    let inline compareNums a b =
+        let fa = (float a)
+        let fb = (float b)
+        a.Equals(b) || float(a - b) < 0.00001 || float(b -  a) < 0.00001 ||
+        Double.IsNaN(fa) && Double.IsInfinity(fb) || Double.IsNaN(fb) && Double.IsInfinity(fa) 
         
-        let mutable x = 1
-        let s = Stopwatch()    
-        while x <= 10000000 do
-            let a = [| 1 .. x |]
-                    
-            s.Restart()
-            let newmap =                                           
-                 a |>
-                 Array.SIMDSimpleExists 500000
-            s.Stop()
-            printf "%A\n" newmap
-            let simdt = s.ElapsedTicks                    
-            System.GC.WaitForFullGCComplete() |> ignore
-            s.Restart()
-            
-            let newmap = 
-                a |>
-                Array.exists findFunc
 
-            s.Stop()        
-            printf "%A\n" newmap
-            let t = s.ElapsedTicks        
-            printf "x:%A Diff:%A  percent:%A\n" x (t-simdt) (((float)t/(float)simdt)*100.0)
-            x <- x * 10
+    let inline testMap (array:'T[]) =
+        
+        let a = array |> Array.SIMDMap (fun x -> x*x)
+        let b = array |> Array.map (fun x -> x*x)
 
-        (*
-        let intArrays =
-          [|            
-            [||]              
-            [|1|]
-            [|0|]
-            [|-1|]
-            [|1;2;|]
-            [|1;2;3|]
-            [|1;2;3;4|]  
-            [|1;2;3;4;5|]
-            [|1;2;3;4;5;6|]
-            [|1;2;3;4;5;6;7|]
-            [|1;2;3;4;5;6;7;8|]
-            [|1;2;3;4;5;6;7;8;9|]
-            [|1;2;3;4;5;6;7;8;9;10|]         
-            [|0 .. 101|]   
-            [|0 .. 1001|]
-            [|0 .. 10001|]
-            [|0 .. 100001|]
-            [|0 .. 1000001|]
-            [|0 .. 10000001|]
-            [|0 .. 100000001|] 
-          |]
+        let c = array |> Array.SIMDMap (fun x -> x+x)
+        let d = array |> Array.map (fun x -> x+x)
+
+        let e = array |> Array.SIMDMap (fun x -> x-x)
+        let f = array |> Array.map (fun x -> x-x)
+
+        let g = array |> Array.SIMDMap (fun x -> x)
+        let h = array |> Array.map (fun x -> x)
+
+        arrayComp a b && arrayComp c d && arrayComp e f && arrayComp g h
+
+    let inline testFold (array:'T[]) =
+        
+        let a = array |> Array.SIMDFold (+) (+) Unchecked.defaultof<'T>
+        let b = array |> Array.fold (+) Unchecked.defaultof<'T>
+                
+        compareNums a b
+
+    let inline testMinMax (array:'T[]) =
+        if array.Length <> 0 then
+            let a = array |> Array.SIMDMin
+            let b = array |> Array.min
+
+            let c = array |> Array.SIMDMax
+            let d = array |> Array.max
+                
+            compareNums a b && compareNums c d
+        else 
+            true
+
+    let testInt32 (array:int[]) =
+        testMap array &&
+        testFold array &&
+        testMinMax array
+
+    let testInt64 (array:int64[]) =
+        testMap array &&
+        testFold array &&
+        testMinMax array
+
+    let testFloat (array:float[]) =
+        testMap array &&
+        testFold array &&
+        testMinMax array
+
+    let testFloat32 (array:float32[]) =
+        testMap array &&
+        testFold array &&
+        testMinMax array
+
+
+    
+    [<EntryPoint>]
+    let main argv =              
+              
        
-        intArrays
-        |> Array.iter (testSIMDMap (fun x -> x * x * x) (fun x -> x*x *x ))
+        let testCount = 100000
+        printf "Test Int32\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt32)
+        printf "Test Int64\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testInt64)
+        printf "Test Float\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat)
+        printf "Test Float32\n"
+        Check.One( {Config.Quick with MaxTest = testCount;}, testFloat32)
+        
 
-        intArrays
-        |> Array.iter (testSIMDFold (+) (+) (+) 0)
-
-        *)
+       
+       
+            
+        
+        
         0
         
             

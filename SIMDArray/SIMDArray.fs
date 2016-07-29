@@ -18,13 +18,14 @@ module Array =
     /// <param name="curIndex"></param>
     let inline private getLeftovers (array: ^T[]) (curIndex: int) : Vector<(^T)>   =
         let mutable vi = curIndex
+        let d = Unchecked.defaultof<(^T)>
         let leftOverArray = 
             [| for _ in 1 .. (Vector<(^T)>.Count) do
                 if vi < array.Length then
                     yield array.[vi]
                     vi <- vi + 1
                 else 
-                    yield Unchecked.defaultof<'T>
+                    yield d
             |]
         Vector<(^T)>(leftOverArray)
 
@@ -124,18 +125,18 @@ module Array =
         
         let mutable state = Vector<(^T)>.Zero
         let mutable vi = 0
-        let vCount = Vector<(^T)>.Count
-        while vi <= array.Length - vCount do
+        let count = Vector<(^T)>.Count
+        while vi <= array.Length - count do
             state <-  state + Vector<(^T)>(array,vi)
-            vi <- vi + vCount
+            vi <- vi + count
         
         let mutable result = Unchecked.defaultof<(^T)>
         while vi < array.Length do
             result <- result + array.[vi]
             vi <- vi + 1
         
-        vi <- 0        
-        while vi < vCount do            
+        vi <- 0                
+        while vi < count do            
             result <- result + state.[vi]
             vi <- vi + 1
         result
@@ -263,7 +264,7 @@ module Array =
          checkNonNull array
 
          let len = array.Length
-         if len = 0 then invalidArg "array" "empty array"
+         if len = 0 then invalidArg "array" "The input array was empty."
          let mutable max = array.[0]
          let count = Vector<(^T)>.Count
 
