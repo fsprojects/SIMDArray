@@ -1,0 +1,12 @@
+source http://www.nuget.org/api/v2
+
+nuget FSharp.Core framework net40
+nuget System.Numerics.Vectors framework net46
+
+group Test
+    source http://www.nuget.org/api/v2
+
+    nuget BenchmarkDotnet framework net45
+    nuget FsCheck
+    nuget Streams 
+    nuget Streams.CSharp
