@@ -1,7 +1,7 @@
 ﻿namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("SIMDArray")>]
+[<assembly: AssemblyTitleAttribute("TestSimd")>]
 [<assembly: AssemblyProductAttribute("SIMDArray")>]
 [<assembly: AssemblyDescriptionAttribute("SIMD enhanced Array operations for F#")>]
 [<assembly: AssemblyVersionAttribute("0.0.1")>]
