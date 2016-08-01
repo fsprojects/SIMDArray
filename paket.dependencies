@@ -1,10 +1,23 @@
 source http://www.nuget.org/api/v2
+redirects: on
+framework: >= net45 
 
-nuget FSharp.Core framework net40
+nuget FSharp.Core redirects: force
 nuget System.Numerics.Vectors framework net46
+
+group Build
+    source https://nuget.org/api/v2
+    framework: >= net45 
+      
+    nuget SourceLink.Fake
+    nuget FAKE
+    nuget FSharp.Formatting
+
+    github fsharp/FAKE modules/Octokit/Octokit.fsx
 
 group Test
     source http://www.nuget.org/api/v2
+    framework: >= net45 
 
     nuget BenchmarkDotnet framework net45
     nuget FsCheck
