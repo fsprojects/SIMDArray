@@ -98,11 +98,13 @@ let inline reduce
 
     
 /// <summary>
-/// Creates an array filled with the value x
+/// Creates an array filled with the value x. Only faster than
+/// Core lib create for larger width Vectors (byte, shorts etc)
 /// </summary>
 /// <param name="count">How large to make the array</param>
 /// <param name="x">What to fille the array with</param>
 let inline create (count :int) (x:^T) =         
+    //if count < 0 then invalidArg "count" "The input must be non-negative."
     let array = Array.zeroCreate count : ^T[]
     let mutable i = 0
     let v = Vector< ^T> x
@@ -115,6 +117,48 @@ let inline create (count :int) (x:^T) =
         array.[i] <- x
         i <- i + 1
 
+    array
+
+/// <summary>
+/// Sets a range of an array to the default value.
+/// </summary>
+/// <param name="array">The array to clear</param>
+/// <param name="index">The starting index to clear</param>
+/// <param name="length">The number of elements to clear</param>
+let inline clear (array : ^T[]) (index : int) (length : int) : unit =  
+    let mutable i = index
+    let v = Vector< ^T> Unchecked.defaultof<(^T)>
+    let vCount = Vector< ^T>.Count
+    while i < length - vCount do
+        v.CopyTo(array,i)
+        i <- i + vCount
+
+    while i < length do
+        array.[i] <- Unchecked.defaultof<(^T)>
+        i <- i + 1
+
+    
+
+/// <summary>
+/// Similar to the built in init function but f will get called with every
+/// nth index, where n is the width of the vector, and you return a Vector.
+/// </summary>
+/// <param name="count">How large to make the array</param>
+/// <param name="f">A function that accepts every Nth index and returns a Vector to be copied into the array</param>
+let inline init (count :int) (f : int -> Vector<(^T)>)  =         
+    if count < 0 then invalidArg "count" "The input must be non-negative."
+    let array = Array.zeroCreate count : ^T[]
+    let mutable i = 0    
+    let vCount = Vector< ^T>.Count
+    while i < count - vCount do
+        (f i).CopyTo(array,i)
+        i <- i + vCount
+    let leftOvers = f i
+    let mutable leftOverIndex = 0
+    while i < count do
+        array.[i] <- leftOvers.[leftOverIndex]
+        leftOverIndex <- leftOverIndex + 1
+        i <- i + 1
     array
 
 
