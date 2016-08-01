@@ -1,11 +1,11 @@
 ﻿[<RequireQualifiedAccess>]
 module Array.SIMD
 
-open System.Numerics 
+open System.Numerics
 
 
-let inline private checkNonNull arg = 
-    match box arg with 
+let inline private checkNonNull arg =
+    match box arg with
     | null -> nullArg "array"
     | _ -> ()
 
@@ -18,12 +18,12 @@ let inline private checkNonNull arg =
 let inline private getLeftovers (array: ^T []) (curIndex: int) : ^T Vector =
     let mutable vi = curIndex
     let d = Unchecked.defaultof< ^T>
-    let leftOverArray = 
+    let leftOverArray =
         [| for i=1 to Vector< ^T>.Count do
             if vi < array.Length then
                 yield array.[vi]
                 vi <- vi + 1
-            else 
+            else
                 yield d
         |]
     Vector< ^T> leftOverArray
@@ -56,23 +56,22 @@ let inline private applyLeftovers (count: int) (input: ^T Vector) (result: ^T Ve
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold
-    (f: ^State Vector -> ^T Vector -> ^State Vector)          
-    (combiner : ^State -> ^State -> ^State)          
-    (acc : ^State) 
+    (f: ^State Vector -> ^T Vector -> ^State Vector)
+    (combiner : ^State -> ^State -> ^State)
+    (acc : ^State)
     (array: ^T[]) : ^State =
-                
+
     checkNonNull array
-        
-    let mutable state = Vector< ^State>(acc)
+    let mutable state = Vector< ^State> acc
     let mutable vi = 0
     let vCount = Vector< ^T>.Count
     while vi <= array.Length - vCount do
         state <- f state (Vector< ^T>(array,vi))
         vi <- vi + vCount
-        
+
     let leftoverCount = array.Length - vi
-    if leftoverCount <> 0 then                                                     
-        let leftOver = f state (getLeftovers array vi )        
+    if leftoverCount <> 0 then
+        let leftOver = f state (getLeftovers array vi )
         state <- applyLeftovers leftoverCount leftOver state
 
     vi <- 0
@@ -90,20 +89,19 @@ let inline fold
 /// <param name="combiner">Function to combine the Vector elements at the end</param>
 /// <param name="array">Source array</param>
 let inline reduce
-    (f: ^State Vector -> ^T Vector -> ^State Vector)          
-    (combiner : ^State -> ^State -> ^State)                  
+    (f: ^State Vector -> ^T Vector -> ^State Vector)
+    (combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
-
     fold f combiner Unchecked.defaultof< ^State> array
 
-    
+
 /// <summary>
 /// Creates an array filled with the value x. Only faster than
 /// Core lib create for larger width Vectors (byte, shorts etc)
 /// </summary>
 /// <param name="count">How large to make the array</param>
 /// <param name="x">What to fille the array with</param>
-let inline create (count :int) (x:^T) =         
+let inline create (count :int) (x:^T) =
     //if count < 0 then invalidArg "count" "The input must be non-negative."
     let array = Array.zeroCreate count : ^T[]
     let mutable i = 0
@@ -125,19 +123,19 @@ let inline create (count :int) (x:^T) =
 /// <param name="array">The array to clear</param>
 /// <param name="index">The starting index to clear</param>
 /// <param name="length">The number of elements to clear</param>
-let inline clear (array : ^T[]) (index : int) (length : int) : unit =  
+let inline clear (array : ^T[]) (index : int) (length : int) : unit =
     let mutable i = index
-    let v = Vector< ^T> Unchecked.defaultof<(^T)>
+    let v = Vector< ^T> Unchecked.defaultof< ^T>
     let vCount = Vector< ^T>.Count
     while i < length - vCount do
         v.CopyTo(array,i)
         i <- i + vCount
 
     while i < length do
-        array.[i] <- Unchecked.defaultof<(^T)>
+        array.[i] <- Unchecked.defaultof< ^T>
         i <- i + 1
 
-    
+
 
 /// <summary>
 /// Similar to the built in init function but f will get called with every
@@ -145,10 +143,10 @@ let inline clear (array : ^T[]) (index : int) (length : int) : unit =
 /// </summary>
 /// <param name="count">How large to make the array</param>
 /// <param name="f">A function that accepts every Nth index and returns a Vector to be copied into the array</param>
-let inline init (count :int) (f : int -> Vector<(^T)>)  =         
+let inline init (count :int) (f : int -> Vector< ^T>)  =
     if count < 0 then invalidArg "count" "The input must be non-negative."
     let array = Array.zeroCreate count : ^T[]
-    let mutable i = 0    
+    let mutable i = 0
     let vCount = Vector< ^T>.Count
     while i < count - vCount do
         (f i).CopyTo(array,i)
@@ -167,23 +165,23 @@ let inline init (count :int) (f : int -> Vector<(^T)>)  =
 /// </summary>
 /// <param name="array"></param>
 let inline sum (array:^T[]) : ^T =
-                
+
     checkNonNull array
-        
+
     let mutable state = Vector< ^T>.Zero
     let mutable vi = 0
     let count = Vector< ^T>.Count
     while vi <= array.Length - count do
         state <-  state + Vector< ^T>(array,vi)
         vi <- vi + count
-        
+
     let mutable result = Unchecked.defaultof< ^T>
     while vi < array.Length do
         result <- result + array.[vi]
         vi <- vi + 1
-        
-    vi <- 0                
-    while vi < count do            
+
+    vi <- 0
+    while vi < count do
         result <- result + state.[vi]
         vi <- vi + 1
     result
@@ -197,7 +195,7 @@ let inline average (array:^T[]) : ^T =
     let sum = sum array
     LanguagePrimitives.DivideByInt< ^T> sum array.Length
 
-  
+
 /// <summary>
 /// Identical to the standard map function, but you must provide
 /// A Vector mapping function.
@@ -209,25 +207,25 @@ let inline map
     (f : ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
 
     checkNonNull array
-        
+
     let len = array.Length
     let result = Array.zeroCreate len
-    let inCount = Vector< ^T>.Count        
+    let inCount = Vector< ^T>.Count
     let outCount = Vector< ^U>.Count
-                   
+
     let mutable i, ri = 0, 0
     while i < len - inCount do
         (f (Vector< ^T>(array,i ))).CopyTo(result,ri)
         i <- i + inCount
         ri <- ri + outCount
-                                                                 
+
     let leftoverCount = len - i
-    if leftoverCount <> 0 then                                                     
+    if leftoverCount <> 0 then
         let mutable ai = len - leftoverCount
-        let leftOver = f (getLeftovers array ai)                    
+        let leftOver = f (getLeftovers array ai)
         for i=0 to leftoverCount-1 do
-            result.[ai] <- leftOver.[i]       
-            ai <- ai + 1     
+            result.[ai] <- leftOver.[i]
+            ai <- ai + 1
     result
 
 
@@ -242,23 +240,23 @@ let inline mapInPlace
     ( f : ^T Vector -> ^T Vector) (array: ^T[]) : unit =
 
     checkNonNull array
-        
-    let len = array.Length        
-    let inCount = Vector< ^T>.Count                                   
 
-    let mutable i = 0        
+    let len = array.Length
+    let inCount = Vector< ^T>.Count
+
+    let mutable i = 0
     while i < len - inCount do
         (f (Vector< ^T>(array,i))).CopyTo(array,i)
         i <- i + inCount
-                                                                         
+
     let leftoverCount = len - i
-    if leftoverCount <> 0 then                                                     
+    if leftoverCount <> 0 then
         let mutable ai = len - leftoverCount
-        let leftOver = f (getLeftovers array ai)                    
+        let leftOver = f (getLeftovers array ai)
         for i=0 to leftoverCount-1 do
-            array.[ai] <- leftOver.[i]       
-            ai <- ai + 1     
-            
+            array.[ai] <- leftOver.[i]
+            ai <- ai + 1
+
 
 /// <summary>
 /// Checks for the existence of a value. You provide a function that takes a Vector
@@ -267,8 +265,8 @@ let inline mapInPlace
 /// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
 /// <param name="array"></param>
 let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
-        
-    let count = Vector< ^T>.Count        
+
+    let count = Vector< ^T>.Count
     let mutable found = false
     let len = array.Length
 
@@ -277,24 +275,24 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
         found <- f (Vector< ^T>(array,vi))
         if found then vi <- len
         else vi <- vi + count
-        
-    if not found && vi < len then            
-        let leftOverArray = 
+
+    if not found && vi < len then
+        let leftOverArray =
             [| for i=1 to Vector< ^T>.Count do
                 if vi < array.Length then
                     yield array.[vi]
                     vi <- vi + 1
-                else 
+                else
                     yield array.[len-1] //just repeat the last item
             |]
         found <- f (Vector< ^T> leftOverArray)
-                                            
+
     found
-    
-    
+
+
 /// <summary>
 /// Helper function to simplify when you just want to check for existence of a value
-/// directly. 
+/// directly.
 /// </summary>
 /// <param name="x"></param>
 /// <param name="array"></param>
@@ -306,7 +304,7 @@ let inline simpleExists (x : ^T) (array:^T[]) : bool =
 /// </summary>
 /// <param name="array"></param>
 let inline max (array :^T[]) : ^T =
-        
+
     checkNonNull array
 
     let len = array.Length
@@ -317,15 +315,15 @@ let inline max (array :^T[]) : ^T =
     let mutable vi = 0
     if len >= count then
         let mutable maxV = Vector< ^T>(array,0)
-        vi <- vi + count            
+        vi <- vi + count
         while vi < len - count do
             let v = Vector< ^T>(array,vi)
             maxV <- Vector.Max(v,maxV)
             vi <- vi + count
-            
-        for i=0 to count-1 do          
+
+        for i=0 to count-1 do
             if maxV.[i] > max then max <- maxV.[i]
-         
+
     while vi < len do
         if array.[vi] > max then max <- array.[vi]
         vi <- vi + 1
@@ -336,27 +334,26 @@ let inline max (array :^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline min (array :^T[]) : ^T =
-        
+
     checkNonNull array
     let len = array.Length
     if len = 0 then invalidArg "array" "empty array"
     let mutable min = array.[0]
     let count = Vector< ^T>.Count
-        
-    let mutable vi = 0         
+
+    let mutable vi = 0
     if len >= count then
         let mutable minV = Vector< ^T>(array,0)
-        vi <- vi + count            
+        vi <- vi + count
         while vi < len - count do
             let v = Vector< ^T>(array,vi)
             minV <- Vector.Min(v,minV)
             vi <- vi + count
-            
-        for i=0 to count-1 do          
+
+        for i=0 to count-1 do
             if minV.[i] < min then min <- minV.[i]
-       
+
     while vi < len do
         if array.[vi] < min then min <- array.[vi]
         vi <- vi + 1
     min
-         

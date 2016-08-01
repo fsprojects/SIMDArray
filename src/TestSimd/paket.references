@@ -1,8 +1,0 @@
-FSharp.Core
-System.Numerics.Vectors
-
-group Test
-    BenchmarkDotnet
-    FsCheck
-    Streams
-    Streams.CSharp
