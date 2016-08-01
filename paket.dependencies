@@ -19,7 +19,9 @@ group Test
     source http://www.nuget.org/api/v2
     framework: >= net45 
 
-    nuget BenchmarkDotnet framework net45
+nuget BenchmarkDotnet
     nuget FsCheck
+nuget NUnit
+nuget NUnit.Runners
     nuget Streams 
     nuget Streams.CSharp

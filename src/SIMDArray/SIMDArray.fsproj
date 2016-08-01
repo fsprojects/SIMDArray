@@ -13,8 +13,8 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Name>SIMDArray</Name>
-    <OutputPath>bin\$(Configuration)\$(Platform)</OutputPath>
-    <DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).XML</DocumentationFile>
+    <OutputPath>bin\$(Configuration)</OutputPath>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
