@@ -139,16 +139,19 @@ Target "Build" (fun _ ->
     |> ignore
 )
 
+open Fake.Testing.NUnit3
+
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
 Target "RunTests" (fun _ ->
     !! testAssemblies
-    |> NUnit (fun p ->
+    |> NUnit3 (fun p ->
         { p with
-            DisableShadowCopy = true
+            ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+            ResultSpecs = ["TestResults.xml"]
+        })
 )
 
 #if MONO

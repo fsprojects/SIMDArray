@@ -1,3 +1,4 @@
+REDIRECTS: ON
 FRAMEWORK: >= NET45
 NUGET
   remote: http://www.nuget.org/api/v2
@@ -20,7 +21,7 @@ NUGET
 GITHUB
   remote: fsharp/FAKE
     modules/Octokit/Octokit.fsx (8fd20ae42c996060bc8bedb821edfb50517cdd8b)
-      Octokit (>= 0.20)
+      Octokit
 GROUP Test
 FRAMEWORK: >= NET45
 NUGET

@@ -3,7 +3,6 @@
 open System.Numerics
 open System
 open System.Diagnostics
-open SIMDArray
 open FsCheck
                   
 
