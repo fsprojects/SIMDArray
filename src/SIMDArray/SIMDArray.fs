@@ -236,7 +236,7 @@ let inline map
 /// the resulting Vector type must be the same as the intial type. This will
 /// perform better when it can be used.
 /// </summary>
-/// <param name="f">Mapping function that takes a Vector<T> and returns a Vector<T></param>
+/// <param name="f">Mapping function that takes a Vector and returns a Vector of the same type</param>
 /// <param name="array"></param>
 let inline mapInPlace
     ( f : ^T Vector -> ^T Vector) (array: ^T[]) : unit =
@@ -261,10 +261,10 @@ let inline mapInPlace
             
 
 /// <summary>
-/// Checks for the existence of a value. You provide a function that takes a Vector<T>
-/// and returns whether the value you want exists in the Vector. Or any other logic you want.
+/// Checks for the existence of a value. You provide a function that takes a Vector
+/// and returns whether the condition you want exists in the Vector.
 /// </summary>
-/// <param name="f">Takes a Vector<T> and returns true or false to indicate existence</param>
+/// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
 /// <param name="array"></param>
 let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
         
