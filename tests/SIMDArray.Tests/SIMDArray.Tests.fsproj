@@ -90,8 +90,8 @@
   <ItemGroup>
     <Content Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="Test.fs" />
+    <Content Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -182,6 +182,17 @@
       <ItemGroup>
         <Reference Include="Streams.CSharp">
           <HintPath>..\..\packages\test\Streams.CSharp\lib\net45\Streams.CSharp.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="Unquote">
+          <HintPath>..\..\packages\test\Unquote\lib\net45\Unquote.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

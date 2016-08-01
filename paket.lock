@@ -23,6 +23,7 @@ GITHUB
     modules/Octokit/Octokit.fsx (8fd20ae42c996060bc8bedb821edfb50517cdd8b)
       Octokit
 GROUP Test
+REDIRECTS: ON
 FRAMEWORK: >= NET45
 NUGET
   remote: http://www.nuget.org/api/v2
@@ -53,3 +54,4 @@ NUGET
     Streams.CSharp (0.4.1)
       Streams (0.4.1)
     System.Threading.Tasks (4.0.11)
+    Unquote (3.1.1)

@@ -1,11 +1,12 @@
-﻿module Test 
+﻿module Program
 
 open System.Numerics
 open System
 open System.Diagnostics
-open FsCheck
+open BenchmarkDotNet
+open BenchmarkDotNet.Attributes
+open BenchmarkDotNet.Running
                   
-
 
 let inline compareNums a b =
     let fa = float a
@@ -129,35 +130,35 @@ let main argv =
     printf "t1:%A  t2:%A\n" t1 t2
     printf "a:%A\n b:%A\n" a b 
     
-    let testCount = 100000
-    let config = {Config.Quick with MaxTest = testCount}
-
-    printf "Test Create\n"
-    Check.One ({config with StartSize = 1},testCreate)
-
-    printf "Test Init\n"
-    Check.One ({config with StartSize = 1},testInit)
-
-
-    printf "***Test Int32***\n"
-    printf "Test Map\n"
-    Check.One (config, testInt32 testMap)
-    printf "Test Fold\n"
-    Check.One (config, testInt32 testFold)
-    printf "Test MinMax\n"
-    Check.One (config, testInt32 testMinMax)
-    printf "Test Sum\n"
-    Check.One (config, testInt32 testSum)
-        
-    printf "***Test Int64***\n"
-    printf "Test Map\n"
-    Check.One (config, testInt64 testMap)
-    printf "Test Fold\n"
-    Check.One (config, testInt64 testFold)
-    printf "Test MinMax\n"
-    Check.One (config, testInt64 testMinMax)
-    printf "Test Sum\n"
-    Check.One (config, testInt64 testSum)
+//    let testCount = 100000
+//    let config = {Config.Quick with MaxTest = testCount}
+//
+//    printf "Test Create\n"
+//    Check.One ({config with StartSize = 1},testCreate)
+//
+//    printf "Test Init\n"
+//    Check.One ({config with StartSize = 1},testInit)
+//
+//
+//    printf "***Test Int32***\n"
+//    printf "Test Map\n"
+//    Check.One (config, testInt32 testMap)
+//    printf "Test Fold\n"
+//    Check.One (config, testInt32 testFold)
+//    printf "Test MinMax\n"
+//    Check.One (config, testInt32 testMinMax)
+//    printf "Test Sum\n"
+//    Check.One (config, testInt32 testSum)
+//        
+//    printf "***Test Int64***\n"
+//    printf "Test Map\n"
+//    Check.One (config, testInt64 testMap)
+//    printf "Test Fold\n"
+//    Check.One (config, testInt64 testFold)
+//    printf "Test MinMax\n"
+//    Check.One (config, testInt64 testMinMax)
+//    printf "Test Sum\n"
+//    Check.One (config, testInt64 testSum)
 
     (*
     printf "Test Float\n"
