@@ -204,28 +204,26 @@ let inline average (array:^T[]) : ^T =
 /// does not have to be the same type</param>
 /// <param name="array">The source array</param>
 let inline map
-    (f : ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
+    (f : ^T Vector -> ^T Vector) (array : ^T[]) : ^T[] =
 
     checkNonNull array
 
     let len = array.Length
     let result = Array.zeroCreate len
-    let inCount = Vector< ^T>.Count
-    let outCount = Vector< ^U>.Count
+    let count = Vector< ^T>.Count
 
     let mutable i, ri = 0, 0
-    while i < len - inCount do
-        (f (Vector< ^T>(array,i ))).CopyTo(result,ri)
-        i <- i + inCount
-        ri <- ri + outCount
+    while i <= len - count do
+        (f (Vector< ^T>(array,i ))).CopyTo(result,i)
+        i <- i + count
+                
+    let leftOver = f (Vector< ^T>(array,len-count))
+    let mutable j = count - (len-i)
+    while i < len do
+        result.[i] <- leftOver.[j]
+        i <- i + 1
+        j <- j + 1
 
-    let leftoverCount = len - i
-    if leftoverCount <> 0 then
-        let mutable ai = len - leftoverCount
-        let leftOver = f (getLeftovers array ai)
-        for i=0 to leftoverCount-1 do
-            result.[ai] <- leftOver.[i]
-            ai <- ai + 1
     result
 
 
@@ -242,20 +240,19 @@ let inline mapInPlace
     checkNonNull array
 
     let len = array.Length
-    let inCount = Vector< ^T>.Count
+    let count = Vector< ^T>.Count
 
     let mutable i = 0
-    while i < len - inCount do
+    while i <= len - count do
         (f (Vector< ^T>(array,i))).CopyTo(array,i)
-        i <- i + inCount
+        i <- i + count
 
-    let leftoverCount = len - i
-    if leftoverCount <> 0 then
-        let mutable ai = len - leftoverCount
-        let leftOver = f (getLeftovers array ai)
-        for i=0 to leftoverCount-1 do
-            array.[ai] <- leftOver.[i]
-            ai <- ai + 1
+    let leftOver = f (Vector< ^T>(array,len-count))
+    let mutable j = count - (len-i)
+    while i < len do
+        array.[i] <- leftOver.[j]
+        i <- i + 1
+        j <- j + 1
 
 
 /// <summary>
