@@ -2,6 +2,7 @@ source http://www.nuget.org/api/v2
 redirects: on
 framework: >= net45 
 
+nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FSharp.Core redirects: force
 nuget System.Numerics.Vectors framework net46
 
@@ -26,4 +27,5 @@ group Test
     nuget NUnit.Runners
     nuget Streams 
     nuget Streams.CSharp
-nuget Unquote
+    nuget System.Reflection.Metadata
+    nuget Unquote
