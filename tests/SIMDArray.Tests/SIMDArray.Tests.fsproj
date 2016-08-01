@@ -7,36 +7,31 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>01b550a9-f5ac-49ab-9b62-2838119339f9</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TestSimd</RootNamespace>
-    <AssemblyName>TestSimd</AssemblyName>
+    <RootNamespace>SIMDArray.Tests</RootNamespace>
+    <AssemblyName>SIMDArray.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>SIMDArray.Tests</Name>
-    <TargetFrameworkProfile />
+    <OutputPath>bin\$(Configuration)\$(Platform)</OutputPath>
+    <DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\TestSimd.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
-    <DocumentationFile>bin\Release\TestSimd.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
     <OtherFlags />
   </PropertyGroup>
@@ -48,10 +43,8 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\TestSimd.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
@@ -59,12 +52,8 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants />
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\TestSimd.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <OtherFlags />
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -72,10 +61,8 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\TestSimd.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
@@ -83,12 +70,8 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants />
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\TestSimd.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <OtherFlags />
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <Choose>
