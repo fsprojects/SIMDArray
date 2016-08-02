@@ -202,18 +202,18 @@ let inline average (array:^T[]) : ^T =
 /// A Vector mapping function.
 /// </summary>
 /// <param name="f">A function that takes a Vector and returns a Vector. The returned vector
-/// does not have to be the same type</param>
+/// does not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 
 let inline map
-    (f : ^T Vector -> ^T Vector) (array : ^T[]) : ^T[] =
+    (f : ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
 
     checkNonNull array
-    
-    let len = array.Length
-    
-    let result = Array.zeroCreate len
     let count = Vector< ^T>.Count
+    if count <> Vector< ^U>.Count then invalidArg "array" "Output type must have the same width as input type."
+    let len = array.Length    
+    let result = Array.zeroCreate len
+    
     let lenLessCount = len-count
 
     let mutable i = 0
@@ -238,23 +238,75 @@ let inline map
 
     result
 
+
 /// <summary>
 /// Identical to the standard map function, but you must provide
 /// A Vector mapping function.
 /// </summary>
 /// <param name="f">A function that takes a Vector and returns a Vector. The returned vector
-/// does not have to be the same type</param>
+/// does not have to be the same type but must be the same width</param>
+/// <param name="array">The source array</param>
+
+let inline map2
+    (f : ^T Vector -> ^U Vector -> ^V Vector) (array1 : ^T[]) (array2 :^U[]) : ^V[] =
+
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count || count <> Vector< ^V>.Count then invalidArg "array" "Inputs and output must all have same Vector wdith"
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+
+    let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
+
+    let result = Array.zeroCreate len
+    let lenLessCount = len-count
+
+    let mutable i = 0    
+    while i <= lenLessCount do
+        f.Invoke(Vector< ^T>(array1,i ),Vector< ^U>(array2,i)).CopyTo(result,i)        
+        i <- i + count
+    
+    
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray1 = Array.init count (fun x -> if x < leftOver then 
+                                                          array1.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^T>)
+        let leftOverArray2 = Array.init count (fun x -> if x < leftOver then 
+                                                          array2.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^U>)
+        let v = f.Invoke(Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0) )
+        let mutable j = 0
+        while i < len do
+            result.[i] <- v.[j]
+            i <- i + 1
+            j <- j + 1
+
+    result
+
+/// <summary>
+/// Identical to the standard mapi function, but you must provide
+/// A Vector mapping function.
+/// </summary>
+/// <param name="f">A function that takes the current index and it's Vector and returns a Vector. The returned vector
+/// does not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 
 let inline mapi
-    (f : int -> ^T Vector -> ^T Vector) (array : ^T[]) : ^T[] =
+    (f : int -> ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
 
     checkNonNull array
-    
+    let count = Vector< ^T>.Count
+    if count <> Vector< ^U>.Count then invalidArg "array" "Output type must have the same width as input type."
     let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
     let len = array.Length    
     let result = Array.zeroCreate len
-    let count = Vector< ^T>.Count
+    
     let lenLessCount = len-count
 
     let mutable i = 0

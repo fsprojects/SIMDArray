@@ -69,6 +69,37 @@ let ``SIMD.map = Array.map`` () =
         (lazy test <@ multA xs = multB xs @>)   |@ "map x * x" .&.
         (lazy test <@ minusA xs = minusB xs @>) |@ "map x - x" 
 
+[<Test>]                  
+let ``SIMD.map2 = Array.map2`` () =
+    quickCheck <|
+    fun (xs: int []) (xs2: int[]) ->
+        (xs.Length > 0 && xs <> [||] ) ==>
+        let xs2 = xs |> Array.map(fun x -> x+1)
+        let plusA   xs xs2 = xs |> Array.SIMD.map2 (fun x y -> x+y) xs2
+        let plusB   xs xs2 = xs |> Array.map2 (fun x y -> x+y) xs2
+        let multA   xs xs2 = xs |> Array.SIMD.map2 (fun (x:Vector<int>) (y:Vector<int>) -> x*y) xs2
+        let multB   xs xs2 = xs |> Array.map2 (fun x y -> x*y) xs2
+        let minusA  xs xs2 = xs |> Array.SIMD.map2 (fun x y -> x-y) xs2
+        let minusB  xs xs2 = xs |> Array.map2 (fun x y -> x-y) xs2
+        (lazy test <@ plusA xs xs2 = plusB xs xs2 @>)   |@ "map x + y" .&.
+        (lazy test <@ multA xs xs2 = multB xs xs2 @>)   |@ "map x * y" .&.
+        (lazy test <@ minusA xs xs2 = minusB xs xs2 @>) |@ "map x - y" 
+
+[<Test>]                  
+let ``SIMD.mapi = Array.mapi`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let plusA   xs = xs |> Array.SIMD.mapi (fun i x -> x+x)
+        let plusB   xs = xs |> Array.mapi (fun i x -> x+x)
+        let multA   xs = xs |> Array.SIMD.mapi (fun i x -> x*x)
+        let multB   xs = xs |> Array.mapi (fun i x -> x*x)
+        let minusA  xs = xs |> Array.SIMD.mapi (fun i x -> x-x)
+        let minusB  xs = xs |> Array.mapi (fun i x -> x-x)
+        (lazy test <@ plusA xs = plusB xs @>)   |@ "map x + x" .&.
+        (lazy test <@ multA xs = multB xs @>)   |@ "map x * x" .&.
+        (lazy test <@ minusA xs = minusB xs @>) |@ "map x - x" 
+
   
 
 [<Test>]                  
