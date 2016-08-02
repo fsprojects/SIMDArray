@@ -552,58 +552,60 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
     found
 
 /// <summary>
+/// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option
+/// that returns true or None if none match. Leftover array elements are ignored.
+/// </summary>
+/// <param name="f">Takes a Vector and returns true or false</param>
+/// <param name="array"></param>
+let inline tryFindVector (f : ^T Vector -> bool)  (array: ^T[]) : Vector< ^T> Option =
+
+    checkNonNull array
+
+    let count = Vector< ^T>.Count
+    let mutable found = false
+    let len = array.Length
+
+    
+    let mutable vi = 0
+    while vi < len - count && not found do
+        found <- f (Vector< ^T>(array,vi))
+        vi <- vi + count
+
+    if found then
+        Some (Vector< ^T>(array,vi-count))
+    else
+        None
+
+
+/// <summary>
 /// Takes a function that accepts a vector and returns true or false. Returns the first Vector that 
-/// returns true, and then extracts the desired value with extractor or null if none is found
+/// returns true, and then extracts the desired value with extractor or null if none is found.
+/// Leftover array elements are ignored.
 /// </summary>
 /// <param name="finder">Takes a Vector and returns true or false</param>
 /// <param name="extractor">Takes a vector and extracts the desied value from it</param>
 /// <param name="array"></param>
 let inline find (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T) (array: ^T[]) : ^T =
 
-    checkNonNull array
-
-    let count = Vector< ^T>.Count
-    let mutable found = false
-    let len = array.Length
-
-    
-    let mutable vi = 0
-    while vi < len - count && not found do
-        found <- finder (Vector< ^T>(array,vi))
-        vi <- vi + count
-
-    if found then
-        let v = Vector< ^T>(array,vi-count)
-        extractor v
-    else 
-        null
+    let v = tryFindVector finder array
+    match v with
+    | Some v -> extractor v
+    | None -> null
     
 /// <summary>
 /// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option that 
-/// returns true, and then extracts the desired value with extractor or returns None if not found.
+/// returns true, and then extracts the desired value with extractor or returns None if not found. Leftover
+/// array elements are ignored.
 /// </summary>
 /// <param name="finder">Takes a Vector and returns true or false</param>
 /// <param name="extractor">Takes a vector and extracts the desied value Option from it</param>
 /// <param name="array"></param>
 let inline tryFind (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T Option) (array: ^T[]) : ^T Option =
-
-    checkNonNull array
-
-    let count = Vector< ^T>.Count
-    let mutable found = false
-    let len = array.Length
-
-    
-    let mutable vi = 0
-    while vi < len - count && not found do
-        found <- finder (Vector< ^T>(array,vi))
-        vi <- vi + count
-
-    if found then
-        let v = Vector< ^T>(array,vi-count)
-        extractor v
-    else 
-        None
+ 
+    let v = tryFindVector finder array
+    match v with
+    | Some v -> extractor v
+    | None -> None
 
 /// <summary>
 /// Identical to the standard contains, just faster
