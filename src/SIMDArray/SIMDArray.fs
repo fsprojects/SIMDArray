@@ -217,13 +217,14 @@ let inline map
     
     let lenLessCount = len-count
 
-    let mutable i = 0
+    let rec loop i = 
+        if i <= lenLessCount then
+            (f (Vector< ^T>(array,i ))).CopyTo(result,i)   
+            loop (i+count)
+       
+    loop 0
     
-    while i <= lenLessCount do
-        (f (Vector< ^T>(array,i ))).CopyTo(result,i)        
-        i <- i + count
-    
-    
+    let mutable i = len - len % count
     if i < len then 
         let leftOver = len - i
         let leftOverArray = Array.init count (fun x -> if x < leftOver then 
@@ -238,6 +239,7 @@ let inline map
             j <- j + 1
 
     result
+
 
 
 /// <summary>
@@ -259,18 +261,18 @@ let inline map2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-
-    let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
-
+    
     let result = Array.zeroCreate len
     let lenLessCount = len-count
 
-    let mutable i = 0    
-    while i <= lenLessCount do
-        f.Invoke(Vector< ^T>(array1,i ),Vector< ^U>(array2,i)).CopyTo(result,i)        
-        i <- i + count
+    let rec loop i = 
+        if i <= lenLessCount then
+            (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
+            loop (i+count)
+       
+    loop 0
     
-    
+    let mutable i = len - len % count
     if i < len then 
         let leftOver = len - i
         let leftOverArray1 = Array.init count (fun x -> if x < leftOver then 
@@ -281,7 +283,7 @@ let inline map2
                                                           array2.[x+i]
                                                         else
                                                           Unchecked.defaultof< ^U>)
-        let v = f.Invoke(Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0) )
+        let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
         let mutable j = 0
         while i < len do
             result.[i] <- v.[j]
@@ -289,7 +291,6 @@ let inline map2
             j <- j + 1
 
     result
-
 /// <summary>
 /// Identical to the standard map2 function, but you must provide
 /// A Vector mapping function.
