@@ -63,14 +63,15 @@ let inline fold
     (array: ^T[]) : ^State =
 
     checkNonNull array
+    let len = array.Length
     let mutable state = Vector< ^State> acc
     let mutable vi = 0
-    let vCount = Vector< ^T>.Count
-    while vi <= array.Length - vCount do
+    let count = Vector< ^T>.Count
+    while vi <= len - count do
         state <- f state (Vector< ^T>(array,vi))
-        vi <- vi + vCount
+        vi <- vi + count
 
-    let leftoverCount = array.Length - vi
+    let leftoverCount = len - vi
     if leftoverCount <> 0 then
         let leftOver = f state (getLeftovers array vi )
         state <- applyLeftovers leftoverCount leftOver state
@@ -240,11 +241,11 @@ let inline map
 
 
 /// <summary>
-/// Identical to the standard map function, but you must provide
+/// Identical to the standard map2 function, but you must provide
 /// A Vector mapping function.
 /// </summary>
-/// <param name="f">A function that takes a Vector and returns a Vector. The returned vector
-/// does not have to be the same type but must be the same width</param>
+/// <param name="f">A function that takes two Vectors and returns a Vector. Both vectors and the
+/// returned vector do not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 
 let inline map2
@@ -281,6 +282,112 @@ let inline map2
                                                         else
                                                           Unchecked.defaultof< ^U>)
         let v = f.Invoke(Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0) )
+        let mutable j = 0
+        while i < len do
+            result.[i] <- v.[j]
+            i <- i + 1
+            j <- j + 1
+
+    result
+
+/// <summary>
+/// Identical to the standard map2 function, but you must provide
+/// A Vector mapping function.
+/// </summary>
+/// <param name="f">A function that takes three Vectors and returns a Vector. All vectors and the
+/// returned vector do not have to be the same type but must be the same width</param>
+/// <param name="array">The source array</param>
+
+let inline map3
+    (f : ^T Vector -> ^U Vector -> ^V Vector -> ^W Vector) (array1 : ^T[]) (array2 :^U[]) (array3 :^V[]): ^W[] =
+
+    checkNonNull array1
+    checkNonNull array2
+    checkNonNull array3
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count || count <> Vector< ^V>.Count || count <> Vector< ^W>.Count then invalidArg "array" "Inputs and output must all have same Vector wdith"
+    
+    let len = array1.Length        
+    if len <> array2.Length || len <> array3.Length then invalidArg "array2" "Arrays must have same length"
+
+    let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(f)
+
+    let result = Array.zeroCreate len
+    let lenLessCount = len-count
+
+    let mutable i = 0    
+    while i <= lenLessCount do
+        f.Invoke(Vector< ^T>(array1,i ),Vector< ^U>(array2,i),Vector< ^V>(array3,i)).CopyTo(result,i)        
+        i <- i + count
+    
+    
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray1 = Array.init count (fun x -> if x < leftOver then 
+                                                          array1.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^T>)
+        let leftOverArray2 = Array.init count (fun x -> if x < leftOver then 
+                                                          array2.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^U>)
+        let leftOverArray3 = Array.init count (fun x -> if x < leftOver then 
+                                                          array3.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^V>)
+
+        let v = f.Invoke(Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0),Vector< ^V>(leftOverArray3,0))
+        let mutable j = 0
+        while i < len do
+            result.[i] <- v.[j]
+            i <- i + 1
+            j <- j + 1
+
+    result
+
+/// <summary>
+/// Identical to the standard mapi2 function, but you must provide
+/// A Vector mapping function.
+/// </summary>
+/// <param name="f">A function that takes two Vectors and an index 
+/// and returns a Vector. All vectors must be the same width</param>
+/// <param name="array">The source array</param>
+
+let inline mapi2
+    (f : int -> ^T Vector -> ^U Vector -> ^V Vector) (array1 : ^T[]) (array2 :^U[]) : ^V[] =
+
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count || count <> Vector< ^V>.Count then invalidArg "array" "Inputs and output must all have same Vector wdith"
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+
+    let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(f)
+
+    let result = Array.zeroCreate len
+    let lenLessCount = len-count
+
+    let mutable i = 0    
+    while i <= lenLessCount do
+        f.Invoke(i,Vector< ^T>(array1,i ),Vector< ^U>(array2,i)).CopyTo(result,i)        
+        i <- i + count
+    
+    
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray1 = Array.init count (fun x -> if x < leftOver then 
+                                                          array1.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^T>)
+        let leftOverArray2 = Array.init count (fun x -> if x < leftOver then 
+                                                          array2.[x+i]
+                                                        else
+                                                          Unchecked.defaultof< ^U>)
+        let v = f.Invoke(i,Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0) )
         let mutable j = 0
         while i < len do
             result.[i] <- v.[j]
@@ -419,6 +526,8 @@ let inline mapInPlace
 /// <param name="array"></param>
 let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
 
+    checkNonNull array
+
     let count = Vector< ^T>.Count
     let mutable found = false
     let len = array.Length
@@ -444,13 +553,37 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
 
 
 /// <summary>
-/// Helper function to simplify when you just want to check for existence of a value
-/// directly.
+/// Identical to the standard contains, just faster
 /// </summary>
 /// <param name="x"></param>
 /// <param name="array"></param>
-let inline simpleExists (x : ^T) (array:^T[]) : bool =
-    exists (fun v -> Vector.EqualsAny(v, Vector< ^T> x)) array
+let inline contains (x : ^T) (array:^T[]) : bool =
+    
+    checkNonNull array
+
+    let count = Vector< ^T>.Count
+    let mutable found = false
+    let len = array.Length
+
+    let mutable vi = 0
+    let compareVector = Vector< ^T>(x)
+    while vi < len - count do
+        found <- Vector.EqualsAny(Vector< ^T>(array,vi),compareVector)
+        if found then vi <- len
+        else vi <- vi + count
+
+    if not found && vi < len then
+        let leftOverArray =
+            [| for i=1 to Vector< ^T>.Count do
+                if vi < array.Length then
+                    yield array.[vi]
+                    vi <- vi + 1
+                else
+                    yield array.[len-1] //just repeat the last item
+            |]
+        found <- Vector.EqualsAny(Vector< ^T>(leftOverArray),compareVector)
+
+    found
 
 /// <summary>
 /// Exactly like the standard Max function, only faster
