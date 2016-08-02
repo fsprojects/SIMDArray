@@ -221,22 +221,19 @@ let inline map
         (f (Vector< ^T>(array,i ))).CopyTo(result,i)        
         i <- i + count
     
-    if len > count && i < len  then            
-        let v = (Vector< ^T>(array,lenLessCount))
-        let mutable j = count - (len-i)
+    
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray = Array.init count (fun x -> if x < leftOver then 
+                                                        array.[x+i]
+                                                       else
+                                                        Unchecked.defaultof< ^T>)
+        let v = f (Vector< ^T>(leftOverArray,0))
+        let mutable j = 0
         while i < len do
             result.[i] <- v.[j]
             i <- i + 1
             j <- j + 1
-    else if i < len then 
-        let leftOverArray = Array.init count (fun i -> if i < len then 
-                                                        array.[i]
-                                                       else
-                                                        Unchecked.defaultof< ^T>)
-        let v = f (Vector< ^T>(leftOverArray,0))
-        while i < len do
-            result.[i] <- v.[i]
-            i <- i + 1
 
     result
 
@@ -261,12 +258,18 @@ let inline mapInPlace
         (f (Vector< ^T>(array,i))).CopyTo(array,i)
         i <- i + count
 
-    let leftOver = f (Vector< ^T>(array,len-count))
-    let mutable j = count - (len-i)
-    while i < len do
-        array.[i] <- leftOver.[j]
-        i <- i + 1
-        j <- j + 1
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray = Array.init count (fun x -> if x < leftOver then 
+                                                        array.[x+i]
+                                                       else
+                                                        Unchecked.defaultof< ^T>)
+        let v = f (Vector< ^T>(leftOverArray,0))
+        let mutable j = 0
+        while i < len do
+            array.[i] <- v.[j]
+            i <- i + 1
+            j <- j + 1
 
 
 /// <summary>
