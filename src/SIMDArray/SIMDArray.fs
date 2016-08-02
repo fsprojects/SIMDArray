@@ -203,26 +203,40 @@ let inline average (array:^T[]) : ^T =
 /// <param name="f">A function that takes a Vector and returns a Vector. The returned vector
 /// does not have to be the same type</param>
 /// <param name="array">The source array</param>
+
 let inline map
     (f : ^T Vector -> ^T Vector) (array : ^T[]) : ^T[] =
 
     checkNonNull array
-
+    
     let len = array.Length
+    
     let result = Array.zeroCreate len
     let count = Vector< ^T>.Count
+    let lenLessCount = len-count
 
-    let mutable i, ri = 0, 0
-    while i <= len - count do
-        (f (Vector< ^T>(array,i ))).CopyTo(result,i)
+    let mutable i = 0
+    
+    while i <= lenLessCount do
+        (f (Vector< ^T>(array,i ))).CopyTo(result,i)        
         i <- i + count
-                
-    let leftOver = f (Vector< ^T>(array,len-count))
-    let mutable j = count - (len-i)
-    while i < len do
-        result.[i] <- leftOver.[j]
-        i <- i + 1
-        j <- j + 1
+    
+    if len > count && i < len  then            
+        let v = (Vector< ^T>(array,lenLessCount))
+        let mutable j = count - (len-i)
+        while i < len do
+            result.[i] <- v.[j]
+            i <- i + 1
+            j <- j + 1
+    else if i < len then 
+        let leftOverArray = Array.init count (fun i -> if i < len then 
+                                                        array.[i]
+                                                       else
+                                                        Unchecked.defaultof< ^T>)
+        let v = f (Vector< ^T>(leftOverArray,0))
+        while i < len do
+            result.[i] <- v.[i]
+            i <- i + 1
 
     result
 
