@@ -261,18 +261,16 @@ let inline map2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-    
+
     let result = Array.zeroCreate len
     let lenLessCount = len-count
 
-    let rec loop i = 
-        if i <= lenLessCount then
-            (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
-            loop (i+count)
-       
-    loop 0
+    let mutable i = 0    
+    while i <= lenLessCount do
+        (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
+        i <- i + count
     
-    let mutable i = len - len % count
+    
     if i < len then 
         let leftOver = len - i
         let leftOverArray1 = Array.init count (fun x -> if x < leftOver then 
@@ -291,6 +289,7 @@ let inline map2
             j <- j + 1
 
     result
+
 /// <summary>
 /// Identical to the standard map2 function, but you must provide
 /// A Vector mapping function.
@@ -311,15 +310,13 @@ let inline map3
     
     let len = array1.Length        
     if len <> array2.Length || len <> array3.Length then invalidArg "array2" "Arrays must have same length"
-
-    let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(f)
-
+    
     let result = Array.zeroCreate len
     let lenLessCount = len-count
 
     let mutable i = 0    
     while i <= lenLessCount do
-        f.Invoke(Vector< ^T>(array1,i ),Vector< ^U>(array2,i),Vector< ^V>(array3,i)).CopyTo(result,i)        
+        (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i)) (Vector< ^V>(array3,i))).CopyTo(result,i)        
         i <- i + count
     
     
@@ -338,7 +335,7 @@ let inline map3
                                                         else
                                                           Unchecked.defaultof< ^V>)
 
-        let v = f.Invoke(Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0),Vector< ^V>(leftOverArray3,0))
+        let v = f (Vector< ^T>(leftOverArray1,0)) (Vector< ^U>(leftOverArray2,0)) (Vector< ^V>(leftOverArray3,0))
         let mutable j = 0
         while i < len do
             result.[i] <- v.[j]
@@ -492,6 +489,7 @@ let inline iteri
 /// </summary>
 /// <param name="f">Mapping function that takes a Vector and returns a Vector of the same type</param>
 /// <param name="array"></param>
+
 let inline mapInPlace
     ( f : ^T Vector -> ^T Vector) (array: ^T[]) : unit =
 
@@ -499,12 +497,15 @@ let inline mapInPlace
 
     let len = array.Length
     let count = Vector< ^T>.Count
-
-    let mutable i = 0
-    while i <= len - count do
-        (f (Vector< ^T>(array,i))).CopyTo(array,i)
-        i <- i + count
-
+    let lenLessCount = len - count
+    let rec loop i = 
+        if i <= lenLessCount then
+            (f (Vector< ^T>(array,i ))).CopyTo(array,i)   
+            loop (i+count)
+       
+    loop 0
+    
+    let mutable i = len - len % count
     if i < len then 
         let leftOver = len - i
         let leftOverArray = Array.init count (fun x -> if x < leftOver then 
