@@ -2,6 +2,7 @@
 module Array.SIMD
 
 open System.Numerics
+open FSharp.Core
 
 
 let inline private checkNonNull arg =
@@ -237,6 +238,92 @@ let inline map
 
     result
 
+/// <summary>
+/// Identical to the standard map function, but you must provide
+/// A Vector mapping function.
+/// </summary>
+/// <param name="f">A function that takes a Vector and returns a Vector. The returned vector
+/// does not have to be the same type</param>
+/// <param name="array">The source array</param>
+
+let inline mapi
+    (f : int -> ^T Vector -> ^T Vector) (array : ^T[]) : ^T[] =
+
+    checkNonNull array
+    
+    let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
+    let len = array.Length    
+    let result = Array.zeroCreate len
+    let count = Vector< ^T>.Count
+    let lenLessCount = len-count
+
+    let mutable i = 0
+    
+    while i <= lenLessCount do
+        f.Invoke(i,(Vector< ^T>(array,i ))).CopyTo(result,i)                
+        i <- i + count
+    
+    
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray = Array.init count (fun x -> if x < leftOver then 
+                                                        array.[x+i]
+                                                       else
+                                                        Unchecked.defaultof< ^T>)
+        let v = f.Invoke(i, (Vector< ^T>(leftOverArray,0)))
+        let mutable j = 0
+        while i < len do
+            result.[i] <- v.[j]
+            i <- i + 1
+            j <- j + 1
+
+    result
+
+/// <summary>
+/// Iterates over the array applying f to each Vector sized chunk
+/// Returns the number of leftover array elements so the caller
+/// can deal with them
+/// </summary>
+/// <param name="f">Accepts a Vector</param>
+/// <param name="array"></param>
+let inline iter
+    f (array : ^T[]) : int  =
+
+    checkNonNull array
+        
+    let len = array.Length        
+    let count = Vector< ^T>.Count
+    
+    let mutable i = 0    
+    while i <= (len-count) do
+        f (Vector< ^T>(array,i ))
+        i <- i + count
+        
+    len-i
+
+/// <summary>
+/// Iterates over the array applying f to each Vector sized chunk
+/// along with the current index.
+/// Returns the number of leftover array elements so the caller
+/// can deal with them
+/// </summary>
+/// <param name="f">Accepts the current index and associated Vector</param>
+/// <param name="array"></param>
+let inline iteri
+    f (array : ^T[]) : int  =
+
+    checkNonNull array
+     
+    let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
+    let len = array.Length        
+    let count = Vector< ^T>.Count
+    
+    let mutable i = 0    
+    while i <= (len-count) do
+        f.Invoke(i,(Vector< ^T>(array,i )))
+        i <- i + count
+        
+    len-i
 
 /// <summary>
 /// Identical to the SIMDMap except the operation is done in place, and thus
