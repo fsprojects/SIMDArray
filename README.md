@@ -23,8 +23,8 @@ you apply.  For small arrays the core libs may be faster due to increased fixed 
 performance be sure to use Release builds with optimizations turned on.
 
 ## Performance Comparison vs Standrd Array Functions
-With 32bit Floats
-Map function `(fun x -> x*x)`
+With 32bit Floats. Map function `(fun x -> x*x)`
+
 ```ini
 
 Host Process Environment Information:
