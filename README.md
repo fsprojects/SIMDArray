@@ -23,7 +23,7 @@ you apply.  For small arrays the core libs may be faster due to increased fixed 
 performance be sure to use Release builds with optimizations turned on.
 
 ## Performance Comparison vs Standrd Array Functions
-With 32bit Floats. Map function `(fun x -> x*x)`
+### With 32bit Floats. Map function `(fun x -> x*x)`
 
 ```ini
 
@@ -75,3 +75,45 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
       SIMDMax | 1000000 |   158,835.3746 ns |  3,773.1697 ns |     - |     - |   0.06 |           1,961.66 |
           Max | 1000000 |   633,761.7634 ns |  6,149.8767 ns |     - |     - |   0.24 |           7,495.76 |
 
+### With 64bit Floats. Map function `(fun x -> x*x+x)`
+```ini
+
+Host Process Environment Information:
+BenchmarkDotNet=v0.9.8.0
+OS=Microsoft Windows NT 6.2.9200.0
+Processor=Intel(R) Core(TM) i7-4712HQ CPU 2.30GHz, ProcessorCount=8
+Frequency=2240907 ticks, Resolution=446.2479 ns, Timer=TSC
+CLR=MS.NET 4.0.30319.42000, Arch=64-bit RELEASE [RyuJIT]
+GC=Concurrent Workstation
+JitModules=clrjit-v4.6.1590.0
+
+Type=SIMDBenchmark  Mode=Throughput  Platform=X64  
+Jit=RyuJit  GarbageCollection=Concurrent Workstation  
+
+```
+       Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
+------------- |-------- |------------------ |--------------- |------ |------ |------- |------------------- |
+ **SIMDContains** |    **1000** |       **842.2604 ns** |     **36.6615 ns** |     **-** |     **-** |      **-** |               **0.13** |
+     Contains |    1000 |     1,338.2032 ns |     21.7835 ns |     - |     - |      - |               0.13 |
+      SIMDSum |    1000 |       302.8986 ns |     12.0417 ns |     - |     - |      - |               0.03 |
+          Sum |    1000 |       953.9314 ns |      7.3770 ns |     - |     - |      - |               0.13 |
+      SIMDMax |    1000 |       302.3690 ns |     11.8064 ns |     - |     - |      - |               0.03 |
+          Max |    1000 |       713.9227 ns |     23.1721 ns |     - |     - |      - |               0.07 |
+      SIMDMap |    1000 |       905.3396 ns |     21.1726 ns |  2.79 |     - |      - |           4,447.68 |
+          Map |    1000 |     1,369.6668 ns |     17.1072 ns |  2.88 |     - |      - |           4,591.74 |
+ **SIMDContains** |  **100000** |    **86,987.0417 ns** |    **212.5612 ns** |     **-** |     **-** |      **-** |             **204.08** |
+     Contains |  100000 |   129,737.5287 ns |  2,300.6178 ns |     - |     - |      - |             398.91 |
+      SIMDSum |  100000 |    30,836.7527 ns |     52.3596 ns |     - |     - |      - |             103.84 |
+          Sum |  100000 |    97,310.6367 ns |    444.7469 ns |     - |     - |      - |             203.88 |
+      SIMDMax |  100000 |    30,755.6959 ns |    189.2460 ns |     - |     - |      - |             103.84 |
+          Max |  100000 |    65,190.8396 ns |    810.8605 ns |     - |     - |      - |             203.88 |
+      SIMDMap |  100000 |   250,263.5686 ns | 23,822.3931 ns |     - |     - | 351.03 |         384,182.34 |
+          Map |  100000 |   239,693.9435 ns | 20,283.1824 ns |     - |     - | 350.24 |         383,399.62 |
+ **SIMDContains** | **1000000** |   **952,116.9191 ns** | **22,885.3666 ns** |     **-** |     **-** |   **0.17** |          **29,960.47** |
+     Contains | 1000000 | 1,469,353.0761 ns | 44,872.5327 ns |     - |     - |   0.15 |          28,150.78 |
+      SIMDSum | 1000000 |   493,523.5731 ns |  6,629.8292 ns |     - |     - |   0.12 |          15,020.79 |
+          Sum | 1000000 | 1,059,862.2497 ns | 21,029.2608 ns |     - |     - |   0.17 |          29,921.97 |
+      SIMDMax | 1000000 |   486,232.3883 ns |  3,963.6126 ns |     - |     - |   0.11 |          15,080.61 |
+          Max | 1000000 |   771,554.3061 ns |  7,083.0659 ns |     - |     - |   0.12 |          15,008.20 |
+      SIMDMap | 1000000 | 3,625,255.0307 ns | 40,939.9131 ns |     - |     - | 439.00 |       3,763,516.65 |
+          Map | 1000000 | 3,490,854.2334 ns | 51,255.2300 ns |     - |     - | 413.00 |       3,589,365.95 |
