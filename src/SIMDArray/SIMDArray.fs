@@ -233,9 +233,9 @@ let inline map
     let count = Vector< ^T>.Count
     if count <> Vector< ^U>.Count then invalidArg "array" "Output type must have the same width as input type."
     let len = array.Length    
-    let result = Array.zeroCreate len
-    
+    let result = Array.zeroCreate len    
     let lenLessCount = len-count
+
     let mutable i = 0
     while i <= lenLessCount do        
         (f (Vector< ^T>(array,i ))).CopyTo(result,i)   
