@@ -27,6 +27,7 @@ performance be sure to use Release builds with optimizations turned on.
 * [VS Core Lib 32bit Floats](#core32)
 * [VS Core Lib 64bit Floats](#core64)
 * [VS MathNET.Numerics 32bit Floats](#mathnet)
+* [VS MathNET.Numerics MKL Native 32bit Floats](#mathnetnative)
 
 ```ini
 
@@ -131,3 +132,15 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
  MathNETMapInPlace | 1000000 | 824,388.9221 ns | 47,134.8321 ns |     - |     - |  1.87 |          33,210.67 |
            SIMDSum | 1000000 | 159,887.6959 ns |  5,030.3486 ns |     - |     - |  0.18 |           3,433.93 |
         MathNETSum | 1000000 | 967,761.7422 ns | 17,557.1206 ns |     - |     - |  2.00 |          29,450.93 |
+
+### With 32bit Floats vs MathNET.Numerics MKL Native. Adding two arrays <a name-"mathnetnative"></a>
+     Method |  Length |            Median |          StdDev | Gen 0 | Gen 1 |    Gen 2 | Bytes Allocated/Op |
+----------- |-------- |------------------ |---------------- |------ |------ |--------- |------------------- |
+   **SIMDMap2** |     **100** |        **92.1515 ns** |       **3.0304 ns** |  **2.70** |     **-** |        **-** |             **212.76** |
+ MathNETAdd |     100 |       156.7522 ns |       7.3969 ns |  2.92 |     - |        - |             230.42 |
+   **SIMDMap2** |    **1000** |       **493.5448 ns** |       **8.1340 ns** | **21.40** |     **-** |        **-** |           **2,048.32** |
+ MathNETAdd |    1000 |       444.0753 ns |       5.9375 ns | 20.12 |     - |        - |           1,553.56 |
+   **SIMDMap2** |  **100000** |   **161,024.7782 ns** |  **24,704.0627 ns** |     **-** |     **-** | **2,348.29** |         **197,602.33** |
+ MathNETAdd |  100000 |   155,985.3149 ns |   1,478.0502 ns |     - |     - | 1,755.36 |         155,754.29 |
+   **SIMDMap2** | **1000000** | **2,024,351.2170 ns** | **242,101.0167 ns** |     **-** |     **-** | **3,317.76** |       **2,025,584.78** |
+ MathNETAdd | 1000000 | 1,551,270.9391 ns | 216,545.6630 ns |     - |     - | 2,466.00 |       1,693,319.93 |
