@@ -109,6 +109,20 @@ let ``SIMD.sum = Array.sum`` () =
         (array.Length > 0 && array <> [||]) ==>
         lazy (Array.SIMD.sum array = Array.sum array)
 
+[<Test>]                  
+let ``SIMD.contains = Array.contains`` () =
+    quickCheck <|
+    fun (array: int []) (value:int) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMD.contains value array = Array.contains value array)
+
+[<Test>]                  
+let ``SIMD.exists = Array.exists`` () =
+    quickCheck <|
+    fun (array: int []) (value:int) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMD.exists (fun x -> Vector.EqualsAny(Vector<int>(value),x)) array = Array.exists (fun x -> x = value) array)
+
 
 [<Test>]                  
 let ``SIMD.average = Array.average`` () =

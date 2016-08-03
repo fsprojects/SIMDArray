@@ -508,42 +508,7 @@ let inline mapInPlace
             array.[i] <- v.[j]
             i <- i + 1
     
-            
-
-/// <summary>
-/// Checks for the existence of a value. You provide a function that takes a Vector
-/// and returns whether the condition you want exists in the Vector.
-/// </summary>
-/// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
-/// <param name="array"></param>
-let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
-
-    checkNonNull array
-
-    let count = Vector< ^T>.Count
-    let mutable found = false
-    let len = array.Length
-    let lenLessCount = len-count
-
-    let mutable i = 0
-    while i <= lenLessCount do
-        found <- f (Vector< ^T>(array,i))
-        if found then i <- len
-        else i <- i + count
-
-    if not found && i < len then
-        let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length do
-            if i < array.Length then
-                leftOverArray.[j] <- array.[i]
-                i <- i + 1
-            else
-                leftOverArray.[j] <- array.[len-1] //just repeat the last item
-            
-        found <- f (Vector< ^T> leftOverArray)
-
-    found
-
+  
 /// <summary>
 /// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option
 /// that returns true or None if none match. Leftover array elements are ignored.
@@ -600,6 +565,42 @@ let inline tryFind (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T Opt
     | Some v -> extractor v
     | None -> None
 
+
+          
+
+/// <summary>
+/// Checks for the existence of a value. You provide a function that takes a Vector
+/// and returns whether the condition you want exists in the Vector.
+/// </summary>
+/// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
+/// <param name="array"></param>
+let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
+
+    checkNonNull array
+
+    let count = Vector< ^T>.Count
+    let mutable found = false
+    let len = array.Length
+    let lenLessCount = len-count
+
+    let mutable i = 0
+    while i <= lenLessCount do
+        found <- f (Vector< ^T>(array,i))
+        if found then i <- len
+        else i <- i + count
+
+    if not found && i < len then
+        let leftOverArray = Array.zeroCreate count
+        for j=0 to leftOverArray.Length-1 do
+            if i < len then
+                leftOverArray.[j] <- array.[i]
+                i <- i + 1
+            else
+                leftOverArray.[j] <- array.[len-1] //just repeat the last item
+            
+        found <- f (Vector< ^T> leftOverArray)
+
+    found
 /// <summary>
 /// Identical to the standard contains, just faster
 /// </summary>
@@ -623,8 +624,8 @@ let inline contains (x : ^T) (array:^T[]) : bool =
 
     if not found && i < len then
         let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length do
-            if i < array.Length then
+        for j=0 to leftOverArray.Length-1 do
+            if i < len then
                 leftOverArray.[j] <- array.[i]
                 i <- i + 1
             else
