@@ -585,7 +585,6 @@ let inline tryFind (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T Opt
 
 
           
-
 /// <summary>
 /// Checks for the existence of a value. You provide a function that takes a Vector
 /// and returns whether the condition you want exists in the Vector.
@@ -619,6 +618,8 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
         found <- f (Vector< ^T> leftOverArray)
 
     found
+
+
 /// <summary>
 /// Identical to the standard contains, just faster
 /// </summary>

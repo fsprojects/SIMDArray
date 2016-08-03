@@ -23,7 +23,10 @@ you apply.  For small arrays the core libs may be faster due to increased fixed 
 performance be sure to use Release builds with optimizations turned on.
 
 ## Performance Comparison vs Standrd Array Functions
-### With 32bit Floats. Map function `(fun x -> x*x)`
+
+* [VS Core Lib 32bit Floats](#core32)
+* [VS Core Lib 64bit Floats](#core32)
+* [VS MathNET.Numerics 32bit Floats](#mathnet)
 
 ```ini
 
@@ -40,6 +43,9 @@ Type=SIMDBenchmark  Mode=Throughput  Platform=X64
 Jit=RyuJit  GarbageCollection=Concurrent Workstation  
 
 ```
+
+### With 32bit Floats Vs Core Lib. Map function `(fun x -> x*x)`<a name="core32"></a>
+
        Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
 ------------- |-------- |------------------ |--------------- |------ |------ |------- |------------------- |
  **SIMDContains** |      **10** |        **32.3354 ns** |      **0.0933 ns** |  **0.04** |     **-** |      **-** |              **22.80** |
@@ -75,22 +81,8 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
       SIMDMax | 1000000 |   158,835.3746 ns |  3,773.1697 ns |     - |     - |   0.06 |           1,961.66 |
           Max | 1000000 |   633,761.7634 ns |  6,149.8767 ns |     - |     - |   0.24 |           7,495.76 |
 
-### With 64bit Floats. Map function `(fun x -> x*x+x)`
-```ini
+### With 64bit Floats vs Core Lib. Map function `(fun x -> x*x+x)`<a name="core64"></a>
 
-Host Process Environment Information:
-BenchmarkDotNet=v0.9.8.0
-OS=Microsoft Windows NT 6.2.9200.0
-Processor=Intel(R) Core(TM) i7-4712HQ CPU 2.30GHz, ProcessorCount=8
-Frequency=2240907 ticks, Resolution=446.2479 ns, Timer=TSC
-CLR=MS.NET 4.0.30319.42000, Arch=64-bit RELEASE [RyuJIT]
-GC=Concurrent Workstation
-JitModules=clrjit-v4.6.1590.0
-
-Type=SIMDBenchmark  Mode=Throughput  Platform=X64  
-Jit=RyuJit  GarbageCollection=Concurrent Workstation  
-
-```
        Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
 ------------- |-------- |------------------ |--------------- |------ |------ |------- |------------------- |
  **SIMDContains** |    **1000** |       **842.2604 ns** |     **36.6615 ns** |     **-** |     **-** |      **-** |               **0.13** |
@@ -117,3 +109,25 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
           Max | 1000000 |   771,554.3061 ns |  7,083.0659 ns |     - |     - |   0.12 |          15,008.20 |
       SIMDMap | 1000000 | 3,625,255.0307 ns | 40,939.9131 ns |     - |     - | 439.00 |       3,763,516.65 |
           Map | 1000000 | 3,490,854.2334 ns | 51,255.2300 ns |     - |     - | 413.00 |       3,589,365.95 |
+
+
+### With 32bit Floats vs MathNET.Numerics managed. Map function `(fun x -> x*x+x)` <a name="mathnet"></a>
+
+            Method |  Length |          Median |         StdDev | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
+------------------ |-------- |---------------- |--------------- |------ |------ |------ |------------------- |
+    **SIMDMapInPlace** |     **100** |      **46.5269 ns** |      **4.9229 ns** |  **0.08** |     **-** |     **-** |              **22.54** |
+ MathNETMapInPlace |     100 |     354.0866 ns |      7.5375 ns |  0.36 |     - |     - |              99.59 |
+           SIMDSum |     100 |      32.0283 ns |      2.9529 ns |     - |     - |     - |               0.00 |
+        MathNETSum |     100 |      88.7532 ns |      1.9561 ns |     - |     - |     - |               0.00 |
+    **SIMDMapInPlace** |    **1000** |     **165.7885 ns** |      **9.0778 ns** |     **-** |     **-** |     **-** |               **0.01** |
+ MathNETMapInPlace |    1000 |   3,057.9378 ns |     56.8845 ns |  0.30 |     - |     - |              94.64 |
+           SIMDSum |    1000 |     163.1672 ns |      6.7001 ns |     - |     - |     - |               0.01 |
+        MathNETSum |    1000 |     962.2084 ns |     13.9839 ns |     - |     - |     - |               0.12 |
+    **SIMDMapInPlace** |  **100000** |  **21,078.0491 ns** |    **627.8978 ns** |     **-** |     **-** |     **-** |              **56.61** |
+ MathNETMapInPlace |  100000 | 104,831.7547 ns |  8,823.8473 ns |  5.26 |     - |     - |           2,267.50 |
+           SIMDSum |  100000 |  15,134.0240 ns |    708.8177 ns |     - |     - |     - |              46.02 |
+        MathNETSum |  100000 |  97,051.7780 ns |    875.9276 ns |     - |     - |     - |             217.82 |
+    **SIMDMapInPlace** | **1000000** | **220,760.2212 ns** |  **7,167.1597 ns** |     **-** |     **-** |  **0.46** |           **7,402.18** |
+ MathNETMapInPlace | 1000000 | 824,388.9221 ns | 47,134.8321 ns |     - |     - |  1.87 |          33,210.67 |
+           SIMDSum | 1000000 | 159,887.6959 ns |  5,030.3486 ns |     - |     - |  0.18 |           3,433.93 |
+        MathNETSum | 1000000 | 967,761.7422 ns | 17,557.1206 ns |     - |     - |  2.00 |          29,450.93 |

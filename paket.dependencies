@@ -20,7 +20,9 @@ group Test
     source http://www.nuget.org/api/v2
     framework: >= net45 
     redirects: on
-
+    nuget MathNET.Numerics
+    nuget MathNet.Numerics.FSharp
+    nuget MathNet.Numerics.MKL.Win-x64
     nuget BenchmarkDotnet
     nuget FsCheck
     nuget NUnit
