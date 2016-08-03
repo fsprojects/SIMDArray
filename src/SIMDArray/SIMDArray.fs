@@ -63,11 +63,15 @@ let inline fold
     (array: ^T[]) : ^State =
 
     checkNonNull array
+
     let len = array.Length
+    let count = Vector< ^T>.Count
+    let lenLessCount = len-count
+
     let mutable state = Vector< ^State> acc
     let mutable vi = 0
-    let count = Vector< ^T>.Count
-    while vi <= len - count do
+    
+    while vi <= lenLessCount do
         state <- f state (Vector< ^T>(array,vi))
         vi <- vi + count
 
@@ -104,12 +108,16 @@ let inline reduce
 /// <param name="count">How large to make the array</param>
 /// <param name="x">What to fille the array with</param>
 let inline create (count :int) (x:^T) =
-    //if count < 0 then invalidArg "count" "The input must be non-negative."
-    let array = Array.zeroCreate count : ^T[]
-    let mutable i = 0
+    
+    if count < 0 then invalidArg "count" "The input must be non-negative."
+
+    let array = Array.zeroCreate count
     let v = Vector< ^T> x
     let vCount = Vector< ^T>.Count
-    while i < count - vCount do
+    let lenLessCount = count-vCount
+
+    let mutable i = 0
+    while i <= lenLessCount do
         v.CopyTo(array,i)
         i <- i + vCount
 
@@ -126,10 +134,13 @@ let inline create (count :int) (x:^T) =
 /// <param name="index">The starting index to clear</param>
 /// <param name="length">The number of elements to clear</param>
 let inline clear (array : ^T[]) (index : int) (length : int) : unit =
-    let mutable i = index
+    
     let v = Vector< ^T>.Zero
     let vCount = Vector< ^T>.Count
-    while i < length - vCount do
+    let lenLessCount = length-vCount
+
+    let mutable i = index
+    while i <= lenLessCount do
         v.CopyTo(array,i)
         i <- i + vCount
 
@@ -146,19 +157,25 @@ let inline clear (array : ^T[]) (index : int) (length : int) : unit =
 /// <param name="count">How large to make the array</param>
 /// <param name="f">A function that accepts every Nth index and returns a Vector to be copied into the array</param>
 let inline init (count :int) (f : int -> Vector< ^T>)  =
+    
     if count < 0 then invalidArg "count" "The input must be non-negative."
-    let array = Array.zeroCreate count : ^T[]
-    let mutable i = 0
+    
+    let array = Array.zeroCreate count : ^T[]    
     let vCount = Vector< ^T>.Count
-    while i < count - vCount do
+    let lenLessCount = count - vCount
+
+    let mutable i = 0
+    while i <= lenLessCount do
         (f i).CopyTo(array,i)
         i <- i + vCount
+
     let leftOvers = f i
     let mutable leftOverIndex = 0
     while i < count do
         array.[i] <- leftOvers.[leftOverIndex]
         leftOverIndex <- leftOverIndex + 1
         i <- i + 1
+
     array
 
 
