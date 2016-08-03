@@ -242,7 +242,6 @@ let inline map
     result
 
 
-
 /// <summary>
 /// Identical to the standard map2 function, but you must provide
 /// A Vector mapping function.
@@ -259,7 +258,7 @@ let inline map2
     checkNonNull array2
 
     let count = Vector< ^T>.Count    
-    if count <> Vector< ^U>.Count || count <> Vector< ^V>.Count then invalidArg "array" "Inputs and output must all have same Vector wdith"
+    if count <> Vector< ^U>.Count || count <> Vector< ^V>.Count then invalidArg "array" "Inputs and output must all have same Vector width."
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
@@ -360,34 +359,30 @@ let inline mapi2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-
-    let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(f)
-
+    
     let result = Array.zeroCreate len
     let lenLessCount = len-count
 
     let mutable i = 0    
     while i <= lenLessCount do
-        f.Invoke(i,Vector< ^T>(array1,i ),Vector< ^U>(array2,i)).CopyTo(result,i)        
+        (f i (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)        
         i <- i + count
-    
-    
+        
     if i < len then 
         let leftOver = len - i
-        let leftOverArray1 = Array.init count (fun x -> if x < leftOver then 
-                                                          array1.[x+i]
-                                                        else
-                                                          Unchecked.defaultof< ^T>)
-        let leftOverArray2 = Array.init count (fun x -> if x < leftOver then 
-                                                          array2.[x+i]
-                                                        else
-                                                          Unchecked.defaultof< ^U>)
-        let v = f.Invoke(i,Vector< ^T>(leftOverArray1,0),Vector< ^U>(leftOverArray2,0) )
-        let mutable j = 0
-        while i < len do
+        let leftOverArray1 = Array.zeroCreate count
+        let leftOverArray2 = Array.zeroCreate count
+        for j in 0 .. leftOverArray1.Length-1 do
+            if j < leftOver then
+                leftOverArray1.[j] <- array1.[j+i]
+                leftOverArray2.[j] <- array2.[j+i]
+                        
+        let v = f i (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
+        
+        for j in 0 .. leftOver-1 do
             result.[i] <- v.[j]
             i <- i + 1
-            j <- j + 1
+
 
     result
 
@@ -405,32 +400,29 @@ let inline mapi
     checkNonNull array
     let count = Vector< ^T>.Count
     if count <> Vector< ^U>.Count then invalidArg "array" "Output type must have the same width as input type."
-    let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
-    let len = array.Length    
-    let result = Array.zeroCreate len
     
+    let len = array.Length    
+    let result = Array.zeroCreate len    
     let lenLessCount = len-count
 
-    let mutable i = 0
-    
+    let mutable i = 0    
     while i <= lenLessCount do
-        f.Invoke(i,(Vector< ^T>(array,i ))).CopyTo(result,i)                
+        (f i (Vector< ^T>(array,i ))).CopyTo(result,i)                
         i <- i + count
-    
-    
+        
     if i < len then 
         let leftOver = len - i
-        let leftOverArray = Array.init count (fun x -> if x < leftOver then 
-                                                        array.[x+i]
-                                                       else
-                                                        Unchecked.defaultof< ^T>)
-        let v = f.Invoke(i, (Vector< ^T>(leftOverArray,0)))
-        let mutable j = 0
-        while i < len do
+        let leftOverArray = Array.zeroCreate count
+        for j in 0 .. leftOverArray.Length-1 do
+            if j < leftOver then 
+                leftOverArray.[j] <- array.[j+i]
+           
+        let v = f i (Vector< ^T>(leftOverArray,0))
+        
+        for j in 0 .. leftOver-1 do        
             result.[i] <- v.[j]
             i <- i + 1
-            j <- j + 1
-
+            
     result
 
 /// <summary>
@@ -447,9 +439,10 @@ let inline iter
         
     let len = array.Length        
     let count = Vector< ^T>.Count
-    
+    let lenLessCount = len-count
+
     let mutable i = 0    
-    while i <= (len-count) do
+    while i <= lenLessCount do
         f (Vector< ^T>(array,i ))
         i <- i + count
         
@@ -467,14 +460,14 @@ let inline iteri
     f (array : ^T[]) : int  =
 
     checkNonNull array
-     
-    let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
+         
     let len = array.Length        
     let count = Vector< ^T>.Count
-    
+    let lenLessCount = len-count
+
     let mutable i = 0    
-    while i <= (len-count) do
-        f.Invoke(i,(Vector< ^T>(array,i )))
+    while i <= lenLessCount do
+        f i (Vector< ^T>(array,i ))
         i <- i + count
         
     len-i
@@ -495,27 +488,27 @@ let inline mapInPlace
     let len = array.Length
     let count = Vector< ^T>.Count
     let lenLessCount = len - count
-    let rec loop i = 
-        if i <= lenLessCount then
-            (f (Vector< ^T>(array,i ))).CopyTo(array,i)   
-            loop (i+count)
+
+    let mutable i = 0
+    while i <= lenLessCount do
+        (f (Vector< ^T>(array,i ))).CopyTo(array,i)   
+        i <- i + count
        
-    loop 0
-    
-    let mutable i = len - len % count
+        
     if i < len then 
         let leftOver = len - i
-        let leftOverArray = Array.init count (fun x -> if x < leftOver then 
-                                                        array.[x+i]
-                                                       else
-                                                        Unchecked.defaultof< ^T>)
+        let leftOverArray = Array.zeroCreate count
+        for j in 0 .. leftOverArray.Length-1 do
+            if j < leftOver then 
+                leftOverArray.[j] <- array.[j+i]
+           
         let v = f (Vector< ^T>(leftOverArray,0))
-        let mutable j = 0
-        while i < len do
+        
+        for j in 0 .. leftOver-1 do        
             array.[i] <- v.[j]
             i <- i + 1
-            j <- j + 1
-
+    
+            
 
 /// <summary>
 /// Checks for the existence of a value. You provide a function that takes a Vector
@@ -530,22 +523,23 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
     let count = Vector< ^T>.Count
     let mutable found = false
     let len = array.Length
+    let lenLessCount = len-count
 
-    let mutable vi = 0
-    while vi < len - count do
-        found <- f (Vector< ^T>(array,vi))
-        if found then vi <- len
-        else vi <- vi + count
+    let mutable i = 0
+    while i <= lenLessCount do
+        found <- f (Vector< ^T>(array,i))
+        if found then i <- len
+        else i <- i + count
 
-    if not found && vi < len then
-        let leftOverArray =
-            [| for i=1 to Vector< ^T>.Count do
-                if vi < array.Length then
-                    yield array.[vi]
-                    vi <- vi + 1
-                else
-                    yield array.[len-1] //just repeat the last item
-            |]
+    if not found && i < len then
+        let leftOverArray = Array.zeroCreate count
+        for j=0 to leftOverArray.Length do
+            if i < array.Length then
+                leftOverArray.[j] <- array.[i]
+                i <- i + 1
+            else
+                leftOverArray.[j] <- array.[len-1] //just repeat the last item
+            
         found <- f (Vector< ^T> leftOverArray)
 
     found
@@ -563,15 +557,15 @@ let inline tryFindVector (f : ^T Vector -> bool)  (array: ^T[]) : Vector< ^T> Op
     let count = Vector< ^T>.Count
     let mutable found = false
     let len = array.Length
-
-    
-    let mutable vi = 0
-    while vi < len - count && not found do
-        found <- f (Vector< ^T>(array,vi))
-        vi <- vi + count
+    let lenLessCount = len-count
+        
+    let mutable i = 0
+    while i <= lenLessCount && not found do
+        found <- f (Vector< ^T>(array,i))
+        i <- i + count
 
     if found then
-        Some (Vector< ^T>(array,vi-count))
+        Some (Vector< ^T>(array,i-count))
     else
         None
 
@@ -617,28 +611,26 @@ let inline contains (x : ^T) (array:^T[]) : bool =
 
     let count = Vector< ^T>.Count    
     let len = array.Length
-    let lenLessCount = len - count
+    let lenLessCount = len - count    
+    let compareVector = Vector< ^T>(x)    
     
-    let compareVector = Vector< ^T>(x)
-    
-    let rec loop i =         
-        if i <= lenLessCount && not (Vector.EqualsAny(Vector< ^T>(array,i),compareVector)) then
-            loop (i+count)
-        else 
-            (Vector.EqualsAny(Vector< ^T>(array,i),compareVector))
-    
-    let mutable found = loop 0
-    let mutable vi = len - len % count
-    if not found && vi < len then
-        let leftOverArray =
-            [| for i=1 to Vector< ^T>.Count do
-                if vi < array.Length then
-                    yield array.[vi]
-                    vi <- vi + 1
-                else
-                    yield array.[len-1] //just repeat the last item
-            |]
-        found <- Vector.EqualsAny(Vector< ^T>(leftOverArray),compareVector)
+    let mutable found = false
+    let mutable i = 0
+    while i <= lenLessCount do
+        found <- Vector.EqualsAny(Vector< ^T>(array,i),compareVector)
+        if found then i <- len
+        else i <- i + count
+
+    if not found && i < len then
+        let leftOverArray = Array.zeroCreate count
+        for j=0 to leftOverArray.Length do
+            if i < array.Length then
+                leftOverArray.[j] <- array.[i]
+                i <- i + 1
+            else
+                leftOverArray.[j] <- array.[len-1] //just repeat the last item
+            
+        found <- Vector.EqualsAny(Vector< ^T> leftOverArray,compareVector)
 
     found
 
@@ -656,21 +648,22 @@ let inline max (array :^T[]) : ^T =
     let mutable max = array.[0]
     let count = Vector< ^T>.Count
     let lenLessCount = len-count
-    let mutable vi = 0
+
+    let mutable i = 0
     if len >= count then
         let mutable maxV = Vector< ^T>(array,0)
-        vi <- vi + count
-        while vi < lenLessCount do
-            let v = Vector< ^T>(array,vi)
+        i <- i + count
+        while i <= lenLessCount do
+            let v = Vector< ^T>(array,i)
             maxV <- Vector.Max(v,maxV)
-            vi <- vi + count
+            i <- i + count
 
-        for i=0 to count-1 do
-            if maxV.[i] > max then max <- maxV.[i]
+        for j=0 to count-1 do
+            if maxV.[j] > max then max <- maxV.[j]
 
-    while vi < len do
-        if array.[vi] > max then max <- array.[vi]
-        vi <- vi + 1
+    while i < len do
+        if array.[i] > max then max <- array.[i]
+        i <- i + 1
     max
 
 
@@ -685,20 +678,21 @@ let inline min (array :^T[]) : ^T =
     if len = 0 then invalidArg "array" "empty array"
     let mutable min = array.[0]
     let count = Vector< ^T>.Count
+    let lenLessCount = len-count
 
-    let mutable vi = 0
+    let mutable i = 0
     if len >= count then
         let mutable minV = Vector< ^T>(array,0)
-        vi <- vi + count
-        while vi < len - count do
-            let v = Vector< ^T>(array,vi)
+        i <- i + count
+        while i <= lenLessCount do
+            let v = Vector< ^T>(array,i)
             minV <- Vector.Min(v,minV)
-            vi <- vi + count
+            i <- i + count
 
-        for i=0 to count-1 do
-            if minV.[i] < min then min <- minV.[i]
+        for j=0 to count-1 do
+            if minV.[j] < min then min <- minV.[j]
 
-    while vi < len do
-        if array.[vi] < min then min <- array.[vi]
-        vi <- vi + 1
+    while i < len do
+        if array.[i] < min then min <- array.[i]
+        i <- i + 1
     min
