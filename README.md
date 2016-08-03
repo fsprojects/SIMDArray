@@ -24,6 +24,7 @@ performance be sure to use Release builds with optimizations turned on.
 
 ## Performance Comparison vs Standrd Array Functions
 With 32bit Floats
+Map function `(fun x -> x*x)`
 ```ini
 
 Host Process Environment Information:
