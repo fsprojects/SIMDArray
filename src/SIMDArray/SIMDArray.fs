@@ -191,6 +191,7 @@ let inline sum (array:^T[]) : ^T =
     let count = Vector< ^T>.Count
     let len = array.Length
     let lenLessCount = len-count
+
     let mutable vi = 0
     while vi <= lenLessCount do
         state <-  state + Vector< ^T>(array,vi)
