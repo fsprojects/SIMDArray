@@ -133,7 +133,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
            SIMDSum | 1000000 | 159,887.6959 ns |  5,030.3486 ns |     - |     - |  0.18 |           3,433.93 |
         MathNETSum | 1000000 | 967,761.7422 ns | 17,557.1206 ns |     - |     - |  2.00 |          29,450.93 |
 
-### With 32bit Floats vs MathNET.Numerics MKL Native. Adding two arrays <a name-"mathnetnative"></a>
+### With 32bit Floats vs MathNET.Numerics MKL Native. Adding two arrays <a name="mathnetnative"></a>
      Method |  Length |            Median |          StdDev | Gen 0 | Gen 1 |    Gen 2 | Bytes Allocated/Op |
 ----------- |-------- |------------------ |---------------- |------ |------ |--------- |------------------- |
    **SIMDMap2** |     **100** |        **92.1515 ns** |       **3.0304 ns** |  **2.70** |     **-** |        **-** |             **212.76** |
