@@ -25,7 +25,7 @@ performance be sure to use Release builds with optimizations turned on.
 ## Performance Comparison vs Standrd Array Functions
 
 * [VS Core Lib 32bit Floats](#core32)
-* [VS Core Lib 64bit Floats](#core32)
+* [VS Core Lib 64bit Floats](#core64)
 * [VS MathNET.Numerics 32bit Floats](#mathnet)
 
 ```ini
