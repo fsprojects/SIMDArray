@@ -144,8 +144,7 @@ let inline reduce
 
 
 /// <summary>
-/// Creates an array filled with the value x. Only faster than
-/// Core lib create for larger width Vectors (byte, shorts etc)
+/// Creates an array filled with the value x. 
 /// </summary>
 /// <param name="count">How large to make the array</param>
 /// <param name="x">What to fille the array with</param>
@@ -163,11 +162,37 @@ let inline create (count :int) (x:^T) =
         v.CopyTo(array,i)
         i <- i + vCount
 
+    while i < array.Length do
+        array.[i] <- x
+        i <- i + 1
+
+    array
+
+/// <summary>
+/// Fills an array filled with the value x. 
+/// </summary>
+/// <param name="count">How large to make the array</param>
+/// <param name="x">What to fille the array with</param>
+let inline fill (array: ^T[]) (index: int) (count :int) (x:^T) =
+    
+    if count < 0 || count > array.Length then invalidArg "count" "The count was invalid."
+    if index < 0 || index >= array.Length then invalidArg "index" "The index was invalid."
+            
+    let v = Vector< ^T> x
+    let vCount = Vector< ^T>.Count
+    let lenLessCount = count-vCount
+
+    let mutable i = index
+    while i <= lenLessCount do
+        v.CopyTo(array,i)
+        i <- i + vCount
+
     while i < count do
         array.[i] <- x
         i <- i + 1
 
     array
+
 
 /// <summary>
 /// Sets a range of an array to the default value.
@@ -801,9 +826,9 @@ let inline max (array :^T[]) : ^T =
         let mutable maxV = Vector< ^T>(array,0)
         i <- i + count
         while i <= lenLessCount do
-            let v = Vector< ^T>(array,i)
-            maxV <- Vector.Max(v,maxV)
-            i <- i + count
+           let v = Vector< ^T>(array,i)
+           maxV <- Vector.Max(v,maxV)
+           i <- i + count
 
         for j=0 to count-1 do
             if maxV.[j] > max then max <- maxV.[j]
@@ -818,7 +843,7 @@ let inline max (array :^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
-
+    
     checkNonNull array
 
     let len = array.Length
@@ -856,6 +881,7 @@ let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
     
     max
 
+        
 /// <summary>
 /// Find the min by applying the function to each Vector in the array
 /// </summary>
@@ -863,7 +889,7 @@ let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
 let inline minBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
 
     checkNonNull array
-
+            
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."    
     let count = Vector< ^T>.Count
@@ -907,6 +933,7 @@ let inline minBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
 let inline min (array :^T[]) : ^T =
 
     checkNonNull array
+
     let len = array.Length
     if len = 0 then invalidArg "array" "empty array"
     let mutable min = array.[0]
@@ -929,3 +956,40 @@ let inline min (array :^T[]) : ^T =
         if array.[i] < min then min <- array.[i]
         i <- i + 1
     min
+
+
+/// This is probably useless, but in case not...
+/// TODO delete this or make it useful
+let inline filter (f: Vector< ^T> -> bool) (array: ( ^T)[]) = 
+
+    checkNonNull array
+    
+    let len = array.Length
+    if len = 0 then invalidArg "array" "empty array"    
+    let count = Vector< ^T>.Count
+    let lenLessCount = len-count
+
+    let temp = Array.zeroCreate<bool> (len/count)
+
+    let mutable i = 0
+    let mutable resultCount = 0
+    while i <= lenLessCount do
+        let b = f (Vector< ^T>(array,i))        
+        if b then
+            temp.[i/count] <- true        
+            resultCount <- resultCount + 1
+        i <- i + count
+
+    let res = Array.zeroCreate (resultCount*count)
+    i <- 0
+    resultCount <- 0
+    while i < len/count do
+        if temp.[i] then            
+            (Vector< ^T>(array,i*count)).CopyTo(res,resultCount)
+            resultCount <- resultCount + count
+        i <- i + 1
+    res
+
+
+    
+
