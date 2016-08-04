@@ -1,9 +1,9 @@
 ﻿[<RequireQualifiedAccess>]
 module Array.SIMD
 
+open System
 open System.Numerics
 open FSharp.Core
-
 
 let inline private checkNonNull arg =
     match box arg with
@@ -379,8 +379,6 @@ let inline map
 /// <param name="f">A function that takes two Vectors and returns a Vector. Both vectors and the
 /// returned vector do not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
-
-
 let inline map2
     (f : ^T Vector -> ^U Vector -> ^V Vector) (array1 : ^T[]) (array2 :^U[]) : ^V[] =
 
@@ -394,28 +392,27 @@ let inline map2
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
 
     let result = Array.zeroCreate len
-    let lenLessCount = len-count
 
-    let mutable i = 0    
-    while i <= lenLessCount do
-        (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
-        i <- i + count
+    if count <= len then
+      let lenLessCount = len - count
+      let mutable i = 0    
+      while i <= lenLessCount do
+          (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
+          i <- i + count
     
-    
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray1 = Array.zeroCreate count
-        let leftOverArray2 = Array.zeroCreate count
-        for j in 0 .. leftOverArray1.Length-1 do
-            if j < leftOver then
-                leftOverArray1.[j] <- array1.[j+i]
-                leftOverArray2.[j] <- array2.[j+i]
-                        
-        let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
-        
-        for j in 0 .. leftOver-1 do
-            result.[i] <- v.[j]
-            i <- i + 1
+      if i < len then
+          let lastVector1 = Vector< ^T>(array1, lenLessCount)
+          let lastVector2 = Vector< ^U>(array2, lenLessCount)
+          (f (lastVector1) (lastVector2)).CopyTo(result,lenLessCount)
+    else
+      let leftOverArray1 = Array.zeroCreate count
+      let leftOverArray2 = Array.zeroCreate count
+      Array.Copy(array1, leftOverArray1, len)
+      Array.Copy(array2, leftOverArray2, len)
+                          
+      let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
+      for j in 0 .. len-1 do
+          result.[j] <- v.[j]
             
     result
     
