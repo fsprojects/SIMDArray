@@ -612,13 +612,12 @@ let inline tryFind (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T Opt
 
           
 /// <summary>
-/// Checks for the existence of a value. You provide a function that takes a Vector
-/// and returns whether the condition you want exists in the Vector.
+/// Checks for the existence of a value satisfying the Vector predicate. 
 /// </summary>
 /// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
 /// <param name="array"></param>
 let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
-
+    
     checkNonNull array
 
     let count = Vector< ^T>.Count
@@ -642,6 +641,47 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
                 leftOverArray.[j] <- array.[len-1] //just repeat the last item
             
         found <- f (Vector< ^T> leftOverArray)
+
+    found
+
+/// <summary>
+/// Checks for the existence of a pair of values satisfying the Vector predicate. 
+/// </summary>
+/// <param name="f">Takes two Vectors and returns true or false to indicate existence</param>
+/// <param name="array"></param>
+let inline exists2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: ^U[]) : bool =
+    
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count
+    if count <> Vector< ^U>.Count then invalidArg "array" "Arrays must have same Vector width"
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+         
+    let lenLessCount = len-count
+
+    let mutable found = false
+    let mutable i = 0
+    while i <= lenLessCount do
+        found <- f (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        if found then i <- len
+        else i <- i + count
+
+    if not found && i < len then
+        let leftOverArray1 = Array.zeroCreate count
+        let leftOverArray2 = Array.zeroCreate count
+        for j=0 to leftOverArray1.Length-1 do
+            if i < len then
+                leftOverArray1.[j] <- array1.[i]
+                leftOverArray2.[j] <- array2.[i]
+                i <- i + 1
+            else
+                leftOverArray1.[j] <- array1.[len-1] //just repeat the last item
+                leftOverArray2.[j] <- array2.[len-1] //just repeat the last item
+            
+        found <- f (Vector< ^T> leftOverArray1) (Vector< ^U> leftOverArray2)
 
     found
 
