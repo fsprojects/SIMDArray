@@ -44,7 +44,7 @@ let inline fold
     (array: ^T[]) : ^State =
 
     checkNonNull array
-
+    
     let len = array.Length
     let count = Vector< ^T>.Count
     let lenLessCount = len-count
@@ -64,6 +64,61 @@ let inline fold
                 leftOverArray.[j] <- array.[j+i]
            
         let v = f state (Vector< ^T>(leftOverArray,0))
+        state <- applyLeftovers leftOver v state
+           
+        
+    i <- 0
+    let mutable result = acc
+    while i < Vector< ^State>.Count do
+        result <- combiner result state.[i]
+        i <- i + 1
+    result
+
+/// <summary>
+/// Similar to the standard Fold2 functionality but you must also provide a combiner
+/// function to combine each element of the Vector at the end. Not that acc
+/// can be double applied, this will not behave the same as fold. Typically
+/// 0 will be used for summing operations and 1 for multiplication.
+/// </summary>
+/// <param name="f">The folding function</param>
+/// <param name="combiner">Function to combine the Vector elements at the end</param>
+/// <param name="acc">Initial value to accumulate from</param>
+/// <param name="array">Source array</param>
+let inline fold2
+    (f: ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)
+    (combiner : ^State -> ^State -> ^State)
+    (acc : ^State)
+    (array1: ^T[])
+    (array2: ^U[]) : ^State =
+
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count then invalidArg "array" "Inputs and output must all have same Vector width."
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+            
+    let lenLessCount = len-count
+
+    let mutable state = Vector< ^State> acc
+    let mutable i = 0    
+    while i <= lenLessCount do
+        state <- f state (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        i <- i + count
+
+
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray1 = Array.zeroCreate count
+        let leftOverArray2 = Array.zeroCreate count
+        for j in 0 .. leftOverArray1.Length-1 do
+            if j < leftOver then 
+                leftOverArray1.[j] <- array1.[j+i]
+                leftOverArray2.[j] <- array2.[j+i]
+           
+        let v = f state (Vector< ^T>(leftOverArray1,0)) (Vector< ^U>(leftOverArray2,0))
         state <- applyLeftovers leftOver v state
            
         
