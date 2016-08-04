@@ -393,7 +393,7 @@ let inline map2
 
     let result = Array.zeroCreate len
 
-    if count < len then
+    if count <= len then
       let lenLessCount = len - count
       let mutable i = 0    
       while i <= lenLessCount do
