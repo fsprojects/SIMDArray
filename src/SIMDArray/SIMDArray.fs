@@ -11,25 +11,6 @@ let inline private checkNonNull arg =
     | _ -> ()
 
 /// <summary>
-/// Creates a vector based on remaining elements of the array that were not
-/// evenly divisible by the width of the vector, padding as necessary
-/// </summary>
-/// <param name="array"></param>
-/// <param name="curIndex"></param>
-let inline private getLeftovers (array: ^T []) (curIndex: int) : ^T Vector =
-    let mutable vi = curIndex
-    let d = Unchecked.defaultof< ^T>
-    let leftOverArray =
-        [| for i=1 to Vector< ^T>.Count do
-            if vi < array.Length then
-                yield array.[vi]
-                vi <- vi + 1
-            else
-                yield d
-        |]
-    Vector< ^T> leftOverArray
-
-/// <summary>
 /// Applies the leftover Vector to the result vector, ignoring the padding
 /// </summary>
 /// <param name="count"></param>
@@ -69,22 +50,28 @@ let inline fold
     let lenLessCount = len-count
 
     let mutable state = Vector< ^State> acc
-    let mutable vi = 0
-    
-    while vi <= lenLessCount do
-        state <- f state (Vector< ^T>(array,vi))
-        vi <- vi + count
+    let mutable i = 0    
+    while i <= lenLessCount do
+        state <- f state (Vector< ^T>(array,i))
+        i <- i + count
 
-    let leftoverCount = len - vi
-    if leftoverCount <> 0 then
-        let leftOver = f state (getLeftovers array vi )
-        state <- applyLeftovers leftoverCount leftOver state
 
-    vi <- 0
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray = Array.zeroCreate count
+        for j in 0 .. leftOverArray.Length-1 do
+            if j < leftOver then 
+                leftOverArray.[j] <- array.[j+i]
+           
+        let v = f state (Vector< ^T>(leftOverArray,0))
+        state <- applyLeftovers leftOver v state
+           
+        
+    i <- 0
     let mutable result = acc
-    while vi < Vector< ^State>.Count do
-        result <- combiner result state.[vi]
-        vi <- vi + 1
+    while i < Vector< ^State>.Count do
+        result <- combiner result state.[i]
+        i <- i + 1
     result
 
 
