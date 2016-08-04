@@ -195,6 +195,34 @@ let inline sum (array:^T[]) : ^T =
         vi <- vi + 1
     result
 
+/// <summary>
+/// Sums the elements of the array by applying the function to each Vector of the array
+/// </summary>
+/// <param name="array"></param>
+let inline sumBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
+
+    checkNonNull array
+    
+    let mutable state = Vector< ^U>.Zero    
+    let count = Vector< ^T>.Count
+    let len = array.Length
+    let lenLessCount = len-count
+
+    let mutable i = 0
+    while i <= lenLessCount do
+        state <-  state + f (Vector< ^T>(array,i))
+        i <- i + count
+
+    let mutable result = Unchecked.defaultof< ^U>
+    while i < len do
+        result <- result + array.[i]
+        i <- i + 1
+
+    i <- 0
+    while i < count do
+        result <- result + state.[i]
+        i <- i + 1
+    result
 
 /// <summary>
 /// Computes the average of the elements in the array
@@ -203,6 +231,17 @@ let inline sum (array:^T[]) : ^T =
 let inline average (array:^T[]) : ^T =
     let sum = sum array
     LanguagePrimitives.DivideByInt< ^T> sum array.Length
+    
+
+/// <summary>
+/// Computes the average of the elements in the array by applying the function to
+/// each Vector of the array
+/// </summary>
+/// <param name="array"></param>
+let inline averageBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
+    let sum = sumBy f array
+    LanguagePrimitives.DivideByInt< ^U> sum array.Length
+
 
 
 /// <summary>
