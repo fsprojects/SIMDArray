@@ -251,7 +251,7 @@ let inline sum (array:^T[]) : ^T =
     result
 
 /// <summary>
-/// Sums the elements of the array by applying the function to each Vector of the array
+/// Sums the elements of the array by applying the function to each Vector of the array.
 /// </summary>
 /// <param name="array"></param>
 let inline sumBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
@@ -268,11 +268,17 @@ let inline sumBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
         state <-  state + f (Vector< ^T>(array,i))
         i <- i + count
 
-    let mutable result = Unchecked.defaultof< ^U>
-    while i < len do
-        result <- result + array.[i]
-        i <- i + 1
+    if i < len then 
+        let leftOver = len - i
+        let leftOverArray = Array.zeroCreate count
+        for j in 0 .. leftOverArray.Length-1 do
+            if j < leftOver then 
+                leftOverArray.[j] <- array.[j+i]
+           
+        let v = f (Vector< ^T>(leftOverArray,0))
+        state <- applyLeftovers leftOver v state 
 
+    let mutable result = Unchecked.defaultof< ^U>    
     i <- 0
     while i < count do
         result <- result + state.[i]
@@ -750,7 +756,7 @@ let inline contains (x : ^T) (array:^T[]) : bool =
     
     checkNonNull array
 
-    let count = Vector< ^T>.Count    
+    let count = Vector< ^T>.Count      
     let len = array.Length
     let lenLessCount = len - count    
     let compareVector = Vector< ^T>(x)    
@@ -806,6 +812,92 @@ let inline max (array :^T[]) : ^T =
         if array.[i] > max then max <- array.[i]
         i <- i + 1
     max
+
+/// <summary>
+/// Find the max by applying the function to each Vector in the array
+/// </summary>
+/// <param name="array"></param>
+let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
+
+    checkNonNull array
+
+    let len = array.Length
+    if len = 0 then invalidArg "array" "The input array was empty."    
+    let count = Vector< ^T>.Count
+    let lenLessCount = len-count
+    let minValue = typeof< ^U>.GetField("MinValue").GetValue() |> unbox< ^U>
+    let mutable max = minValue 
+    let mutable maxV =  Vector< ^U>(minValue)
+    let mutable i = 0
+    if len >= count then
+        maxV  <- f (Vector< ^T>(array,0))
+        max <- maxV.[0]
+        i <- i + count
+        while i <= lenLessCount do
+            let v = f (Vector< ^T>(array,i))
+            maxV <- Vector.Max(v,maxV)
+            i <- i + count
+        
+
+    if i < len then
+        let leftOver = len-i
+        let leftOverArray = Array.zeroCreate count
+        for j=0 to leftOverArray.Length-1 do
+            if i < len then
+                leftOverArray.[j] <- array.[i]
+                i <- i + 1
+            else
+                leftOverArray.[j] <- array.[len-1] //just repeat the last item
+        let v = Vector.Max(f (Vector< ^T>(leftOverArray)),maxV)
+        maxV <- applyLeftovers leftOver v maxV
+    
+    for j=0 to Vector< ^U>.Count-1 do
+        if maxV.[j] > max then max <- maxV.[j]
+    
+    max
+
+/// <summary>
+/// Find the min by applying the function to each Vector in the array
+/// </summary>
+/// <param name="array"></param>
+let inline minBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
+
+    checkNonNull array
+
+    let len = array.Length
+    if len = 0 then invalidArg "array" "The input array was empty."    
+    let count = Vector< ^T>.Count
+    let lenLessCount = len-count
+    let maxValue = typeof< ^U>.GetField("MaxValue").GetValue() |> unbox< ^U>
+    let mutable min = maxValue 
+    let mutable minV =  Vector< ^U>(maxValue)
+    let mutable i = 0
+    if len >= count then
+        minV  <- f (Vector< ^T>(array,0))
+        min <- minV.[0]
+        i <- i + count
+        while i <= lenLessCount do
+            let v = f (Vector< ^T>(array,i))
+            minV <- Vector.Min(v,minV)
+            i <- i + count
+        
+
+    if i < len then
+        let leftOver = len-i
+        let leftOverArray = Array.zeroCreate count
+        for j=0 to leftOverArray.Length-1 do
+            if i < len then
+                leftOverArray.[j] <- array.[i]
+                i <- i + 1
+            else
+                leftOverArray.[j] <- array.[len-1] //just repeat the last item
+        let v = Vector.Min(f (Vector< ^T>(leftOverArray)),minV)
+        minV <- applyLeftovers leftOver v minV
+    
+    for j=0 to Vector< ^U>.Count-1 do
+        if minV.[j] < min then min <- minV.[j]
+    
+    min
 
 
 /// <summary>

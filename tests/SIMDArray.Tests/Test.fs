@@ -242,6 +242,20 @@ let ``SIMD.max = Array.max`` () =
         (array.Length > 0 && array <> [||]) ==>
         lazy ((compareNums (Array.SIMD.max array) (Array.max array)))
 
+[<Test>]                  
+let ``SIMD.maxBy = Array.maxBy`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy ((compareNums (Array.SIMD.maxBy (fun x -> x+x) array) (Array.maxBy (fun x -> x+x) array)))
+
+[<Test>]                  
+let ``SIMD.minBy = Array.minBy`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy ((compareNums (Array.SIMD.minBy (fun x -> x+x) array) (Array.minBy (fun x -> x+x) array)))
+
 
 [<Test>]                  
 let ``SIMD.min = Array.min`` () =
