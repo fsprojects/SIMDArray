@@ -393,27 +393,27 @@ let inline map2
 
     let result = Array.zeroCreate len
 
-    if count <= len then
-      let lenLessCount = len - count
-      let mutable i = 0    
-      while i <= lenLessCount do
-          (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
-          i <- i + count
-    
-      if i < len then
-          let lastVector1 = Vector< ^T>(array1, lenLessCount)
-          let lastVector2 = Vector< ^U>(array2, lenLessCount)
-          (f (lastVector1) (lastVector2)).CopyTo(result,lenLessCount)
-    else
-      let leftOverArray1 = Array.zeroCreate count
-      let leftOverArray2 = Array.zeroCreate count
-      Array.Copy(array1, leftOverArray1, len)
-      Array.Copy(array2, leftOverArray2, len)
+    let lenLessCount = len - count
+    let mutable i = 0    
+    while i <= lenLessCount do
+        (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
+        i <- i + count
+
+    if i < len then
+        if count < len then
+            let lastVector1 = Vector< ^T>(array1, lenLessCount)
+            let lastVector2 = Vector< ^U>(array2, lenLessCount)
+            (f (lastVector1) (lastVector2)).CopyTo(result,lenLessCount)
+        else
+            let leftOverArray1 = Array.zeroCreate count
+            let leftOverArray2 = Array.zeroCreate count
+            Array.Copy(array1, leftOverArray1, len)
+            Array.Copy(array2, leftOverArray2, len)
                           
-      let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
-      for j in 0 .. len-1 do
-          result.[j] <- v.[j]
-            
+            let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
+            for j in 0 .. len-1 do
+                result.[j] <- v.[j]
+
     result
     
 
