@@ -30,28 +30,27 @@ type SIMDBenchmark () =
     let r = Random()
     let mutable array = [||]
     let mutable array2 = [||]
-    let mutable mathnetVector = vector [1.0f]
-    let mutable mathnetVector2 = vector [1.0f]
+    let mutable array3 = [||]
+    //let mutable mathnetVector = vector [1.0f]
+    //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (100, 1000,100000,1000000)>] 
+    [<Params (100,1001,100000,1000000,5000000)>] 
     member val public Length = 0 with get, set
 
     [<Setup>]
     member self.SetupData () =        
         
         array <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
-        mathnetVector <- DenseVector.init self.Length (fun x -> (float32)(r.NextDouble()))
-        array2 <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
-        mathnetVector2 <- DenseVector.init self.Length (fun x -> (float32)(r.NextDouble()))
+        //mathnetVector <- DenseVector.init self.Length (fun x -> (float32)(r.NextDouble()))
+        //array2 <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
+        //array3 <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
+        //mathnetVector2 <- DenseVector.init self.Length (fun x -> (float32)(r.NextDouble()))
 
     
     [<Benchmark>]
-    member self.SIMDMap2 ()  = Array.SIMD.map2 (fun x y -> x+y) array array2
+    member self.SIMDMapInPlace ()  = Array.SIMD.mapInPlace (fun x -> x*x+x) array
 
        
-    [<Benchmark>]
-    member self.MathNETSum ()  =  mathnetVector.Add(mathnetVector2)
-
 
         
 [<EntryPoint>]
