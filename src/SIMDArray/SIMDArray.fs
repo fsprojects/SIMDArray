@@ -338,7 +338,6 @@ let inline averageBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
 /// does not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 
-
 let inline map
     (f : ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
 
@@ -355,21 +354,19 @@ let inline map
         i <- i + count
                
     
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray = Array.zeroCreate count
-        for j in 0 .. leftOverArray.Length-1 do
-            if j < leftOver then 
-                leftOverArray.[j] <- array.[j+i]
-           
-        let v = f (Vector< ^T>(leftOverArray,0))
-        
-        for j in 0 .. leftOver-1 do        
-            result.[i] <- v.[j]
-            i <- i + 1
-            
+    if i < len then
+        if count < len then
+            let lastVector1 = Vector< ^T>(array, lenLessCount)            
+            (f (lastVector1) ).CopyTo(result,lenLessCount)
+        else
+            let leftOverArray1 = Array.zeroCreate count           
+            Array.Copy(array, leftOverArray1, len)                                     
+            let v = f (Vector< ^T>(leftOverArray1,0 ))
+            for j in 0 .. len-1 do
+                result.[j] <- v.[j]
 
     result
+
 
 
 /// <summary>
@@ -425,6 +422,7 @@ let inline map2
 /// returned vector do not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 
+
 let inline map3
     (f : ^T Vector -> ^U Vector -> ^V Vector -> ^W Vector) (array1 : ^T[]) (array2 :^U[]) (array3 :^V[]): ^W[] =
 
@@ -447,26 +445,25 @@ let inline map3
         i <- i + count
     
     
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray1 = Array.zeroCreate count
-        let leftOverArray2 = Array.zeroCreate count
-        let leftOverArray3 = Array.zeroCreate count
-        for j in 0 .. leftOverArray1.Length-1 do
-            if j < leftOver then
-                leftOverArray1.[j] <- array1.[j+i]
-                leftOverArray2.[j] <- array2.[j+i]
-                leftOverArray3.[j] <- array3.[j+i]
-        
-                        
-        let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0)) (Vector< ^V>(leftOverArray3,0))
-        
-        for j in 0 .. leftOver-1 do
-            result.[i] <- v.[j]
-            i <- i + 1
+    if i < len then
+        if count < len then
+            let lastVector1 = Vector< ^T>(array1, lenLessCount)
+            let lastVector2 = Vector< ^U>(array2, lenLessCount)
+            let lastVector3 = Vector< ^V>(array3, lenLessCount)
+            (f (lastVector1) (lastVector2) (lastVector3)).CopyTo(result,lenLessCount)
+        else
+            let leftOverArray1 = Array.zeroCreate count
+            let leftOverArray2 = Array.zeroCreate count
+            let leftOverArray3 = Array.zeroCreate count
+            Array.Copy(array1, leftOverArray1, len)
+            Array.Copy(array2, leftOverArray2, len)
+            Array.Copy(array3, leftOverArray3, len)
+                          
+            let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0)) (Vector< ^V>(leftOverArray3,0))
+            for j in 0 .. len-1 do
+                result.[j] <- v.[j]
 
     result
-
 /// <summary>
 /// Identical to the standard mapi2 function, but you must provide
 /// A Vector mapping function.
@@ -495,21 +492,20 @@ let inline mapi2
         (f i (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)        
         i <- i + count
         
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray1 = Array.zeroCreate count
-        let leftOverArray2 = Array.zeroCreate count
-        for j in 0 .. leftOverArray1.Length-1 do
-            if j < leftOver then
-                leftOverArray1.[j] <- array1.[j+i]
-                leftOverArray2.[j] <- array2.[j+i]
-                        
-        let v = f i (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
-        
-        for j in 0 .. leftOver-1 do
-            result.[i] <- v.[j]
-            i <- i + 1
-
+    if i < len then
+        if count < len then
+            let lastVector1 = Vector< ^T>(array1, lenLessCount)
+            let lastVector2 = Vector< ^U>(array2, lenLessCount)
+            (f i (lastVector1) (lastVector2)).CopyTo(result,lenLessCount)
+        else
+            let leftOverArray1 = Array.zeroCreate count
+            let leftOverArray2 = Array.zeroCreate count
+            Array.Copy(array1, leftOverArray1, len)
+            Array.Copy(array2, leftOverArray2, len)
+                          
+            let v = f i (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
+            for j in 0 .. len-1 do
+                result.[j] <- v.[j]
 
     result
 
@@ -537,19 +533,18 @@ let inline mapi
         (f i (Vector< ^T>(array,i ))).CopyTo(result,i)                
         i <- i + count
         
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray = Array.zeroCreate count
-        for j in 0 .. leftOverArray.Length-1 do
-            if j < leftOver then 
-                leftOverArray.[j] <- array.[j+i]
-           
-        let v = f i (Vector< ^T>(leftOverArray,0))
-        
-        for j in 0 .. leftOver-1 do        
-            result.[i] <- v.[j]
-            i <- i + 1
-            
+   
+    if i < len then
+        if count < len then
+            let lastVector = Vector< ^T>(array, lenLessCount)          
+            (f i (lastVector) ).CopyTo(result,lenLessCount)
+        else
+            let leftOverArray = Array.zeroCreate count            
+            Array.Copy(array, leftOverArray, len)                                      
+            let v = f i (Vector< ^T>(leftOverArray,0 ))
+            for j in 0 .. len-1 do
+                result.[j] <- v.[j]
+
     result
 
 /// <summary>
@@ -634,7 +629,7 @@ let inline mapInPlace
         for j in 0 .. leftOver-1 do        
             array.[i] <- v.[j]
             i <- i + 1
-    
+  
   
 /// <summary>
 /// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option
