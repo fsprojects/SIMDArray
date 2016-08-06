@@ -473,7 +473,9 @@ let inline mapi
 /// <param name="f">Accepts a Vector</param>
 /// <param name="array"></param>
 let inline iter
-    (vf : Vector< ^T> -> unit) (sf : ^T -> unit) (array : ^T[]) : unit  =
+    (vf : Vector< ^T> -> unit) 
+    (sf : ^T -> unit) 
+    (array : ^T[]) : unit  =
 
     checkNonNull array
         
@@ -826,16 +828,8 @@ let inline contains (x : ^T) (array:^T[]) : bool =
         if found then i <- len
         else i <- i + count
 
-    if i < len then
-        let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length-1 do
-            if i < len then
-                leftOverArray.[j] <- array.[i]
-                i <- i + 1
-            else
-                leftOverArray.[j] <- array.[len-1] //just repeat the last item
-            
-        found <- Vector.EqualsAny(Vector< ^T> leftOverArray,compareVector)
+    while i < len && not found do                
+        found <- x = array.[i]
 
     found
 
