@@ -13,22 +13,6 @@ let inline private checkNonNull arg =
     | null -> nullArg "array"
     | _ -> ()
 
-/// <summary>
-/// Applies the leftover Vector to the result vector, ignoring the padding
-/// </summary>
-/// <param name="count"></param>
-/// <param name="input"></param>
-/// <param name="result"></param>
-let inline private applyLeftovers (count: int) (input: ^T Vector) (result: ^T Vector) =
-    let vCount = Vector< ^T>.Count
-    let newArray = Array.zeroCreate vCount
-    for i=0 to vCount-1 do
-        if i < count then
-            newArray.[i] <- input.[i]
-        else
-            newArray.[i] <- result.[i]
-    Vector< ^T> newArray
-
 
 /// <summary>
 /// Similar to the standard Fold functionality but you must also provide a combiner
