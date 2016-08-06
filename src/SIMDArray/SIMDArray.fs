@@ -830,6 +830,7 @@ let inline contains (x : ^T) (array:^T[]) : bool =
 
     while i < len && not found do                
         found <- x = array.[i]
+        i <- i + 1
 
     found
 
@@ -869,7 +870,10 @@ let inline max (array :^T[]) : ^T =
 /// Find the max by applying the function to each Vector in the array
 /// </summary>
 /// <param name="array"></param>
-let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
+let inline maxBy 
+    (vf: Vector< ^T> -> Vector< ^U>) 
+    (sf: ^T -> ^U)
+    (array :^T[]) : ^U =
     
     checkNonNull array
 
@@ -882,29 +886,21 @@ let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
     let mutable maxV =  Vector< ^U>(minValue)
     let mutable i = 0
     if len >= count then
-        maxV  <- f (Vector< ^T>(array,0))
+        maxV  <- vf (Vector< ^T>(array,0))
         max <- maxV.[0]
         i <- i + count
         while i <= lenLessCount do
-            let v = f (Vector< ^T>(array,i))
+            let v = vf (Vector< ^T>(array,i))
             maxV <- Vector.Max(v,maxV)
-            i <- i + count
-        
-
-    if i < len then
-        let leftOver = len-i
-        let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length-1 do
-            if i < len then
-                leftOverArray.[j] <- array.[i]
-                i <- i + 1
-            else
-                leftOverArray.[j] <- array.[len-1] //just repeat the last item
-        let v = Vector.Max(f (Vector< ^T>(leftOverArray)),maxV)
-        maxV <- applyLeftovers leftOver v maxV
+            i <- i + count                
     
     for j=0 to Vector< ^U>.Count-1 do
         if maxV.[j] > max then max <- maxV.[j]
+
+    while i < len do
+        let x = sf array.[i]
+        if x > max then max <- x
+        i <- i + 1
     
     max
 
@@ -913,7 +909,10 @@ let inline maxBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
 /// Find the min by applying the function to each Vector in the array
 /// </summary>
 /// <param name="array"></param>
-let inline minBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
+let inline minBy 
+    (vf: Vector< ^T> -> Vector< ^U>) 
+    (sf: ^T -> ^U)
+    (array :^T[]) : ^U =
 
     checkNonNull array
             
@@ -932,23 +931,15 @@ let inline minBy (f: Vector< ^T> -> Vector< ^U>) (array :^T[]) : ^U =
         while i <= lenLessCount do
             let v = f (Vector< ^T>(array,i))
             minV <- Vector.Min(v,minV)
-            i <- i + count
-        
-
-    if i < len then
-        let leftOver = len-i
-        let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length-1 do
-            if i < len then
-                leftOverArray.[j] <- array.[i]
-                i <- i + 1
-            else
-                leftOverArray.[j] <- array.[len-1] //just repeat the last item
-        let v = Vector.Min(f (Vector< ^T>(leftOverArray)),minV)
-        minV <- applyLeftovers leftOver v minV
+            i <- i + count        
     
     for j=0 to Vector< ^U>.Count-1 do
         if minV.[j] < min then min <- minV.[j]
+
+    while i < len do
+        let x = sf array.[i]
+        if x < min then min <- x
+        i <- i + 1
     
     min
 
