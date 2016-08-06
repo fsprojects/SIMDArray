@@ -925,11 +925,11 @@ let inline minBy
     let mutable minV =  Vector< ^U>(maxValue)
     let mutable i = 0
     if len >= count then
-        minV  <- f (Vector< ^T>(array,0))
+        minV  <- vf (Vector< ^T>(array,0))
         min <- minV.[0]
         i <- i + count
         while i <= lenLessCount do
-            let v = f (Vector< ^T>(array,i))
+            let v = vf (Vector< ^T>(array,i))
             minV <- Vector.Min(v,minV)
             i <- i + count        
     
