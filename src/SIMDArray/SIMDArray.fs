@@ -228,7 +228,10 @@ let inline sum (array:^T[]) : ^T =
 /// Sums the elements of the array by applying the function to each Vector of the array.
 /// </summary>
 /// <param name="array"></param>
-let inline sumBy (vf: Vector< ^T> -> Vector< ^U>) (sf : ^T -> ^U) (array:^T[]) : ^U =
+let inline sumBy 
+    (vf: Vector< ^T> -> Vector< ^U>) 
+    (sf : ^T -> ^U) 
+    (array:^T[]) : ^U =
 
     checkNonNull array
     
@@ -268,7 +271,8 @@ let inline average (array:^T[]) : ^T =
 /// each Vector of the array
 /// </summary>
 /// <param name="array"></param>
-let inline averageBy (vf: Vector< ^T> -> Vector< ^U>) (sf: ^T -> ^U) (array:^T[]) : ^U =
+let inline averageBy 
+    (vf: Vector< ^T> -> Vector< ^U>) (sf: ^T -> ^U) (array:^T[]) : ^U =
     let sum = sumBy vf sf array
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 
@@ -621,34 +625,43 @@ let inline tryFindVector
 
 
 /// <summary>
-/// Takes a function that accepts a vector and returns true or false. Returns the first Vector that 
-/// returns true, and then extracts the desired value with extractor or null if none is found.
-/// Leftover array elements are ignored.
+/// vPredicate for whether the Vector contains the value
+/// sPredicate for the value
 /// </summary>
-/// <param name="finder">Takes a Vector and returns true or false</param>
-/// <param name="extractor">Takes a vector and extracts the desied value from it</param>
+/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
+/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
 /// <param name="array"></param>
-let inline find (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T) (array: ^T[]) : ^T =
+let inline find 
+    (vPredicate : ^T Vector -> bool) 
+    (sPredicate : ^T -> bool) 
+    (array : ^T[]) : ^T =
 
-    let v = tryFindVector finder array
-    match v with
-    | Some v -> extractor v
-    | None -> null
+    let count = Vector< ^T>.Count
+    let len = array.Length
+    let o = tryFindVector vPredicate array
+    let a = match o with
+            | Some v -> Array.init Vector< ^T>.Count (fun i -> v.[i])
+            | None -> Array.init (len % count) ( fun i -> array.[len-(count-i)] )
+
+    Array.find sPredicate a
     
+
 /// <summary>
-/// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option that 
-/// returns true, and then extracts the desired value with extractor or returns None if not found. Leftover
-/// array elements are ignored.
+/// vPredicate for whether the Vector contains the value
+/// sPredicate for the value
 /// </summary>
-/// <param name="finder">Takes a Vector and returns true or false</param>
-/// <param name="extractor">Takes a vector and extracts the desied value Option from it</param>
+/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
+/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
 /// <param name="array"></param>
-let inline tryFind (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T Option) (array: ^T[]) : ^T Option =
+let inline tryFind 
+    (vPredicate : ^T Vector -> bool) 
+    (sPredicate : ^T -> bool) 
+    (array: ^T[]) : ^T Option =
  
-    let v = tryFindVector finder array
+    let v = find vPredicate sPredicate array
     match v with
-    | Some v -> extractor v
-    | None -> None
+    | null -> None
+    | x -> Some x
 
 
           
@@ -686,7 +699,10 @@ let inline exists
 /// </summary>
 /// <param name="f">Takes a Vector and returns true or false</param>
 /// <param name="array"></param>
-let inline forall (f : ^T Vector -> bool) (array: ^T[]) : bool =
+let inline forall 
+    (vf : ^T Vector -> bool) 
+    (sf : ^T -> bool)
+    (array: ^T[]) : bool =
     
     checkNonNull array
 
@@ -697,20 +713,13 @@ let inline forall (f : ^T Vector -> bool) (array: ^T[]) : bool =
 
     let mutable i = 0
     while i <= lenLessCount do
-        found <- f (Vector< ^T>(array,i))
+        found <- vf (Vector< ^T>(array,i))
         if not found then i <- len
         else i <- i + count
 
-    if i < len then
-        let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length-1 do
-            if i < len then
-                leftOverArray.[j] <- array.[i]
-                i <- i + 1
-            else
-                leftOverArray.[j] <- array.[len-1] //just repeat the last item
-            
-        found <- f (Vector< ^T> leftOverArray)
+    while i < len && found do
+        found <- sf array.[i]
+        i <- i + 1
 
     found
 
@@ -754,7 +763,11 @@ let inline exists2
 /// </summary>
 /// <param name="f">Takes two Vectors and returns true or false to indicate existence</param>
 /// <param name="array"></param>
-let inline forall2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: ^U[]) : bool =
+let inline forall2 
+    (vf : ^T Vector -> ^U Vector -> bool) 
+    (sf : ^T -> ^U -> bool)
+    (array1: ^T[]) 
+    (array2: ^U[]) : bool =
     
     checkNonNull array1
     checkNonNull array2
@@ -770,23 +783,13 @@ let inline forall2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: 
     let mutable found = true
     let mutable i = 0
     while i <= lenLessCount do
-        found <- f (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        found <- vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         if not found then i <- len
         else i <- i + count
 
-    if i < len then
-        let leftOverArray1 = Array.zeroCreate count
-        let leftOverArray2 = Array.zeroCreate count
-        for j=0 to leftOverArray1.Length-1 do
-            if i < len then
-                leftOverArray1.[j] <- array1.[i]
-                leftOverArray2.[j] <- array2.[i]
-                i <- i + 1
-            else
-                leftOverArray1.[j] <- array1.[len-1] //just repeat the last item
-                leftOverArray2.[j] <- array2.[len-1] //just repeat the last item
-            
-        found <- f (Vector< ^T> leftOverArray1) (Vector< ^U> leftOverArray2)
+    while i < len && found do
+        found <- sf array1.[i] array2.[i]
+        i <- i + 1
 
     found
 
