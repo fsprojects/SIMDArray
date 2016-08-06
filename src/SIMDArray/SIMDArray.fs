@@ -171,30 +171,6 @@ let inline create (count :int) (x:^T) =
 
     array
 
-/// <summary>
-/// Fills an array filled with the value x. 
-/// </summary>
-/// <param name="count">How large to make the array</param>
-/// <param name="x">What to fille the array with</param>
-let inline fill (array: ^T[]) (index: int) (count :int) (x:^T) =
-    
-    if count < 0 || count > array.Length then invalidArg "count" "The count was invalid."
-    if index < 0 || index >= array.Length then invalidArg "index" "The index was invalid."
-            
-    let v = Vector< ^T> x
-    let vCount = Vector< ^T>.Count
-    let lenLessCount = count-vCount
-
-    let mutable i = index
-    while i <= lenLessCount do
-        v.CopyTo(array,i)
-        i <- i + vCount
-
-    while i < count do
-        array.[i] <- x
-        i <- i + 1
-
-    array
 
 
 /// <summary>
@@ -766,7 +742,7 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
         if found then i <- len
         else i <- i + count
 
-    if not found && i < len then
+    if i < len then
         let leftOverArray = Array.zeroCreate count
         for j=0 to leftOverArray.Length-1 do
             if i < len then
@@ -778,6 +754,40 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
         found <- f (Vector< ^T> leftOverArray)
 
     found
+
+/// <summary>
+/// Checks if all Vectors satisfy the predicate.
+/// </summary>
+/// <param name="f">Takes a Vector and returns true or false</param>
+/// <param name="array"></param>
+let inline forall (f : ^T Vector -> bool) (array: ^T[]) : bool =
+    
+    checkNonNull array
+
+    let count = Vector< ^T>.Count
+    let mutable found = true
+    let len = array.Length
+    let lenLessCount = len-count
+
+    let mutable i = 0
+    while i <= lenLessCount do
+        found <- f (Vector< ^T>(array,i))
+        if not found then i <- len
+        else i <- i + count
+
+    if i < len then
+        let leftOverArray = Array.zeroCreate count
+        for j=0 to leftOverArray.Length-1 do
+            if i < len then
+                leftOverArray.[j] <- array.[i]
+                i <- i + 1
+            else
+                leftOverArray.[j] <- array.[len-1] //just repeat the last item
+            
+        found <- f (Vector< ^T> leftOverArray)
+
+    found
+
 
 /// <summary>
 /// Checks for the existence of a pair of values satisfying the Vector predicate. 
@@ -804,7 +814,48 @@ let inline exists2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: 
         if found then i <- len
         else i <- i + count
 
-    if not found && i < len then
+    if i < len then
+        let leftOverArray1 = Array.zeroCreate count
+        let leftOverArray2 = Array.zeroCreate count
+        for j=0 to leftOverArray1.Length-1 do
+            if i < len then
+                leftOverArray1.[j] <- array1.[i]
+                leftOverArray2.[j] <- array2.[i]
+                i <- i + 1
+            else
+                leftOverArray1.[j] <- array1.[len-1] //just repeat the last item
+                leftOverArray2.[j] <- array2.[len-1] //just repeat the last item
+            
+        found <- f (Vector< ^T> leftOverArray1) (Vector< ^U> leftOverArray2)
+
+    found
+
+/// <summary>
+/// Checks for the if all Vector pairs satisfy the predicate
+/// </summary>
+/// <param name="f">Takes two Vectors and returns true or false to indicate existence</param>
+/// <param name="array"></param>
+let inline forall2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: ^U[]) : bool =
+    
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count
+    if count <> Vector< ^U>.Count then invalidArg "array" "Arrays must have same Vector width"
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+         
+    let lenLessCount = len-count
+
+    let mutable found = true
+    let mutable i = 0
+    while i <= lenLessCount do
+        found <- f (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        if not found then i <- len
+        else i <- i + count
+
+    if i < len then
         let leftOverArray1 = Array.zeroCreate count
         let leftOverArray2 = Array.zeroCreate count
         for j=0 to leftOverArray1.Length-1 do
@@ -842,7 +893,7 @@ let inline contains (x : ^T) (array:^T[]) : bool =
         if found then i <- len
         else i <- i + count
 
-    if not found && i < len then
+    if i < len then
         let leftOverArray = Array.zeroCreate count
         for j=0 to leftOverArray.Length-1 do
             if i < len then
