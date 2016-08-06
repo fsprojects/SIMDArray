@@ -2,8 +2,11 @@
 module Array.SIMD
 
 open System
+open System.Threading
 open System.Numerics
 open FSharp.Core
+
+
 
 let inline private checkNonNull arg =
     match box arg with
@@ -571,6 +574,34 @@ let inline iter
     len-i
 
 /// <summary>
+/// Iterates over the two arrays applying f to each Vector pair
+/// Returns the number of leftover array elements so the caller
+/// can deal with them
+/// </summary>
+/// <param name="f">Accepts two Vectors</param>
+/// <param name="array"></param>
+let inline iter2 f (array1: ^T[]) (array2: ^U[]) : int =
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count then invalidArg "array" "Inputs and output must all have same Vector width."
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+    let lenLessCount = len-count
+
+    let mutable i = 0
+    while i <= lenLessCount do 
+        f (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        i <- i + count
+
+    len-i
+
+
+    
+
+/// <summary>
 /// Iterates over the array applying f to each Vector sized chunk
 /// along with the current index.
 /// Returns the number of leftover array elements so the caller
@@ -592,6 +623,32 @@ let inline iteri
         f i (Vector< ^T>(array,i ))
         i <- i + count
         
+    len-i
+
+/// <summary>
+/// Iterates over the two arrays applying f to each Vector pair
+/// and their current index.
+/// Returns the number of leftover array elements so the caller
+/// can deal with them
+/// </summary>
+/// <param name="f">Accepts two Vectors</param>
+/// <param name="array"></param>
+let inline iteri2 f (array1: ^T[]) (array2: ^U[]) : int =
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count then invalidArg "array" "Inputs and output must all have same Vector width."
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+    let lenLessCount = len-count
+
+    let mutable i = 0
+    while i <= lenLessCount do 
+        f i (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        i <- i + count
+
     len-i
 
 /// <summary>
@@ -950,38 +1007,5 @@ let inline min (array :^T[]) : ^T =
     min
 
 
-/// This is probably useless, but in case not...
-/// TODO delete this or make it useful
-let inline filter (f: Vector< ^T> -> bool) (array: ( ^T)[]) = 
 
-    checkNonNull array
-    
-    let len = array.Length
-    if len = 0 then invalidArg "array" "empty array"    
-    let count = Vector< ^T>.Count
-    let lenLessCount = len-count
-
-    let temp = Array.zeroCreate<bool> (len/count)
-
-    let mutable i = 0
-    let mutable resultCount = 0
-    while i <= lenLessCount do
-        let b = f (Vector< ^T>(array,i))        
-        if b then
-            temp.[i/count] <- true        
-            resultCount <- resultCount + 1
-        i <- i + count
-
-    let res = Array.zeroCreate (resultCount*count)
-    i <- 0
-    resultCount <- 0
-    while i < len/count do
-        if temp.[i] then            
-            (Vector< ^T>(array,i*count)).CopyTo(res,resultCount)
-            resultCount <- resultCount + count
-        i <- i + 1
-    res
-
-
-    
 
