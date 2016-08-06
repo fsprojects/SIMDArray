@@ -41,7 +41,8 @@ let inline private applyLeftovers (count: int) (input: ^T Vector) (result: ^T Ve
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold
-    (f: ^State Vector -> ^T Vector -> ^State Vector)
+    (vf: ^State Vector -> ^T Vector -> ^State Vector)
+    (sf : ^State -> ^T -> ^State)
     (combiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array: ^T[]) : ^State =
@@ -55,23 +56,15 @@ let inline fold
     let mutable state = Vector< ^State> acc
     let mutable i = 0    
     while i <= lenLessCount do
-        state <- f state (Vector< ^T>(array,i))
+        state <- vf state (Vector< ^T>(array,i))
         i <- i + count
 
-
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray = Array.zeroCreate count
-        for j in 0 .. leftOverArray.Length-1 do
-            if j < leftOver then 
-                leftOverArray.[j] <- array.[j+i]
-           
-        let v = f state (Vector< ^T>(leftOverArray,0))
-        state <- applyLeftovers leftOver v state
-           
-        
-    i <- 0
     let mutable result = acc
+    while i < len do
+        result <- sf result array.[i]
+        i <- i + 1
+                   
+    i <- 0    
     while i < Vector< ^State>.Count do
         result <- combiner result state.[i]
         i <- i + 1
@@ -88,7 +81,8 @@ let inline fold
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold2
-    (f: ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)
+    (vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
+    (sf : ^State -> ^T -> ^U -> ^State)
     (combiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array1: ^T[])
@@ -108,25 +102,16 @@ let inline fold2
     let mutable state = Vector< ^State> acc
     let mutable i = 0    
     while i <= lenLessCount do
-        state <- f state (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        state <- vf state (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
 
 
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray1 = Array.zeroCreate count
-        let leftOverArray2 = Array.zeroCreate count
-        for j in 0 .. leftOverArray1.Length-1 do
-            if j < leftOver then 
-                leftOverArray1.[j] <- array1.[j+i]
-                leftOverArray2.[j] <- array2.[j+i]
-           
-        let v = f state (Vector< ^T>(leftOverArray1,0)) (Vector< ^U>(leftOverArray2,0))
-        state <- applyLeftovers leftOver v state
-           
-        
-    i <- 0
     let mutable result = acc
+    while i < len do
+        result <- sf result array1.[i] array2.[i]
+        i <- i + 1 
+        
+    i <- 0    
     while i < Vector< ^State>.Count do
         result <- combiner result state.[i]
         i <- i + 1
@@ -140,10 +125,11 @@ let inline fold2
 /// <param name="combiner">Function to combine the Vector elements at the end</param>
 /// <param name="array">Source array</param>
 let inline reduce
-    (f: ^State Vector -> ^T Vector -> ^State Vector)
+    (vf: ^State Vector -> ^T Vector -> ^State Vector)
+    (sf: ^State -> ^T -> ^State )
     (combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
-    fold f combiner Unchecked.defaultof< ^State> array
+    fold vf sf combiner Unchecked.defaultof< ^State> array
 
 
 /// <summary>
@@ -238,27 +224,27 @@ let inline sum (array:^T[]) : ^T =
     let len = array.Length
     let lenLessCount = len-count
 
-    let mutable vi = 0
-    while vi <= lenLessCount do
-        state <-  state + Vector< ^T>(array,vi)
-        vi <- vi + count
+    let mutable i = 0
+    while i <= lenLessCount do
+        state <-  state + Vector< ^T>(array,i)
+        i <- i + count
 
     let mutable result = Unchecked.defaultof< ^T>
-    while vi < len do
-        result <- result + array.[vi]
-        vi <- vi + 1
+    while i < len do
+        result <- result + array.[i]
+        i <- i + 1
 
-    vi <- 0
-    while vi < count do
-        result <- result + state.[vi]
-        vi <- vi + 1
+    i <- 0
+    while i < count do
+        result <- result + state.[i]
+        i <- i + 1
     result
 
 /// <summary>
 /// Sums the elements of the array by applying the function to each Vector of the array.
 /// </summary>
 /// <param name="array"></param>
-let inline sumBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
+let inline sumBy (vf: Vector< ^T> -> Vector< ^U>) (sf : ^T -> ^U) (array:^T[]) : ^U =
 
     checkNonNull array
     
@@ -269,20 +255,15 @@ let inline sumBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
 
     let mutable i = 0
     while i <= lenLessCount do
-        state <-  state + f (Vector< ^T>(array,i))
+        state <-  state + vf (Vector< ^T>(array,i))
         i <- i + count
-
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray = Array.zeroCreate count
-        for j in 0 .. leftOverArray.Length-1 do
-            if j < leftOver then 
-                leftOverArray.[j] <- array.[j+i]
-           
-        let v = f (Vector< ^T>(leftOverArray,0))
-        state <- applyLeftovers leftOver v state 
-
+    
     let mutable result = Unchecked.defaultof< ^U>    
+
+    while i < len do
+        result <- result + sf array.[i]
+        i <- i + 1
+
     i <- 0
     while i < count do
         result <- result + state.[i]
@@ -303,8 +284,8 @@ let inline average (array:^T[]) : ^T =
 /// each Vector of the array
 /// </summary>
 /// <param name="array"></param>
-let inline averageBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
-    let sum = sumBy f array
+let inline averageBy (vf: Vector< ^T> -> Vector< ^U>) (sf: ^T -> ^U) (array:^T[]) : ^U =
+    let sum = sumBy vf sf array
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 
 
@@ -313,12 +294,13 @@ let inline averageBy (f: Vector< ^T> -> Vector< ^U>) (array:^T[]) : ^U =
 /// Identical to the standard map function, but you must provide
 /// A Vector mapping function.
 /// </summary>
-/// <param name="f">A function that takes a Vector and returns a Vector. The returned vector
+/// <param name="vf">A function that takes a Vector and returns a Vector. The returned vector
 /// does not have to be the same type but must be the same width</param>
+/// <param name="sf">A function to handle the leftover scalar elements if array is not divisible by Vector.count</param>
 /// <param name="array">The source array</param>
 
 let inline map
-    (f : ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
+    (vf : ^T Vector -> ^U Vector) (sf : ^T -> ^U) (array : ^T[]) : ^U[] =
 
     checkNonNull array
     let count = Vector< ^T>.Count
@@ -329,20 +311,13 @@ let inline map
 
     let mutable i = 0
     while i <= lenLessCount do        
-        (f (Vector< ^T>(array,i ))).CopyTo(result,i)   
+        (vf (Vector< ^T>(array,i ))).CopyTo(result,i)   
         i <- i + count
                
     
-    if i < len then
-        if count < len then
-            let lastVector1 = Vector< ^T>(array, lenLessCount)            
-            (f (lastVector1) ).CopyTo(result,lenLessCount)
-        else
-            let leftOverArray1 = Array.zeroCreate count           
-            Array.Copy(array, leftOverArray1, len)                                     
-            let v = f (Vector< ^T>(leftOverArray1,0 ))
-            for j in 0 .. len-1 do
-                result.[j] <- v.[j]
+    while i < len do
+        result.[i] <- sf array.[i]
+        i <- i + 1
 
     result
 
@@ -356,7 +331,10 @@ let inline map
 /// returned vector do not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 let inline map2
-    (f : ^T Vector -> ^U Vector -> ^V Vector) (array1 : ^T[]) (array2 :^U[]) : ^V[] =
+    (vf : ^T Vector -> ^U Vector -> ^V Vector) 
+    (sf : ^T -> ^U -> ^V)
+    (array1 : ^T[]) 
+    (array2 :^U[]) : ^V[] =
 
     checkNonNull array1
     checkNonNull array2
@@ -372,23 +350,12 @@ let inline map2
     let lenLessCount = len - count
     let mutable i = 0    
     while i <= lenLessCount do
-        (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
+        (vf (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
         i <- i + count
 
-    if i < len then
-        if count < len then
-            let lastVector1 = Vector< ^T>(array1, lenLessCount)
-            let lastVector2 = Vector< ^U>(array2, lenLessCount)
-            (f (lastVector1) (lastVector2)).CopyTo(result,lenLessCount)
-        else
-            let leftOverArray1 = Array.zeroCreate count
-            let leftOverArray2 = Array.zeroCreate count
-            Array.Copy(array1, leftOverArray1, len)
-            Array.Copy(array2, leftOverArray2, len)
-                          
-            let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
-            for j in 0 .. len-1 do
-                result.[j] <- v.[j]
+    while i < len do
+        result.[i] <- sf array1.[i] array2.[i]
+        i <- i + 1
 
     result
     
@@ -403,7 +370,9 @@ let inline map2
 
 
 let inline map3
-    (f : ^T Vector -> ^U Vector -> ^V Vector -> ^W Vector) (array1 : ^T[]) (array2 :^U[]) (array3 :^V[]): ^W[] =
+    (vf : ^T Vector -> ^U Vector -> ^V Vector -> ^W Vector) 
+    (sf : ^T -> ^U -> ^V -> ^W)
+    (array1 : ^T[]) (array2 :^U[]) (array3 :^V[]): ^W[] =
 
     checkNonNull array1
     checkNonNull array2
@@ -420,27 +389,14 @@ let inline map3
 
     let mutable i = 0    
     while i <= lenLessCount do
-        (f (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i)) (Vector< ^V>(array3,i))).CopyTo(result,i)        
+        (vf (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i)) (Vector< ^V>(array3,i))).CopyTo(result,i)        
         i <- i + count
     
     
-    if i < len then
-        if count < len then
-            let lastVector1 = Vector< ^T>(array1, lenLessCount)
-            let lastVector2 = Vector< ^U>(array2, lenLessCount)
-            let lastVector3 = Vector< ^V>(array3, lenLessCount)
-            (f (lastVector1) (lastVector2) (lastVector3)).CopyTo(result,lenLessCount)
-        else
-            let leftOverArray1 = Array.zeroCreate count
-            let leftOverArray2 = Array.zeroCreate count
-            let leftOverArray3 = Array.zeroCreate count
-            Array.Copy(array1, leftOverArray1, len)
-            Array.Copy(array2, leftOverArray2, len)
-            Array.Copy(array3, leftOverArray3, len)
-                          
-            let v = f (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0)) (Vector< ^V>(leftOverArray3,0))
-            for j in 0 .. len-1 do
-                result.[j] <- v.[j]
+    while i < len do
+        result.[i] <- sf array1.[i] array2.[i] array3.[i]
+        i <- i + 1
+    
 
     result
 /// <summary>
