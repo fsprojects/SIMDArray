@@ -408,7 +408,9 @@ let inline map3
 /// <param name="array">The source array</param>
 
 let inline mapi2
-    (f : int -> ^T Vector -> ^U Vector -> ^V Vector) (array1 : ^T[]) (array2 :^U[]) : ^V[] =
+    (vf : int -> ^T Vector -> ^U Vector -> ^V Vector) 
+    (sf : int -> ^T -> ^U -> ^V)
+    (array1 : ^T[]) (array2 :^U[]) : ^V[] =
 
     checkNonNull array1
     checkNonNull array2
@@ -424,23 +426,12 @@ let inline mapi2
 
     let mutable i = 0    
     while i <= lenLessCount do
-        (f i (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)        
+        (vf i (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)        
         i <- i + count
         
-    if i < len then
-        if count < len then
-            let lastVector1 = Vector< ^T>(array1, lenLessCount)
-            let lastVector2 = Vector< ^U>(array2, lenLessCount)
-            (f i (lastVector1) (lastVector2)).CopyTo(result,lenLessCount)
-        else
-            let leftOverArray1 = Array.zeroCreate count
-            let leftOverArray2 = Array.zeroCreate count
-            Array.Copy(array1, leftOverArray1, len)
-            Array.Copy(array2, leftOverArray2, len)
-                          
-            let v = f i (Vector< ^T>(leftOverArray1,0 )) (Vector< ^U>(leftOverArray2,0))
-            for j in 0 .. len-1 do
-                result.[j] <- v.[j]
+    while i < len do
+        result.[i] <- sf i array1.[i] array2.[i]
+        i <- i + 1
 
     result
 
@@ -453,7 +444,9 @@ let inline mapi2
 /// <param name="array">The source array</param>
 
 let inline mapi
-    (f : int -> ^T Vector -> ^U Vector) (array : ^T[]) : ^U[] =
+    (vf : int -> ^T Vector -> ^U Vector) 
+    (sf: int -> ^T -> ^U)
+    (array : ^T[]) : ^U[] =
 
     checkNonNull array
     let count = Vector< ^T>.Count
@@ -465,32 +458,22 @@ let inline mapi
 
     let mutable i = 0    
     while i <= lenLessCount do
-        (f i (Vector< ^T>(array,i ))).CopyTo(result,i)                
+        (vf i (Vector< ^T>(array,i ))).CopyTo(result,i)                
         i <- i + count
         
-   
-    if i < len then
-        if count < len then
-            let lastVector = Vector< ^T>(array, lenLessCount)          
-            (f i (lastVector) ).CopyTo(result,lenLessCount)
-        else
-            let leftOverArray = Array.zeroCreate count            
-            Array.Copy(array, leftOverArray, len)                                      
-            let v = f i (Vector< ^T>(leftOverArray,0 ))
-            for j in 0 .. len-1 do
-                result.[j] <- v.[j]
-
+    while i < len do
+        result.[i] <- sf i array.[i]
+        i <- i + 1
+    
     result
 
 /// <summary>
 /// Iterates over the array applying f to each Vector sized chunk
-/// Returns the number of leftover array elements so the caller
-/// can deal with them
 /// </summary>
 /// <param name="f">Accepts a Vector</param>
 /// <param name="array"></param>
 let inline iter
-    f (array : ^T[]) : int  =
+    (vf : Vector< ^T> -> unit) (sf : ^T -> unit) (array : ^T[]) : unit  =
 
     checkNonNull array
         
@@ -500,19 +483,24 @@ let inline iter
 
     let mutable i = 0    
     while i <= lenLessCount do
-        f (Vector< ^T>(array,i ))
+        vf (Vector< ^T>(array,i ))
         i <- i + count
-        
-    len-i
+     
+    while i < len do
+        sf array.[i]
+        i <- i + 1
+    
 
 /// <summary>
 /// Iterates over the two arrays applying f to each Vector pair
-/// Returns the number of leftover array elements so the caller
-/// can deal with them
 /// </summary>
 /// <param name="f">Accepts two Vectors</param>
 /// <param name="array"></param>
-let inline iter2 f (array1: ^T[]) (array2: ^U[]) : int =
+let inline iter2 
+    (vf : Vector< ^T> -> Vector< ^U> -> unit)
+    (sf : ^T -> ^U -> unit)
+    (array1: ^T[]) (array2: ^U[]) : unit =
+
     checkNonNull array1
     checkNonNull array2
 
@@ -525,24 +513,24 @@ let inline iter2 f (array1: ^T[]) (array2: ^U[]) : int =
 
     let mutable i = 0
     while i <= lenLessCount do 
-        f (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
 
-    len-i
-
-
+    while i < len do
+        sf array1.[i] array2.[i]
+        i <- i + 1
     
 
 /// <summary>
 /// Iterates over the array applying f to each Vector sized chunk
 /// along with the current index.
-/// Returns the number of leftover array elements so the caller
-/// can deal with them
 /// </summary>
 /// <param name="f">Accepts the current index and associated Vector</param>
 /// <param name="array"></param>
 let inline iteri
-    f (array : ^T[]) : int  =
+    (vf : int -> Vector< ^T> -> unit)
+    (sf : int -> ^T -> unit)
+    (array : ^T[]) : unit  =
 
     checkNonNull array
          
@@ -552,20 +540,26 @@ let inline iteri
 
     let mutable i = 0    
     while i <= lenLessCount do
-        f i (Vector< ^T>(array,i ))
+        vf i (Vector< ^T>(array,i ))
         i <- i + count
+
+    while i < len do
+        sf i array.[i]
+        i <- i + 1
         
-    len-i
+    
 
 /// <summary>
 /// Iterates over the two arrays applying f to each Vector pair
 /// and their current index.
-/// Returns the number of leftover array elements so the caller
-/// can deal with them
 /// </summary>
 /// <param name="f">Accepts two Vectors</param>
 /// <param name="array"></param>
-let inline iteri2 f (array1: ^T[]) (array2: ^U[]) : int =
+let inline iteri2 
+    (vf : int -> Vector< ^T> -> Vector< ^U> -> unit)
+    (sf : int -> ^T -> ^U -> unit)
+    (array1: ^T[]) (array2: ^U[]) : unit =
+
     checkNonNull array1
     checkNonNull array2
 
@@ -578,11 +572,13 @@ let inline iteri2 f (array1: ^T[]) (array2: ^U[]) : int =
 
     let mutable i = 0
     while i <= lenLessCount do 
-        f i (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        vf i (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
 
-    len-i
-
+    while i < len do
+        sf i array1.[i] array2.[i]
+        i <- i + 1
+    
 /// <summary>
 /// Identical to the SIMDMap except the operation is done in place, and thus
 /// the resulting Vector type must be the same as the intial type. This will
@@ -592,7 +588,9 @@ let inline iteri2 f (array1: ^T[]) (array2: ^U[]) : int =
 /// <param name="array"></param>
 
 let inline mapInPlace
-    ( f : ^T Vector -> ^T Vector) (array: ^T[]) : unit =
+    ( vf : ^T Vector -> ^T Vector) 
+    ( sf : ^T -> ^T )
+    (array: ^T[]) : unit =
 
     checkNonNull array
 
@@ -602,31 +600,21 @@ let inline mapInPlace
 
     let mutable i = 0
     while i <= lenLessCount do
-        (f (Vector< ^T>(array,i ))).CopyTo(array,i)   
+        (vf (Vector< ^T>(array,i ))).CopyTo(array,i)   
         i <- i + count
-       
-        
-    if i < len then 
-        let leftOver = len - i
-        let leftOverArray = Array.zeroCreate count
-        for j in 0 .. leftOverArray.Length-1 do
-            if j < leftOver then 
-                leftOverArray.[j] <- array.[j+i]
-           
-        let v = f (Vector< ^T>(leftOverArray,0))
-        
-        for j in 0 .. leftOver-1 do        
-            array.[i] <- v.[j]
-            i <- i + 1
-  
+               
+    while i < len do
+        array.[i] <- sf array.[i]
+        i <- i + 1
   
 /// <summary>
 /// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option
-/// that returns true or None if none match. Leftover array elements are ignored.
+/// that returns true or None if none match. 
 /// </summary>
 /// <param name="f">Takes a Vector and returns true or false</param>
 /// <param name="array"></param>
-let inline tryFindVector (f : ^T Vector -> bool)  (array: ^T[]) : Vector< ^T> Option =
+let inline tryFindVector 
+    (f : ^T Vector -> bool)  (array: ^T[]) : Vector< ^T> Option =
 
     checkNonNull array
 
@@ -683,7 +671,10 @@ let inline tryFind (finder : ^T Vector -> bool) (extractor : ^T Vector -> ^T Opt
 /// </summary>
 /// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
 /// <param name="array"></param>
-let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
+let inline exists 
+    (vf : ^T Vector -> bool) 
+    (sf : ^T -> bool)
+    (array: ^T[]) : bool =
     
     checkNonNull array
 
@@ -694,20 +685,13 @@ let inline exists (f : ^T Vector -> bool) (array: ^T[]) : bool =
 
     let mutable i = 0
     while i <= lenLessCount do
-        found <- f (Vector< ^T>(array,i))
+        found <- vf (Vector< ^T>(array,i))
         if found then i <- len
         else i <- i + count
 
-    if i < len then
-        let leftOverArray = Array.zeroCreate count
-        for j=0 to leftOverArray.Length-1 do
-            if i < len then
-                leftOverArray.[j] <- array.[i]
-                i <- i + 1
-            else
-                leftOverArray.[j] <- array.[len-1] //just repeat the last item
-            
-        found <- f (Vector< ^T> leftOverArray)
+    while i < len && not found do
+        found <- sf array.[i]
+        i <- i + 1
 
     found
 
@@ -750,7 +734,10 @@ let inline forall (f : ^T Vector -> bool) (array: ^T[]) : bool =
 /// </summary>
 /// <param name="f">Takes two Vectors and returns true or false to indicate existence</param>
 /// <param name="array"></param>
-let inline exists2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: ^U[]) : bool =
+let inline exists2 
+    (vf : ^T Vector -> ^U Vector -> bool) 
+    (sf : ^T -> ^U -> bool)
+    (array1: ^T[]) (array2: ^U[]) : bool =
     
     checkNonNull array1
     checkNonNull array2
@@ -766,23 +753,13 @@ let inline exists2 (f : ^T Vector -> ^U Vector -> bool) (array1: ^T[]) (array2: 
     let mutable found = false
     let mutable i = 0
     while i <= lenLessCount do
-        found <- f (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        found <- vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         if found then i <- len
         else i <- i + count
 
-    if i < len then
-        let leftOverArray1 = Array.zeroCreate count
-        let leftOverArray2 = Array.zeroCreate count
-        for j=0 to leftOverArray1.Length-1 do
-            if i < len then
-                leftOverArray1.[j] <- array1.[i]
-                leftOverArray2.[j] <- array2.[i]
-                i <- i + 1
-            else
-                leftOverArray1.[j] <- array1.[len-1] //just repeat the last item
-                leftOverArray2.[j] <- array2.[len-1] //just repeat the last item
-            
-        found <- f (Vector< ^T> leftOverArray1) (Vector< ^U> leftOverArray2)
+    while i < len && not found do
+        found <- sf array1.[i] array2.[i]
+        i <- i + 1
 
     found
 
