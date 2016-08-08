@@ -141,6 +141,30 @@ let inline create (count :int) (x:^T) =
 
     array
 
+/// <summary>
+/// Fills an array filled with the value x. 
+/// </summary>
+/// <param name="count">How large to make the array</param>
+/// <param name="x">What to fille the array with</param>
+let inline fill (array: ^T[]) (index: int) (count :int) (x:^T) =
+    
+    if count < 0 || count > array.Length then invalidArg "count" "The count was invalid."
+    if index < 0 || index >= array.Length then invalidArg "index" "The index was invalid."
+            
+    let v = Vector< ^T> x
+    let vCount = Vector< ^T>.Count
+    let lenLessCount = count-vCount
+
+    let mutable i = index
+    while i <= lenLessCount do
+        v.CopyTo(array,i)
+        i <- i + vCount
+
+    while i < count do
+        array.[i] <- x
+        i <- i + 1
+
+    array
 
 
 /// <summary>
@@ -963,5 +987,54 @@ let inline min (array :^T[]) : ^T =
     min
 
 
+/// <summary>
+/// Not actually SIMD enhanced, but faster for sufficiently simple predicates
+/// And much less allocation (as long as your predicate doesn't allocate much).
+/// </summary>
+/// <param name="f">Predicate to fitler with</param>
+/// <param name="array"></param>
 
+let inline filterSimplePredicate (f: ^T -> bool) (array: ( ^T)[]) = 
+    
+    if array = null then invalidArg "array" "Array can not be null."            
+    if array.Length = 0 then invalidArg "array" "Array can not be empty."    
+        
+    let mutable count = 0
 
+    for i = 0 to array.Length-1 do
+        if f array.[i] then
+            count <- count + 1
+                    
+    let result = Array.zeroCreate count
+    let mutable j = 0
+    for i = 0 to array.Length-1 do
+        if f array.[i] then
+            result.[j] <- array.[i]
+            j <- j + 1
+    result
+
+/// <summary>
+/// Not actually SIMD enhanced, but faster generally than the core lib in most
+//  scenarios
+/// </summary>
+/// <param name="f">Predicate to fitler with</param>
+/// <param name="array"></param>
+let inline filter (f: ^T -> bool) (array: ( ^T)[]) = 
+    
+    let len = array.Length
+    if array = null then invalidArg "array" "Array can not be null."            
+    if len = 0 then invalidArg "array" "Array can not be empty."    
+            
+    let temp = Array.zeroCreate<int> len
+    let mutable count = 0
+    for i = 0 to array.Length-1 do        
+        if f array.[i] then        
+            temp.[count] <- i
+            count <- count + 1
+                                
+    let result = Array.zeroCreate count    
+    for i = 0 to result.Length - 1 do        
+        result.[i] <- array.[temp.[i]]
+        
+        
+    result
