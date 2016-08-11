@@ -1,10 +1,14 @@
-﻿[<RequireQualifiedAccess>]
+﻿
+[<RequireQualifiedAccess>]
 module Array.SIMD
 
-open System
-open System.Threading
+open System.Runtime.InteropServices
 open System.Numerics
 open FSharp.Core
+open Microsoft.FSharp.Core
+open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
+open Microsoft.FSharp.Collections
+open Microsoft.FSharp.Core.Operators
 
 
 
@@ -140,6 +144,7 @@ let inline create (count :int) (x:^T) =
         i <- i + 1
 
     array
+
 
 /// <summary>
 /// Fills an array filled with the value x. 
@@ -988,13 +993,13 @@ let inline min (array :^T[]) : ^T =
 
 
 /// <summary>
-/// Not actually SIMD enhanced, but faster for sufficiently simple predicates
-/// And much less allocation (as long as your predicate doesn't allocate much).
+/// Not actually SIMD enhanced. 
+/// Much faster and less allocation for sufficiently simple predicates.
+/// Predicates are computed twice to avoid allocating an array.
 /// </summary>
 /// <param name="f">Predicate to fitler with</param>
 /// <param name="array"></param>
-
-let inline filterSimplePredicate (f: ^T -> bool) (array: ( ^T)[]) = 
+let inline filterSimplePredicate (f: ^T -> bool) (array: ^T[]) = 
     
     if array = null then invalidArg "array" "Array can not be null."            
     if array.Length = 0 then invalidArg "array" "Array can not be empty."    
@@ -1013,28 +1018,60 @@ let inline filterSimplePredicate (f: ^T -> bool) (array: ( ^T)[]) =
             j <- j + 1
     result
 
+
 /// <summary>
-/// Not actually SIMD enhanced, but faster generally than the core lib in most
-//  scenarios
+/// Not actually SIMD enhanced, but much faster.
+/// Returns an array with only elements equal to x.
 /// </summary>
-/// <param name="f">Predicate to fitler with</param>
+/// <param name="x"></param>
 /// <param name="array"></param>
-let inline filter (f: ^T -> bool) (array: ( ^T)[]) = 
-    
-    let len = array.Length
-    if array = null then invalidArg "array" "Array can not be null."            
-    if len = 0 then invalidArg "array" "Array can not be empty."    
-            
-    let temp = Array.zeroCreate<int> len
-    let mutable count = 0
-    for i = 0 to array.Length-1 do        
-        if f array.[i] then        
-            temp.[count] <- i
-            count <- count + 1
-                                
-    let result = Array.zeroCreate count    
-    for i = 0 to result.Length - 1 do        
-        result.[i] <- array.[temp.[i]]
-        
-        
-    result
+let inline filterEqual (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e = x) array
+
+
+/// <summary>
+/// Not actually SIMD enhanced, but much faster.
+/// Returns an array with only elements not equal to x.
+/// </summary>
+/// <param name="x"></param>
+/// <param name="array"></param>
+let inline filterNotEqual (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e <> x) array
+
+/// <summary>
+/// Not actually SIMD enhanced, but much faster.
+/// Returns an array with only elements greater than x.
+/// </summary>
+/// <param name="x"></param>
+/// <param name="array"></param>
+let inline filterGreaterThan (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e > x) array
+
+/// <summary>
+/// Not actually SIMD enhanced, but much faster.
+/// Returns an array with only elements less than x.
+/// </summary>
+/// <param name="x"></param>
+/// <param name="array"></param>
+let inline filterLessThan (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e < x) array
+
+/// <summary>
+/// Not actually SIMD enhanced, but much faster.
+/// Returns an array with only elements greater than or equal to x.
+/// </summary>
+/// <param name="x"></param>
+/// <param name="array"></param>
+let inline filterGEq (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e >= x) array
+
+/// <summary>
+/// Not actually SIMD enhanced, but much faster.
+/// Returns an array with only elements less than or equal to x.
+/// </summary>
+/// <param name="x"></param>
+/// <param name="array"></param>
+let inline filterLEq (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e <= x) array
+
+
