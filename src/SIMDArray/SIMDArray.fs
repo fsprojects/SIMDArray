@@ -1085,6 +1085,9 @@ let inline filterSimplePredicate (f: ^T -> bool) (array: ^T[]) =
             j <- j + 1
     result
 
+let inline whereSimplePredicate (f: ^T -> bool) (array: ^T[]) = 
+    filterSimplePredicate f array
+
 
 /// <summary>
 /// Not actually SIMD enhanced, but much faster.
@@ -1093,6 +1096,9 @@ let inline filterSimplePredicate (f: ^T -> bool) (array: ^T[]) =
 /// <param name="x"></param>
 /// <param name="array"></param>
 let inline filterEqual (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e = x) array
+
+let inline whereEqual (x : ^T) (array : ^T[]) = 
     filterSimplePredicate (fun e -> e = x) array
 
 
@@ -1105,6 +1111,9 @@ let inline filterEqual (x : ^T) (array : ^T[]) =
 let inline filterNotEqual (x : ^T) (array : ^T[]) = 
     filterSimplePredicate (fun e -> e <> x) array
 
+let inline whereNotEqual (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e <> x) array
+
 /// <summary>
 /// Not actually SIMD enhanced, but much faster.
 /// Returns an array with only elements greater than x.
@@ -1112,6 +1121,9 @@ let inline filterNotEqual (x : ^T) (array : ^T[]) =
 /// <param name="x"></param>
 /// <param name="array"></param>
 let inline filterGreaterThan (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e > x) array
+
+let inline whereGreaterThan (x : ^T) (array : ^T[]) = 
     filterSimplePredicate (fun e -> e > x) array
 
 /// <summary>
@@ -1123,6 +1135,9 @@ let inline filterGreaterThan (x : ^T) (array : ^T[]) =
 let inline filterLessThan (x : ^T) (array : ^T[]) = 
     filterSimplePredicate (fun e -> e < x) array
 
+let inline whereLessThan (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e < x) array
+
 /// <summary>
 /// Not actually SIMD enhanced, but much faster.
 /// Returns an array with only elements greater than or equal to x.
@@ -1132,6 +1147,9 @@ let inline filterLessThan (x : ^T) (array : ^T[]) =
 let inline filterGEq (x : ^T) (array : ^T[]) = 
     filterSimplePredicate (fun e -> e >= x) array
 
+let inline whereGEq (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e >= x) array
+
 /// <summary>
 /// Not actually SIMD enhanced, but much faster.
 /// Returns an array with only elements less than or equal to x.
@@ -1139,6 +1157,9 @@ let inline filterGEq (x : ^T) (array : ^T[]) =
 /// <param name="x"></param>
 /// <param name="array"></param>
 let inline filterLEq (x : ^T) (array : ^T[]) = 
+    filterSimplePredicate (fun e -> e <= x) array
+
+let inline whereLEq (x : ^T) (array : ^T[]) = 
     filterSimplePredicate (fun e -> e <= x) array
 
 
