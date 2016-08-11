@@ -2,19 +2,20 @@
 
 
 open System
+open System.Numerics
 open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
-open MathNet.Numerics
-open MathNet.Numerics.LinearAlgebra
+
 #if MONO
 #else
 open BenchmarkDotNet.Diagnostics.Windows
 #endif
                   
 
-
+let inline f x =
+    x*x+x
 
 type SIMDConfig () =
     inherit ManualConfig()
@@ -34,29 +35,31 @@ type SIMDBenchmark () =
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (100,1001,100000,1000000,5000000)>] 
+    [<Params (100,1001,1000001)>] 
     member val public Length = 0 with get, set
 
     [<Setup>]
     member self.SetupData () =        
         
-        array <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
+        array <- Array.create self.Length 5
+        //array2 <- Array.create self.Length 5
         //mathnetVector <- DenseVector.init self.Length (fun x -> (float32)(r.NextDouble()))
-        //array2 <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
+        
         //array3 <- Array.init self.Length (fun x -> (float32)(r.NextDouble()))
         //mathnetVector2 <- DenseVector.init self.Length (fun x -> (float32)(r.NextDouble()))
 
     
-    [<Benchmark>]
-    member self.SIMDMapInPlace ()  = Array.SIMD.mapInPlace (fun x -> x*x+x) array
+    
+    
+  
 
-       
 
-        
+
 [<EntryPoint>]
 let main argv =              
-    Control.UseNativeMKL()
-    printf "%A\n" (Control.LinearAlgebraProvider.ToString())
+    
+    
+    
 
     let switch = 
         BenchmarkSwitcher [|
