@@ -13,6 +13,8 @@ let squaredArray = array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)
 // Map needs one lambda to map the Vector<T>, and one to handle any leftover
 // elements if array is not divisible by Vector<T>.Count. In the case of 
 // simple arithmetic operations they can often be the same as shown here.
+// If you arrange your arrays such that they will never have leftovers, 
+// just pass a nop like (fun x -> x), it will never get executed.
 
 
 //Faster create and sum

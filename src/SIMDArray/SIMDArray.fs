@@ -306,6 +306,29 @@ let inline averageBy
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 
 
+/// <summary>
+/// Convenience function for when you do not expect leftover elements
+//  These will just return the input
+/// </summary>
+/// <param name="t"></param>
+let inline nop t =
+    t
+
+/// <summary>
+/// Convenience function for when you do not expect leftover elements
+//  These will just return the input
+/// </summary>
+/// <param name="t"></param>
+let inline nop2 t u =
+    t
+
+/// <summary>
+/// Convenience function for when you do not expect leftover elements
+//  These will just return the input
+/// </summary>
+/// <param name="t"></param>
+let inline nop3 t u v =
+    t
 
 /// <summary>
 /// Identical to the standard map function, but you must provide
