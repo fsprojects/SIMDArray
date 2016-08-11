@@ -8,7 +8,12 @@ open SIMDArray
 
 //Faster map
 let array = [| 1 .. 1000 |]
-let squaredArray = array |> Array.SIMD.map (fun x -> x*x)
+let squaredArray = array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)  
+
+// Map needs one lambda to map the Vector<T>, and one to handle any leftover
+// elements if array is not divisible by Vector<T>.Count. In the case of 
+// simple arithmetic operations they can often be the same as shown here.
+
 
 //Faster create and sum
 let newArray = Array.SIMD.create 1000 5 //create a new array of length 1000 filled with 5
