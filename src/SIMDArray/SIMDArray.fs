@@ -306,29 +306,6 @@ let inline averageBy
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 
 
-/// <summary>
-/// Convenience function for when you do not expect leftover elements
-//  These will just return the input
-/// </summary>
-/// <param name="t"></param>
-let inline nop t =
-    t
-
-/// <summary>
-/// Convenience function for when you do not expect leftover elements
-//  These will just return the input
-/// </summary>
-/// <param name="t"></param>
-let inline nop2 t u =
-    t
-
-/// <summary>
-/// Convenience function for when you do not expect leftover elements
-//  These will just return the input
-/// </summary>
-/// <param name="t"></param>
-let inline nop3 t u v =
-    t
 
 /// <summary>
 /// Identical to the standard map function, but you must provide
@@ -650,13 +627,13 @@ let inline mapInPlace
         i <- i + 1
   
 /// <summary>
-/// Takes a function that accepts a vector and returns true or false. Returns the first Vector Option
-/// that returns true or None if none match. 
+/// Takes a function that accepts a vector and returns true or false. Returns the index of
+/// the first Vector that returns true or KeyNotFoundException if not found
 /// </summary>
 /// <param name="f">Takes a Vector and returns true or false</param>
 /// <param name="array"></param>
-let inline tryFindVector 
-    (f : ^T Vector -> bool)  (array: ^T[]) : Vector< ^T> Option =
+let inline findVectorIndex
+    (f : ^T Vector -> bool)  (array: ^T[]) : int =
 
     checkNonNull array
 
@@ -671,12 +648,40 @@ let inline tryFindVector
         i <- i + count
 
     if found then
-        Some (Vector< ^T>(array,i-count))
+        i-count
+    else
+        raise (System.Collections.Generic.KeyNotFoundException())
+
+/// <summary>
+/// Takes a function that accepts a vector and returns true or false. Returns 
+/// the index Option
+/// the first Vector that returns true or None if none are found
+/// </summary>
+/// <param name="f">Takes a Vector and returns true or false</param>
+/// <param name="array"></param>
+let inline tryFindVectorIndex
+    (f : ^T Vector -> bool)  (array: ^T[]) : int Option =
+
+    checkNonNull array
+
+    let count = Vector< ^T>.Count
+    let mutable found = false
+    let len = array.Length
+    let lenLessCount = len-count
+        
+    let mutable i = 0
+    while i <= lenLessCount && not found do
+        found <- f (Vector< ^T>(array,i))
+        i <- i + count
+
+    if found then
+        Some (i - count)
     else
         None
 
 
 /// <summary>
+/// Finds the first element matching the predicates.
 /// vPredicate for whether the Vector contains the value
 /// sPredicate for the value
 /// </summary>
@@ -687,18 +692,33 @@ let inline find
     (vPredicate : ^T Vector -> bool) 
     (sPredicate : ^T -> bool) 
     (array : ^T[]) : ^T =
-
-    let count = Vector< ^T>.Count
-    let len = array.Length
-    let o = tryFindVector vPredicate array
-    let a = match o with
-            | Some v -> Array.init Vector< ^T>.Count (fun i -> v.[i])
-            | None -> Array.init (len % count) ( fun i -> array.[len-(count-i)] )
-
-    Array.find sPredicate a
     
+    let mutable i = findVectorIndex vPredicate array        
+    while not (sPredicate array.[i]) do
+        i <- i + 1
+    array.[i]
 
 /// <summary>
+/// Finds the index of the first element matching the predicates.
+/// vPredicate for whether the Vector contains the value
+/// sPredicate for the value
+/// </summary>
+/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
+/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
+/// <param name="array"></param>
+let inline findIndex 
+    (vPredicate : ^T Vector -> bool) 
+    (sPredicate : ^T -> bool) 
+    (array : ^T[]) : int =
+    
+    let mutable i = findVectorIndex vPredicate array        
+    while not (sPredicate array.[i]) do
+        i <- i + 1
+    i
+            
+/// <summary>
+/// Finds the first element Option matching the predicates
+/// or None if none are found.
 /// vPredicate for whether the Vector contains the value
 /// sPredicate for the value
 /// </summary>
@@ -710,11 +730,35 @@ let inline tryFind
     (sPredicate : ^T -> bool) 
     (array: ^T[]) : ^T Option =
  
-    let v = find vPredicate sPredicate array
-    match v with
-    | null -> None
-    | x -> Some x
-
+    let o = tryFindVectorIndex vPredicate array        
+    match o with 
+    | Some index -> let mutable i = index
+                    while not (sPredicate array.[i]) do
+                        i <- i + 1
+                    Some array.[i]
+    | None -> None
+    
+/// <summary>
+/// Finds the first element Option matching the predicates
+/// or None if none are found.
+/// vPredicate for whether the Vector contains the value
+/// sPredicate for the value
+/// </summary>
+/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
+/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
+/// <param name="array"></param>
+let inline tryFindIndex
+    (vPredicate : ^T Vector -> bool) 
+    (sPredicate : ^T -> bool) 
+    (array: ^T[]) : int Option =
+ 
+    let o = tryFindVectorIndex vPredicate array        
+    match o with 
+    | Some index -> let mutable i = index
+                    while not (sPredicate array.[i]) do
+                        i <- i + 1
+                    Some i
+    | None -> None
 
           
 /// <summary>
