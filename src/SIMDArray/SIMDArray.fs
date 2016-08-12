@@ -145,6 +145,13 @@ let inline create (count :int) (x:^T) =
 
     array
 
+/// <summary>
+/// Creates an array filled with the value x. 
+/// </summary>
+/// <param name="count">How large to make the array</param>
+/// <param name="x">What to fille the array with</param>
+let inline replicate (count :int) (x:^T) = 
+    create count x
 
 /// <summary>
 /// Fills an array filled with the value x. 
