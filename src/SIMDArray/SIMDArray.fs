@@ -146,12 +146,34 @@ let inline create (count :int) (x:^T) =
     array
 
 /// <summary>
+/// Creates an array filled with the vector X, repeating it count times. 
+/// </summary>
+/// <param name="count">How large to make the array</param>
+/// <param name="x">What to fille the array with</param>
+let inline createVector (count :int) (v:Vector< ^T>) =
+    
+    if count < 0 then invalidArg "count" "The input must be non-negative."
+
+    let vCount = Vector< ^T>.Count
+    let array = Array.zeroCreate (count * vCount)
+                    
+    let mutable i = 0
+    while i < array.Length-1 do
+        v.CopyTo(array,i)
+        i <- i + vCount
+    
+
+    array
+
+/// <summary>
 /// Creates an array filled with the value x. 
 /// </summary>
 /// <param name="count">How large to make the array</param>
 /// <param name="x">What to fille the array with</param>
 let inline replicate (count :int) (x:^T) = 
     create count x
+
+
 
 /// <summary>
 /// Fills an array filled with the value x. 
@@ -311,6 +333,8 @@ let inline averageBy
     (vf: Vector< ^T> -> Vector< ^U>) (sf: ^T -> ^U) (array:^T[]) : ^U =
     let sum = sumBy vf sf array
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
+
+
 
 
 
@@ -1065,10 +1089,42 @@ let inline min (array :^T[]) : ^T =
         i <- i + 1
     min
 
+/// <summary>
+/// Same as standard compareWith, but you proider a Vectorized comparer
+/// </summary>
+/// <param name="comparer">compares Vector chunks of each array</param>
+/// <param name="array1"></param>
+/// <param name="array2"></param>
+let inline compareWith (comparer : Vector< ^T> -> Vector< ^T> -> int)                        
+                       (array1: ^T[])
+                       (array2: ^T[]) =
+
+    checkNonNull array1
+    checkNonNull array2
+    
+    let count = Vector< ^T>.Count
+    let length1 = array1.Length
+    let length2 = array2.Length
+    let minLength = System.Math.Min(length1,length2)
+            
+    let mutable i = 0
+    let mutable result = 0
+            
+    
+    while i < minLength-count && result = 0 do        
+        result <- comparer (Vector< ^T>(array1,i)) (Vector< ^T>(array2,i))
+        i <- i + count
+    
+    if result <> 0 then         
+        result
+    elif length1 = length2 then 0            
+    elif length1 < length2 then -1
+    else 1              
+
 
 /// <summary>
 /// Not actually SIMD enhanced. 
-/// Much faster and less allocation for sufficiently simple predicates.
+/// Much faster and less allocation for sufficiently simple, pure predicates.
 /// Predicates are computed twice to avoid allocating an array.
 /// </summary>
 /// <param name="f">Predicate to fitler with</param>
@@ -1092,6 +1148,13 @@ let inline filterSimplePredicate (f: ^T -> bool) (array: ^T[]) =
             j <- j + 1
     result
 
+/// <summary>
+/// Not actually SIMD enhanced. 
+/// Much faster and less allocation for sufficiently simple, pure predicates.
+/// Predicates are computed twice to avoid allocating an array.
+/// </summary>
+/// <param name="f">Predicate to fitler with</param>
+/// <param name="array"></param>
 let inline whereSimplePredicate (f: ^T -> bool) (array: ^T[]) = 
     filterSimplePredicate f array
 
