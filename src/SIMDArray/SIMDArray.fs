@@ -36,19 +36,17 @@ let inline fold
     (array: ^T[]) : ^State =
 
     checkNonNull array
-    
-    let len = array.Length
+        
     let count = Vector< ^T>.Count
-    let lenLessCount = len-count
-
+    
     let mutable state = Vector< ^State> acc
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= array.Length-count do
         state <- vf state (Vector< ^T>(array,i))
         i <- i + count
 
     let mutable result = acc
-    while i < len do
+    while i < array.Length do
         result <- sf result array.[i]
         i <- i + 1
                    
@@ -56,6 +54,44 @@ let inline fold
     while i < Vector< ^State>.Count do
         result <- combiner result state.[i]
         i <- i + 1
+    result
+
+/// <summary>
+/// Similar to the standard FoldBack functionality but you must also provide a combiner
+/// function to combine each element of the Vector at the end. Not that acc
+/// can be double applied, this will not behave the same as foldback. Typically
+/// 0 will be used for summing operations and 1 for multiplication.
+/// </summary>
+/// <param name="f">The folding function</param>
+/// <param name="combiner">Function to combine the Vector elements at the end</param>
+/// <param name="acc">Initial value to accumulate from</param>
+/// <param name="array">Source array</param>
+let inline foldBack
+    (vf: ^State Vector -> ^T Vector -> ^State Vector)
+    (sf : ^State -> ^T -> ^State)
+    (combiner : ^State -> ^State -> ^State)
+    (acc : ^State)
+    (array: ^T[]) : ^State =
+
+    checkNonNull array        
+    let count = Vector< ^T>.Count    
+
+    let mutable state = Vector< ^State> acc
+    let mutable i = array.Length-count
+    while i >= 0 do
+        state <- vf state (Vector< ^T>(array,i))
+        i <- i - count
+
+    let mutable result = acc
+    i <- i + count - 1
+    while i >= 0 do
+        result <- sf result array.[i]
+        i <- i - 1
+                   
+    i <- Vector< ^State>.Count - 1
+    while i >= 0  do
+        result <- combiner result state.[i]
+        i <- i - 1
     result
 
 /// <summary>
@@ -236,16 +272,16 @@ let inline init (count :int) (f : int -> Vector< ^T>)  =
     
     let array = Array.zeroCreate count : ^T[]    
     let vCount = Vector< ^T>.Count
-    let lenLessCount = count - vCount
+    
 
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= count-vCount do
         (f i).CopyTo(array,i)
         i <- i + vCount
 
     let leftOvers = f i
     let mutable leftOverIndex = 0
-    while i < count do
+    while i < array.Length do
         array.[i] <- leftOvers.[leftOverIndex]
         leftOverIndex <- leftOverIndex + 1
         i <- i + 1
@@ -263,16 +299,14 @@ let inline sum (array:^T[]) : ^T =
 
     let mutable state = Vector< ^T>.Zero    
     let count = Vector< ^T>.Count
-    let len = array.Length
-    let lenLessCount = len-count
-
+        
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= array.Length-count do
         state <-  state + Vector< ^T>(array,i)
         i <- i + count
 
     let mutable result = Unchecked.defaultof< ^T>
-    while i < len do
+    while i < array.Length do
         result <- result + array.[i]
         i <- i + 1
 
@@ -295,17 +329,15 @@ let inline sumBy
     
     let mutable state = Vector< ^U>.Zero    
     let count = Vector< ^T>.Count
-    let len = array.Length
-    let lenLessCount = len-count
-
+    
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= array.Length-count do
         state <-  state + vf (Vector< ^T>(array,i))
         i <- i + count
     
     let mutable result = Unchecked.defaultof< ^U>    
 
-    while i < len do
+    while i < array.Length do
         result <- result + sf array.[i]
         i <- i + 1
 
@@ -336,8 +368,6 @@ let inline averageBy
 
 
 
-
-
 /// <summary>
 /// Identical to the standard map function, but you must provide
 /// A Vector mapping function.
@@ -352,18 +382,16 @@ let inline map
 
     checkNonNull array
     let count = Vector< ^T>.Count
-    if count <> Vector< ^U>.Count then invalidArg "array" "Output type must have the same width as input type."
-    let len = array.Length    
-    let result = Array.zeroCreate len    
-    let lenLessCount = len-count
-
+    if count <> Vector< ^U>.Count then invalidArg "array" "Output type must have the same width as input type."    
+    
+    let result = Array.zeroCreate array.Length
+    
     let mutable i = 0
-    while i <= lenLessCount do        
+    while i <= array.Length-count do        
         (vf (Vector< ^T>(array,i ))).CopyTo(result,i)   
         i <- i + count
-               
-    
-    while i < len do
+                   
+    while i < result.Length do
         result.[i] <- sf array.[i]
         i <- i + 1
 
@@ -394,14 +422,13 @@ let inline map2
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
 
     let result = Array.zeroCreate len
-
-    let lenLessCount = len - count
+    
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= len-count do
         (vf (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)   
         i <- i + count
 
-    while i < len do
+    while i < result.Length do
         result.[i] <- sf array1.[i] array2.[i]
         i <- i + 1
 
@@ -433,15 +460,13 @@ let inline map3
     if len <> array2.Length || len <> array3.Length then invalidArg "array2" "Arrays must have same length"
     
     let result = Array.zeroCreate len
-    let lenLessCount = len-count
-
+    
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= len - count do
         (vf (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i)) (Vector< ^V>(array3,i))).CopyTo(result,i)        
         i <- i + count
-    
-    
-    while i < len do
+        
+    while i < result.Length do
         result.[i] <- sf array1.[i] array2.[i] array3.[i]
         i <- i + 1
     
@@ -470,14 +495,13 @@ let inline mapi2
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
     
     let result = Array.zeroCreate len
-    let lenLessCount = len-count
-
+    
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= len-count do
         (vf i (Vector< ^T>(array1,i )) (Vector< ^U>(array2,i))).CopyTo(result,i)        
         i <- i + count
         
-    while i < len do
+    while i < result.Length do
         result.[i] <- sf i array1.[i] array2.[i]
         i <- i + 1
 
@@ -502,14 +526,13 @@ let inline mapi
     
     let len = array.Length    
     let result = Array.zeroCreate len    
-    let lenLessCount = len-count
-
+    
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= len-count do
         (vf i (Vector< ^T>(array,i ))).CopyTo(result,i)                
         i <- i + count
         
-    while i < len do
+    while i < result.Length do
         result.[i] <- sf i array.[i]
         i <- i + 1
     
@@ -529,14 +552,13 @@ let inline iter
         
     let len = array.Length        
     let count = Vector< ^T>.Count
-    let lenLessCount = len-count
-
+    
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= len-count do
         vf (Vector< ^T>(array,i ))
         i <- i + count
      
-    while i < len do
+    while i < array.Length do
         sf array.[i]
         i <- i + 1
     
@@ -559,14 +581,13 @@ let inline iter2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-    let lenLessCount = len-count
-
+    
     let mutable i = 0
-    while i <= lenLessCount do 
+    while i <= len-count do 
         vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
 
-    while i < len do
+    while i < array1.Length do
         sf array1.[i] array2.[i]
         i <- i + 1
     
@@ -583,22 +604,19 @@ let inline iteri
     (array : ^T[]) : unit  =
 
     checkNonNull array
-         
-    let len = array.Length        
-    let count = Vector< ^T>.Count
-    let lenLessCount = len-count
+             
+    let count = Vector< ^T>.Count    
 
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= array.Length-count do
         vf i (Vector< ^T>(array,i ))
         i <- i + count
 
-    while i < len do
+    while i < array.Length do
         sf i array.[i]
         i <- i + 1
         
     
-
 /// <summary>
 /// Iterates over the two arrays applying f to each Vector pair
 /// and their current index.
@@ -618,14 +636,13 @@ let inline iteri2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-    let lenLessCount = len-count
-
+    
     let mutable i = 0
-    while i <= lenLessCount do 
+    while i <= len-count do 
         vf i (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
 
-    while i < len do
+    while i < array1.Length do
         sf i array1.[i] array2.[i]
         i <- i + 1
     
@@ -643,17 +660,15 @@ let inline mapInPlace
     (array: ^T[]) : unit =
 
     checkNonNull array
-
-    let len = array.Length
+    
     let count = Vector< ^T>.Count
-    let lenLessCount = len - count
-
+    
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= array.Length-count do
         (vf (Vector< ^T>(array,i ))).CopyTo(array,i)   
         i <- i + count
                
-    while i < len do
+    while i < array.Length do
         array.[i] <- sf array.[i]
         i <- i + 1
   
@@ -896,16 +911,14 @@ let inline exists
 
     let count = Vector< ^T>.Count
     let mutable found = false
-    let len = array.Length
-    let lenLessCount = len-count
-
+        
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= array.Length-count do
         found <- vf (Vector< ^T>(array,i))
-        if found then i <- len
+        if found then i <- array.Length
         else i <- i + count
 
-    while i < len && not found do
+    while i < array.Length && not found do
         found <- sf array.[i]
         i <- i + 1
 
@@ -926,15 +939,14 @@ let inline forall
     let count = Vector< ^T>.Count
     let mutable found = true
     let len = array.Length
-    let lenLessCount = len-count
-
+    
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= len-count do
         found <- vf (Vector< ^T>(array,i))
         if not found then i <- len
         else i <- i + count
 
-    while i < len && found do
+    while i < array.Length && found do
         found <- sf array.[i]
         i <- i + 1
 
@@ -959,17 +971,15 @@ let inline exists2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-         
-    let lenLessCount = len-count
-
+             
     let mutable found = false
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= len-count do
         found <- vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         if found then i <- len
         else i <- i + count
 
-    while i < len && not found do
+    while i < array1.Length && not found do
         found <- sf array1.[i] array2.[i]
         i <- i + 1
 
@@ -994,17 +1004,15 @@ let inline forall2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-         
-    let lenLessCount = len-count
-
+             
     let mutable found = true
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= len-count do
         found <- vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         if not found then i <- len
         else i <- i + count
 
-    while i < len && found do
+    while i < array1.Length && found do
         found <- sf array1.[i] array2.[i]
         i <- i + 1
 
@@ -1021,18 +1029,17 @@ let inline contains (x : ^T) (array:^T[]) : bool =
     checkNonNull array
 
     let count = Vector< ^T>.Count      
-    let len = array.Length
-    let lenLessCount = len - count    
+    let len = array.Length    
     let compareVector = Vector< ^T>(x)    
     
     let mutable found = false
     let mutable i = 0
-    while i <= lenLessCount do
+    while i <= len-count do
         found <- Vector.EqualsAny(Vector< ^T>(array,i),compareVector)
         if found then i <- len
         else i <- i + count
 
-    while i < len && not found do                
+    while i < array.Length && not found do                
         found <- x = array.[i]
         i <- i + 1
 
@@ -1050,14 +1057,13 @@ let inline max (array :^T[]) : ^T =
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."
     let mutable max = array.[0]
-    let count = Vector< ^T>.Count
-    let lenLessCount = len-count
+    let count = Vector< ^T>.Count    
 
     let mutable i = 0
     if len >= count then
         let mutable maxV = Vector< ^T>(array,0)
         i <- i + count
-        while i <= lenLessCount do
+        while i <= len-count do
            let v = Vector< ^T>(array,i)
            maxV <- Vector.Max(v,maxV)
            i <- i + count
@@ -1065,7 +1071,7 @@ let inline max (array :^T[]) : ^T =
         for j=0 to count-1 do
             if maxV.[j] > max then max <- maxV.[j]
 
-    while i < len do
+    while i < array.Length do
         if array.[i] > max then max <- array.[i]
         i <- i + 1
     max
@@ -1084,7 +1090,7 @@ let inline maxBy
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."    
     let count = Vector< ^T>.Count
-    let lenLessCount = len-count
+    
     let minValue = typeof< ^U>.GetField("MinValue").GetValue() |> unbox< ^U>
     let mutable max = minValue 
     let mutable maxV =  Vector< ^U>(minValue)
@@ -1093,7 +1099,7 @@ let inline maxBy
         maxV  <- vf (Vector< ^T>(array,0))
         max <- maxV.[0]
         i <- i + count
-        while i <= lenLessCount do
+        while i <= len-count do
             let v = vf (Vector< ^T>(array,i))
             maxV <- Vector.Max(v,maxV)
             i <- i + count                
@@ -1101,7 +1107,7 @@ let inline maxBy
     for j=0 to Vector< ^U>.Count-1 do
         if maxV.[j] > max then max <- maxV.[j]
 
-    while i < len do
+    while i < array.Length do
         let x = sf array.[i]
         if x > max then max <- x
         i <- i + 1
@@ -1122,8 +1128,7 @@ let inline minBy
             
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."    
-    let count = Vector< ^T>.Count
-    let lenLessCount = len-count
+    let count = Vector< ^T>.Count    
     let maxValue = typeof< ^U>.GetField("MaxValue").GetValue() |> unbox< ^U>
     let mutable min = maxValue 
     let mutable minV =  Vector< ^U>(maxValue)
@@ -1132,7 +1137,7 @@ let inline minBy
         minV  <- vf (Vector< ^T>(array,0))
         min <- minV.[0]
         i <- i + count
-        while i <= lenLessCount do
+        while i <= len-count do
             let v = vf (Vector< ^T>(array,i))
             minV <- Vector.Min(v,minV)
             i <- i + count        
@@ -1140,7 +1145,7 @@ let inline minBy
     for j=0 to Vector< ^U>.Count-1 do
         if minV.[j] < min then min <- minV.[j]
 
-    while i < len do
+    while i < array.Length do
         let x = sf array.[i]
         if x < min then min <- x
         i <- i + 1
@@ -1160,13 +1165,12 @@ let inline min (array :^T[]) : ^T =
     if len = 0 then invalidArg "array" "empty array"
     let mutable min = array.[0]
     let count = Vector< ^T>.Count
-    let lenLessCount = len-count
-
+    
     let mutable i = 0
     if len >= count then
         let mutable minV = Vector< ^T>(array,0)
         i <- i + count
-        while i <= lenLessCount do
+        while i <= len-count do
             let v = Vector< ^T>(array,i)
             minV <- Vector.Min(v,minV)
             i <- i + count
@@ -1174,7 +1178,7 @@ let inline min (array :^T[]) : ^T =
         for j=0 to count-1 do
             if minV.[j] < min then min <- minV.[j]
 
-    while i < len do
+    while i < array.Length do
         if array.[i] < min then min <- array.[i]
         i <- i + 1
     min
