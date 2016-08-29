@@ -124,6 +124,7 @@ type CoreBenchmark () =
     [<Benchmark>]
     member self.skipWhile () =                        
         Array.skipWhile (fun x -> x < 50000) array
+        Array.take
                                            
 
     [<Benchmark(Baseline=true)>]
