@@ -162,15 +162,12 @@ let inline foldBack2
     
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
-            
-    
-
+                
     let mutable state = Vector< ^State> acc
     let mutable i = array1.Length-count 
     while i >= 0 do
         state <- vf state (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i - count
-
 
     let mutable result = acc
     i <- i + count - 1
@@ -197,7 +194,7 @@ let inline reduce
     (combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
     fold vf sf combiner Unchecked.defaultof< ^State> array
-
+    
 
 /// <summary>
 /// Creates an array filled with the value x. 
@@ -315,8 +312,7 @@ let inline init (count :int) (f : int -> Vector< ^T>)  =
     
     let array = Array.zeroCreate count : ^T[]    
     let vCount = Vector< ^T>.Count
-    
-
+        
     let mutable i = 0
     while i <= count-vCount do
         (f i).CopyTo(array,i)
@@ -715,6 +711,65 @@ let inline mapInPlace
         array.[i] <- sf array.[i]
         i <- i + 1
   
+/// <summary>
+/// 
+/// </summary>
+/// <param name="vf">Takes a Vector 'T and returns an option</param>
+/// <param name="sf">Takes a 'T and returns an option</param>
+/// <param name="array"></param>
+let inline pick
+    (vf : ^T Vector -> ^U Option) (sf: ^T -> ^U Option) (array: ^T[]) : ^U =
+
+    checkNonNull array    
+
+    let count = Vector< ^T>.Count
+    let mutable found = false    
+    
+    let mutable result = Unchecked.defaultof< ^U>
+    let mutable i = 0
+    while i <= array.Length-count && not found do
+        match vf (Vector< ^T>(array,i)) with
+        | Some x -> result <- x; found <- true
+        | None -> ()
+    
+    if found then        
+        result        
+    else    
+        while i < array.Length && not found do
+            match sf array.[i] with
+            | Some x -> result <- x; found <- true
+            | None -> ()
+        if found then 
+            result
+        else
+            raise (System.Collections.Generic.KeyNotFoundException())
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="vf">Takes a Vector 'T and returns an option</param>
+/// <param name="sf">Takes a 'T and returns an option</param>
+/// <param name="array"></param>
+let inline tryPick
+    (vf : ^T Vector -> ^U Option) (sf: ^T -> ^U Option) (array: ^T[]) : ^U Option =
+
+    checkNonNull array    
+
+    let count = Vector< ^T>.Count
+        
+    let mutable result = None
+    let mutable i = 0
+    while i <= array.Length-count && result.IsNone do
+        result <- vf (Vector< ^T>(array,i)) 
+        
+    
+    if result.IsSome then        
+        result        
+    else    
+        while i < array.Length && result.IsNone do
+            result <- sf array.[i]
+        result
+            
 /// <summary>
 /// Takes a function that accepts a vector and returns true or false, and
 /// a function that takes a single element and returns true or false.
