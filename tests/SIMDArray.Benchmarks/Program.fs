@@ -86,7 +86,7 @@ type CoreBenchmark () =
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (1000000)>]     
+    [<Params (100)>]     
     member val public Length = 0 with get, set
 
    
@@ -101,10 +101,10 @@ type CoreBenchmark () =
        //array <- Array.create self.Length 10 
        //array2 <- Array.init self.Length (fun i -> 3)
         
-       array <- Array.init self.Length (fun i ->(int)( r.NextDouble()*100.0))
-       resizeArray <- ResizeArray<int>(self.Length)
-       for i = 0 to self.Length-1 do
-        resizeArray.Add(array.[i])
+       array <- Array.create self.Length 2
+//       resizeArray <- ResizeArray<int>(self.Length)
+       //for i = 0 to self.Length-1 do
+        //resizeArray.Add(array.[i])
         
         //array2 <- Array.init self.Length (fun i -> i)
         
@@ -117,15 +117,18 @@ type CoreBenchmark () =
         //for concat
         //array <- Array.init self.Length (fun i -> [|1;2;3;4;5;|])
         
-              
-    [<Benchmark(Baseline=true)>]
-    member self.Part () =                    
-        ResizeArray.partition (fun x -> x % 2 = 0) resizeArray
+               
+   
 
     [<Benchmark>]
-    member self.Part2 () =                        
-        ResizeArray.partition2 (fun x -> x % 2 = 0) resizeArray
+    member self.mapfoldnew () =                        
+        Array.Performance.mapFold (fun acc x -> let r = x*x 
+                                                Array.Performance.Pair(r,acc+r)) 0 array
 
+    [<Benchmark(Baseline=true)>]
+    member self.mapfold () =                    
+        Array.Performance.mapFoldOld (fun acc x -> let r = x*x 
+                                                   (r,acc+r)) 0 array  
 
       
     

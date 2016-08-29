@@ -7,6 +7,7 @@ open Microsoft.FSharp.Core
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Core.Operators
 open System.Collections.Generic
+open System.Runtime.InteropServices
 
 let inline private checkNonNull arg =
     match box arg with
@@ -33,6 +34,39 @@ let inline partitionUnordered f (array: _[]) =
             downCount <- downCount - 1
                             
     Array.sub res 0 upCount , Array.sub res upCount (array.Length-upCount)
+
+
+type Pair<'a, 'b> =
+    struct 
+      val Item1 : 'a
+      val Item2 : 'b
+    
+      new(item1, item2) = { 
+        Item1 = item1
+        Item2 = item2
+      }
+    end
+
+/// <summary>
+/// mapFold that uses a struct tuple instead of an object tuple.
+/// Sometimes faster, sometimes not. Much less allocation either way.
+/// </summary>
+/// <param name="f"></param>
+/// <param name="acc"></param>
+/// <param name="array"></param>
+let mapFold (f : 'a -> 'b -> Pair<'c,'a>) acc (array : 'b[])  =
+        match array.Length with
+        | 0 -> [| |], acc
+        | len ->
+            let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(f)
+            let mutable acc = acc
+            let res : 'c []  = Array.zeroCreate len
+            for i = 0 to array.Length-1 do
+                let result = f.Invoke(acc, array.[i])
+                res.[i] <- result.Item1
+                acc <- result.Item2
+            res, acc
+
 
 /// <summary>
 /// Like Array.distinct but results do not maintain order, improving runtime
@@ -75,7 +109,7 @@ let inline distinctByUnordered keyf (array:'T[]) =
 let inline mapInPlace f (array :'T[]) =
     
     checkNonNull array
-
+        
     for i = 0 to array.Length-1 do
         array.[i] <- f array.[i]
 
