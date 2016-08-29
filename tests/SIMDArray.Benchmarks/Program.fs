@@ -126,9 +126,10 @@ type CoreBenchmark () =
                                                 Array.Performance.Pair(r,acc+r)) 0 array
 
     [<Benchmark(Baseline=true)>]
-    member self.mapfold () =                    
-        Array.Performance.mapFoldOld (fun acc x -> let r = x*x 
-                                                   (r,acc+r)) 0 array  
+    member self.mapfold () =    
+        ()                
+       // Array.Performance.mapFoldOld (fun acc x -> let r = x*x 
+         //                                          (r,acc+r)) 0 array  
 
       
     

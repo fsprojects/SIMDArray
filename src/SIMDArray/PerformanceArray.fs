@@ -35,7 +35,7 @@ let inline partitionUnordered f (array: _[]) =
                             
     Array.sub res 0 upCount , Array.sub res upCount (array.Length-upCount)
 
-
+/// Struct Tuple
 type Pair<'a, 'b> =
     struct 
       val Item1 : 'a

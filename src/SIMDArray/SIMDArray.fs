@@ -15,6 +15,93 @@ let inline private checkNonNull arg =
 
 
 /// <summary>
+/// mapFold
+/// </summary>
+/// <param name="vf"></param>
+/// <param name="sf"></param>
+/// <param name="combiner"></param>
+/// <param name="acc"></param>
+/// <param name="array"></param>
+let inline mapFold
+    (vf: ^State Vector -> ^T Vector -> ^U Vector * ^State Vector)
+    (sf : ^State -> ^T -> ^U * ^State)
+    (combiner : ^State -> ^State -> ^State)
+    (acc : ^State)
+    (array: ^T[]) : ^U[] * ^State =
+
+
+    checkNonNull array
+        
+    let count = Vector< ^T>.Count
+    
+    let mutable state = Vector< ^State> acc
+    let mutable i = 0    
+    let res = zeroCreate array.Length 
+    while i <= array.Length-count do
+        let (x,newstate) = vf state (Vector< ^T>(array,i))
+        x.CopyTo(res,i)
+        state <- newstate
+        i <- i + count
+
+    let mutable result = acc
+    while i < array.Length do
+        let (x,newstate) = sf result array.[i]
+        result <- newstate
+        res.[i] <- x
+
+        i <- i + 1
+                   
+    i <- 0    
+    while i < Vector< ^State>.Count do
+        result <- combiner result state.[i]
+        i <- i + 1
+    res,result
+
+/// <summary>
+/// mapFoldBack
+/// </summary>
+/// <param name="vf"></param>
+/// <param name="sf"></param>
+/// <param name="combiner"></param>
+/// <param name="acc"></param>
+/// <param name="array"></param>
+let inline mapFoldBack
+    (vf: ^State Vector -> ^T Vector -> ^U Vector * ^State Vector)
+    (sf : ^State -> ^T -> ^U * ^State)
+    (combiner : ^State -> ^State -> ^State)
+    (acc : ^State)
+    (array: ^T[]) : ^U[] * ^State =
+
+
+    checkNonNull array
+        
+    let count = Vector< ^T>.Count
+    
+    let mutable state = Vector< ^State> acc
+    let mutable i = array.Length-count
+    let res = zeroCreate array.Length 
+    while i >= 0 do
+        let (x,newstate) = vf state (Vector< ^T>(array,i))
+        x.CopyTo(res,i)
+        state <- newstate
+        i <- i - count
+
+    let mutable result = acc
+    i <- i + count - 1
+    while i >= 0 do
+        let (x,newstate) = sf result array.[i]
+        result <- newstate
+        res.[i] <- x
+        i <- i - 1
+                   
+    i <- Vector< ^State>.Count - 1    
+    while i >= 0 do
+        result <- combiner result state.[i]
+        i <- i - 1
+    res,result
+
+
+/// <summary>
 /// Similar to the standard Fold functionality but you must also provide a combiner
 /// function to combine each element of the Vector at the end. Not that acc
 /// can be double applied, this will not behave the same as fold. Typically
