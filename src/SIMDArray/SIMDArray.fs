@@ -28,8 +28,7 @@ let inline mapFold
     (combiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array: ^T[]) : ^U[] * ^State =
-
-
+    
     checkNonNull array
         
     let count = Vector< ^T>.Count
@@ -66,11 +65,11 @@ let inline mapFold
 /// <param name="acc"></param>
 /// <param name="array"></param>
 let inline mapFoldBack
-    (vf: ^State Vector -> ^T Vector -> ^U Vector * ^State Vector)
-    (sf : ^State -> ^T -> ^U * ^State)
+    (vf:  ^T Vector -> ^State Vector -> ^U Vector * ^State Vector)
+    (sf : ^T -> ^State -> ^U * ^State)
     (combiner : ^State -> ^State -> ^State)
-    (acc : ^State)
-    (array: ^T[]) : ^U[] * ^State =
+    (array: ^T[])
+    (acc : ^State) : ^U[] * ^State =
 
 
     checkNonNull array
@@ -81,7 +80,7 @@ let inline mapFoldBack
     let mutable i = array.Length-count
     let res = zeroCreate array.Length 
     while i >= 0 do
-        let (x,newstate) = vf state (Vector< ^T>(array,i))
+        let (x,newstate) = vf (Vector< ^T>(array,i)) state
         x.CopyTo(res,i)
         state <- newstate
         i <- i - count
@@ -89,7 +88,7 @@ let inline mapFoldBack
     let mutable result = acc
     i <- i + count - 1
     while i >= 0 do
-        let (x,newstate) = sf result array.[i]
+        let (x,newstate) = sf array.[i] result
         result <- newstate
         res.[i] <- x
         i <- i - 1
@@ -152,9 +151,9 @@ let inline fold
 let inline foldBack
     (vf: ^State Vector -> ^T Vector -> ^State Vector)
     (sf : ^State -> ^T -> ^State)
-    (combiner : ^State -> ^State -> ^State)
-    (acc : ^State)
-    (array: ^T[]) : ^State =
+    (combiner : ^State -> ^State -> ^State)    
+    (array: ^T[]) 
+    (acc : ^State) : ^State  =
 
     checkNonNull array        
     let count = Vector< ^T>.Count    
@@ -294,7 +293,9 @@ let inline reduceBack
     (sf: ^State -> ^T -> ^State )
     (combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
-    foldBack vf sf combiner Unchecked.defaultof< ^State> array
+    foldBack vf sf combiner  array Unchecked.defaultof< ^State>
+
+    
         
 
 /// <summary>

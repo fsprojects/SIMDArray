@@ -11,6 +11,7 @@ open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
 
+
 #if MONO
 #else
 open BenchmarkDotNet.Diagnostics.Windows
@@ -122,21 +123,28 @@ type CoreBenchmark () =
 
     [<Benchmark>]
     member self.mapfoldnew () =                        
-        Array.Performance.mapFold (fun acc x -> let r = x*x 
-                                                Array.Performance.Pair(r,acc+r)) 0 array
+        Array.SIMD.fold (+) (+) (+) 0 array
+                                           
 
     [<Benchmark(Baseline=true)>]
     member self.mapfold () =    
-        ()                
-       // Array.Performance.mapFoldOld (fun acc x -> let r = x*x 
-         //                                          (r,acc+r)) 0 array  
-
+        Array.fold (+) 0 array           
+        
       
     
 
 [<EntryPoint>]
 let main argv =              
-   
+    
+    let a = [|1;2;3;4;5;6;7;8;9|]
+    
+    let r = Array.SIMD.mapFoldBack (fun x acc -> (x*x,acc+x*x)) (fun acc x -> (acc+x*x,x*x)) (+) a 0
+
+    let r2 = Array.mapFoldBack (fun x acc -> (x*x,acc+x*x)) a 0
+
+    printf "r:%A\n r2:%A" r r2
+
+
     
 
      (*
