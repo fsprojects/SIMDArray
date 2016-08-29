@@ -14,6 +14,29 @@ let inline private checkNonNull arg =
     | _ -> ()
 
 
+    
+/// <summary>
+/// First does skipWhile one vector at a time using vf. If vf returns false
+/// Then narrows doen the exact value with sf.
+/// </summary>
+/// <param name="vf"></param>
+/// <param name="sf"></param>
+/// <param name="array"></param>
+let inline skipWhile (vf : Vector< ^T> -> bool) (sf : ^T -> bool) (array : ^T[]) : ^T[] =
+    checkNonNull array
+    let mutable i = 0
+    let count = Vector< ^T>.Count    
+    while i <= array.Length-count && vf (Vector< ^T>(array,i)) do        
+        i <- i + count
+
+    if i <> array.Length then
+        i <- i - count
+        while sf array.[i] do
+            i <- i + 1
+        Array.sub array i (array.Length - i)
+    else
+        empty
+
 /// <summary>
 /// mapFold
 /// </summary>

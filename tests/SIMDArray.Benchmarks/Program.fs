@@ -87,7 +87,7 @@ type CoreBenchmark () =
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (100)>]     
+    [<Params (100000)>]     
     member val public Length = 0 with get, set
 
    
@@ -102,7 +102,7 @@ type CoreBenchmark () =
        //array <- Array.create self.Length 10 
        //array2 <- Array.init self.Length (fun i -> 3)
         
-       array <- Array.create self.Length 2
+       array <- Array.init self.Length (fun i -> i)
 //       resizeArray <- ResizeArray<int>(self.Length)
        //for i = 0 to self.Length-1 do
         //resizeArray.Add(array.[i])
@@ -122,13 +122,13 @@ type CoreBenchmark () =
    
 
     [<Benchmark>]
-    member self.mapfoldnew () =                        
-        Array.SIMD.fold (+) (+) (+) 0 array
+    member self.skipWhile () =                        
+        Array.skipWhile (fun x -> x < 50000) array
                                            
 
     [<Benchmark(Baseline=true)>]
-    member self.mapfold () =    
-        Array.fold (+) 0 array           
+    member self.simdSkipWhile () =    
+        Array.SIMD.skipWhile (fun x -> Vector.LessThanAll(x,Vector<int>(50000))) (fun x -> x < 50000) array
         
       
     
@@ -136,15 +136,7 @@ type CoreBenchmark () =
 [<EntryPoint>]
 let main argv =              
     
-    let a = [|1;2;3;4;5;6;7;8;9|]
-    
-    let r = Array.SIMD.mapFoldBack (fun x acc -> (x*x,acc+x*x)) (fun acc x -> (acc+x*x,x*x)) (+) a 0
-
-    let r2 = Array.mapFoldBack (fun x acc -> (x*x,acc+x*x)) a 0
-
-    printf "r:%A\n r2:%A" r r2
-
-
+  
     
 
      (*
