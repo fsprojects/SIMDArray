@@ -80,6 +80,7 @@ type CoreBenchmark () =
     let mutable array = [||]
     let mutable array2 = [||]
     let mutable array3 = [||]
+    let mutable resizeArray = ResizeArray<int>()
 
     
     //let mutable mathnetVector = vector [1.0f]
@@ -88,9 +89,7 @@ type CoreBenchmark () =
     [<Params (1000000)>]     
     member val public Length = 0 with get, set
 
-    [<Params (10,1000000,10000000)>]     
-    member val public Density = 0 with get, set
-
+   
       
     [<Setup>]
     member self.SetupData () =  
@@ -102,7 +101,11 @@ type CoreBenchmark () =
        //array <- Array.create self.Length 10 
        //array2 <- Array.init self.Length (fun i -> 3)
         
-       array <- Array.init self.Length (fun i ->(int)( r.NextDouble()*(float)self.Density))
+       array <- Array.init self.Length (fun i ->(int)( r.NextDouble()*100.0))
+       resizeArray <- ResizeArray<int>(self.Length)
+       for i = 0 to self.Length-1 do
+        resizeArray.Add(array.[i])
+        
         //array2 <- Array.init self.Length (fun i -> i)
         
 
@@ -116,12 +119,12 @@ type CoreBenchmark () =
         
               
     [<Benchmark(Baseline=true)>]
-    member self.distinct () =                    
-        Array.distinct array
+    member self.Part () =                    
+        ResizeArray.partition (fun x -> x % 2 = 0) resizeArray
 
     [<Benchmark>]
-    member self.distinctUnordered () =                        
-        Array.Performance.distinctUnordered array
+    member self.Part2 () =                        
+        ResizeArray.partition2 (fun x -> x % 2 = 0) resizeArray
 
 
       

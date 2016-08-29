@@ -1,15 +1,39 @@
-﻿[<RequireQualifiedAccess>]
-module Array.ResizeArray
+﻿module ResizeArray
 
-open System.Numerics
+
 open FSharp.Core
 open Microsoft.FSharp.Core
-open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Core.Operators
 
 let inline private checkNonNull arg =
     match box arg with
-    | null -> nullArg "array"
+    | null -> nullArg "resizearray"
     | _ -> ()
+
+
+let inline partition f (array: ResizeArray<_>) = 
+    checkNonNull array
+
+    let res1 = ResizeArray<_>()
+    let res2 = ResizeArray<_>()
+
+    for i = 0 to array.Count-1 do
+        let e = array.[i]
+        if f e then
+            res1.Add(e)
+        else
+            res2.Add(e)
+
+    res1,res2
+
+let inline map f (array: ResizeArray<_>) =
+    
+    checkNonNull array
+
+    let res = ResizeArray<_>(array.Count)
+    for i = 0 to array.Count-1 do
+        res.[i] <- f array.[i]
+
+    res
 

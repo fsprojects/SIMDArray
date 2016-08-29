@@ -55,7 +55,7 @@ let inline distinctUnordered (array:'T[]) =
 /// slightly and allocations greatly.
 /// </summary>
 /// <param name="array"></param>
-let inline distinctBy keyf (array:'T[]) =
+let inline distinctByUnordered keyf (array:'T[]) =
     checkNonNull array
         
     let hashSet = HashSet<_>(HashIdentity.Structural<_>)
