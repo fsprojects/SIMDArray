@@ -39,6 +39,7 @@ let inline indexNotFound() = raise (KeyNotFoundException())
                     
 
 
+
 type CoreConfig () =
     inherit ManualConfig()
     do               
@@ -57,25 +58,30 @@ type CoreBenchmark () =
     let mutable array = [||]
     let mutable array2 = [||]
     let mutable array3 = [||]
+
+    
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (100,1000,10000)>] 
+    [<Params (1000,100000,1000000)>]     
     member val public Length = 0 with get, set
+
+    [<Params (10000,25000,50000,75000,100000,2000000)>]     
+    member val public Density = 0 with get, set
 
    
 
     [<Setup>]
     member self.SetupData () =  
        
-       //let r = Random(self.Length)
+       let r = Random(self.Length+self.Density)
        //list <- List.init self.Length (fun i -> (1.0,2.0))
 
-       array <- Array.init self.Length (fun i -> 2)
+       //array <- Array.init self.Length (fun i -> 2)
        //array <- Array.create self.Length 10 
-       array2 <- Array.init self.Length (fun i -> 3)
+       //array2 <- Array.init self.Length (fun i -> 3)
         
-       // array <- Array.init self.Length (fun i ->(int)( r.NextDouble()*100.0))
+       array <- Array.init self.Length (fun i ->(int)( r.NextDouble()*(float)self.Density))
         //array2 <- Array.init self.Length (fun i -> i)
         
 
@@ -90,14 +96,11 @@ type CoreBenchmark () =
       
 
     
-    [<Benchmark(Baseline=true)>]
-    member self.Create () = 
-       
-        Array.compareWith (fun a b -> if a = b then 1 else 0) array array2
     
     [<Benchmark>]
-    member self.CreateSIMD () =                    
-        Array.SIMD.compareWith (fun a b -> if Vector.EqualsAny(a,b) then 1 else 0) array array2
+    member self.distinct2 () =                    
+        ()
+
       
     
 

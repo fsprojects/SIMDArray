@@ -658,139 +658,229 @@ let inline mapInPlace
         i <- i + 1
   
 /// <summary>
-/// Takes a function that accepts a vector and returns true or false. Returns the index of
-/// the first Vector that returns true or KeyNotFoundException if not found
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the index of the first element that satisfies both predicates.
+/// returns KeyNotFoundException if not found
 /// </summary>
-/// <param name="f">Takes a Vector and returns true or false</param>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
-let inline findVectorIndex
-    (f : ^T Vector -> bool)  (array: ^T[]) : int =
+let inline findIndex
+    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int =
 
-    checkNonNull array
+    checkNonNull array    
 
     let count = Vector< ^T>.Count
-    let mutable found = false
-    let len = array.Length
-    let lenLessCount = len-count
+    let mutable found = false    
+    
         
     let mutable i = 0
-    while i <= lenLessCount && not found do
-        found <- f (Vector< ^T>(array,i))
+    while i <= array.Length-count && not found do
+        found <- vf (Vector< ^T>(array,i))
         i <- i + count
-
+    
     if found then
-        i-count
-    else
-        raise (System.Collections.Generic.KeyNotFoundException())
+        i <- i - count
+        let v = Vector< ^T>(array,i)
+        let mutable j = 0
+        while j < count-1 && not found do
+            found <- sf v.[j]
+            j <- j + 1                                    
+        i + j - 1                    
+    else    
+        while i < array.Length && not found do
+            found <- sf array.[i]                 
+            i <- i + 1
+        if found then 
+            i-1
+        else
+            raise (System.Collections.Generic.KeyNotFoundException())
 
 /// <summary>
-/// Takes a function that accepts a vector and returns true or false. Returns 
-/// the index Option
-/// the first Vector that returns true or None if none are found
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the value of the first element that satisfies both predicates.
+/// returns KeyNotFoundException if not found
 /// </summary>
-/// <param name="f">Takes a Vector and returns true or false</param>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
-let inline tryFindVectorIndex
-    (f : ^T Vector -> bool)  (array: ^T[]) : int Option =
+let inline find
+    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T =
 
-    checkNonNull array
+    array.[findIndex vf sf array]
+
+/// <summary>
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the index of the last element that satisfies both predicates.
+/// returns KeyNotFoundException if not found
+/// </summary>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
+/// <param name="array"></param>
+let inline findIndexBack
+    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int =
+
+    checkNonNull array    
 
     let count = Vector< ^T>.Count
-    let mutable found = false
-    let len = array.Length
-    let lenLessCount = len-count
+    let mutable found = false    
+    
         
-    let mutable i = 0
-    while i <= lenLessCount && not found do
-        found <- f (Vector< ^T>(array,i))
-        i <- i + count
-
+    let mutable i = array.Length-count
+    while i >= 0 && not found do
+        found <- vf (Vector< ^T>(array,i))
+        i <- i - count
+    
     if found then
-        Some (i - count)
-    else
-        None
+        i <- i + count
+        let v = Vector< ^T>(array,i)
+        let mutable j = count-1
+        while j > 0 && not found do
+            found <- sf v.[j]
+            j <- j - 1                                    
+        i + j + 1                    
+    else    
+        i <- i + count - 1
+        while i >= 0 && not found do
+            found <- sf array.[i]                 
+            i <- i - 1
+        if found then 
+            i+1
+        else
+            raise (System.Collections.Generic.KeyNotFoundException())
 
 
 /// <summary>
-/// Finds the first element matching the predicates.
-/// vPredicate for whether the Vector contains the value
-/// sPredicate for the value
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the value of the last element that satisfies both predicates.
+/// returns KeyNotFoundException if not found
 /// </summary>
-/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
-/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
-let inline find 
-    (vPredicate : ^T Vector -> bool) 
-    (sPredicate : ^T -> bool) 
-    (array : ^T[]) : ^T =
-    
-    let mutable i = findVectorIndex vPredicate array        
-    while not (sPredicate array.[i]) do
-        i <- i + 1
-    array.[i]
+let inline findBack
+    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T =
+
+    array.[findIndexBack vf sf array]
+
 
 /// <summary>
-/// Finds the index of the first element matching the predicates.
-/// vPredicate for whether the Vector contains the value
-/// sPredicate for the value
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the Option index of the first element that satisfies both predicates
+/// or None if not found
 /// </summary>
-/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
-/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
-/// <param name="array"></param>
-let inline findIndex 
-    (vPredicate : ^T Vector -> bool) 
-    (sPredicate : ^T -> bool) 
-    (array : ^T[]) : int =
-    
-    let mutable i = findVectorIndex vPredicate array        
-    while not (sPredicate array.[i]) do
-        i <- i + 1
-    i
-            
-/// <summary>
-/// Finds the first element Option matching the predicates
-/// or None if none are found.
-/// vPredicate for whether the Vector contains the value
-/// sPredicate for the value
-/// </summary>
-/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
-/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
-/// <param name="array"></param>
-let inline tryFind 
-    (vPredicate : ^T Vector -> bool) 
-    (sPredicate : ^T -> bool) 
-    (array: ^T[]) : ^T Option =
- 
-    let o = tryFindVectorIndex vPredicate array        
-    match o with 
-    | Some index -> let mutable i = index
-                    while not (sPredicate array.[i]) do
-                        i <- i + 1
-                    Some array.[i]
-    | None -> None
-    
-/// <summary>
-/// Finds the first element Option matching the predicates
-/// or None if none are found.
-/// vPredicate for whether the Vector contains the value
-/// sPredicate for the value
-/// </summary>
-/// <param name="vPredicate">Takes a vector and returns a bool indicating whether the value exists in the Vector</param>
-/// <param name="sPredicate">Takes a value and returns true of false to extract the value</param>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline tryFindIndex
-    (vPredicate : ^T Vector -> bool) 
-    (sPredicate : ^T -> bool) 
-    (array: ^T[]) : int Option =
- 
-    let o = tryFindVectorIndex vPredicate array        
-    match o with 
-    | Some index -> let mutable i = index
-                    while not (sPredicate array.[i]) do
-                        i <- i + 1
-                    Some i
-    | None -> None
+     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int Option =
 
+    checkNonNull array    
+
+    let count = Vector< ^T>.Count
+    let mutable found = false    
+    
+        
+    let mutable i = 0
+    while i <= array.Length-count && not found do
+        found <- vf (Vector< ^T>(array,i))
+        i <- i + count
+    
+    if found then
+        i <- i - count
+        let v = Vector< ^T>(array,i)
+        let mutable j = 0
+        while j < count-1 && not found do
+            found <- sf v.[j]
+            j <- j + 1                                    
+        Some(i + j - 1)
+    else    
+        while i < array.Length && not found do
+            found <- sf array.[i]                 
+            i <- i + 1
+        if found then 
+            Some(i-1)
+        else
+            None
+
+
+/// <summary>
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the Option value of the first element that satisfies both predicates
+/// or None if not found
+/// </summary>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
+/// <param name="array"></param>
+let inline tryFind
+     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T Option =
+
+   match tryFindIndex vf sf array with
+   | Some i -> Some array.[i]
+   | None -> None
+
+/// <summary>
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the Option index of the last element that satisfies both predicates
+/// or None if not found
+/// </summary>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
+/// <param name="array"></param>
+let inline tryFindIndexBack
+     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int Option =
+
+    checkNonNull array    
+
+    let count = Vector< ^T>.Count
+    let mutable found = false        
+        
+    let mutable i = array.Length-count
+    while i >= 0 && not found do
+        found <- vf (Vector< ^T>(array,i))
+        i <- i - count
+    
+    if found then
+        i <- i + count
+        let v = Vector< ^T>(array,i)
+        let mutable j = count-1
+        while j >= 0 && not found do
+            found <- sf v.[j]
+            j <- j - 1                                    
+        Some(i + j + 1)
+    else    
+        i <- i + count - 1
+        while i >= 0 && not found do
+            found <- sf array.[i]                 
+            i <- i - 1
+        if found then 
+            Some(i+1)
+        else
+            None
+
+
+/// <summary>
+/// Takes a function that accepts a vector and returns true or false, and
+/// a function that takes a single element and returns true or false.
+/// Returns the Option value of the last element that satisfies both predicates
+/// or None if not found
+/// </summary>
+/// <param name="vf">Takes a Vector 'T and returns true or false</param>
+/// <param name="sf">Takes a 'T and returns true or false</param>
+/// <param name="array"></param>
+let inline tryFindBack
+     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T Option =
+
+   match tryFindIndexBack vf sf array with
+   | Some i -> Some array.[i]
+   | None -> None
           
 /// <summary>
 /// Checks for the existence of a value satisfying the Vector predicate. 
@@ -1101,7 +1191,7 @@ let inline compareWith (comparer : Vector< ^T> -> Vector< ^T> -> int)
 
     checkNonNull array1
     checkNonNull array2
-    
+        
     let count = Vector< ^T>.Count
     let length1 = array1.Length
     let length2 = array2.Length
