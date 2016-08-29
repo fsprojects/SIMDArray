@@ -194,7 +194,21 @@ let inline reduce
     (combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
     fold vf sf combiner Unchecked.defaultof< ^State> array
-    
+
+
+/// <summary>
+/// A convenience function to call FoldBack with an acc of 0
+/// </summary>
+/// <param name="f">The folding function</param>
+/// <param name="combiner">Function to combine the Vector elements at the end</param>
+/// <param name="array">Source array</param>
+let inline reduceBack
+    (vf: ^State Vector -> ^T Vector -> ^State Vector)
+    (sf: ^State -> ^T -> ^State )
+    (combiner : ^State -> ^State -> ^State)
+    (array: ^T[]) : ^State =
+    foldBack vf sf combiner Unchecked.defaultof< ^State> array
+        
 
 /// <summary>
 /// Creates an array filled with the value x. 
