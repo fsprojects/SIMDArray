@@ -1,16 +1,12 @@
-﻿
-[<RequireQualifiedAccess>]
+﻿[<RequireQualifiedAccess>]
 module Array.SIMD
 
-open System.Runtime.InteropServices
 open System.Numerics
 open FSharp.Core
 open Microsoft.FSharp.Core
 open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Core.Operators
-
-
 
 let inline private checkNonNull arg =
     match box arg with
@@ -97,7 +93,7 @@ let inline foldBack
 /// <summary>
 /// Similar to the standard Fold2 functionality but you must also provide a combiner
 /// function to combine each element of the Vector at the end. Not that acc
-/// can be double applied, this will not behave the same as fold. Typically
+/// can be double applied, this will not behave the same as fold2back. Typically
 /// 0 will be used for summing operations and 1 for multiplication.
 /// </summary>
 /// <param name="f">The folding function</param>
@@ -121,17 +117,16 @@ let inline fold2
     let len = array1.Length        
     if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
             
-    let lenLessCount = len-count
-
+    
     let mutable state = Vector< ^State> acc
     let mutable i = 0    
-    while i <= lenLessCount do
+    while i <= len-count do
         state <- vf state (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
 
 
     let mutable result = acc
-    while i < len do
+    while i < array1.Length do
         result <- sf result array1.[i] array2.[i]
         i <- i + 1 
         
@@ -139,6 +134,54 @@ let inline fold2
     while i < Vector< ^State>.Count do
         result <- combiner result state.[i]
         i <- i + 1
+    result
+
+/// <summary>
+/// Similar to the standard foldBack2 functionality but you must also provide a combiner
+/// function to combine each element of the Vector at the end. Not that acc
+/// can be double applied, this will not behave the same as foldBack2. Typically
+/// 0 will be used for summing operations and 1 for multiplication.
+/// </summary>
+/// <param name="f">The folding function</param>
+/// <param name="combiner">Function to combine the Vector elements at the end</param>
+/// <param name="acc">Initial value to accumulate from</param>
+/// <param name="array">Source array</param>
+let inline foldBack2
+    (vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
+    (sf : ^State -> ^T -> ^U -> ^State)
+    (combiner : ^State -> ^State -> ^State)
+    (acc : ^State)
+    (array1: ^T[])
+    (array2: ^U[]) : ^State =
+
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    if count <> Vector< ^U>.Count then invalidArg "array" "Inputs and output must all have same Vector width."
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+            
+    
+
+    let mutable state = Vector< ^State> acc
+    let mutable i = array1.Length-count 
+    while i >= 0 do
+        state <- vf state (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
+        i <- i - count
+
+
+    let mutable result = acc
+    i <- i + count - 1
+    while i >= 0 do
+        result <- sf result array1.[i] array2.[i]
+        i <- i - 1 
+        
+    i <- Vector< ^State>.Count - 1    
+    while i >= 0 do
+        result <- combiner result state.[i]
+        i <- i - 1
     result
 
 
