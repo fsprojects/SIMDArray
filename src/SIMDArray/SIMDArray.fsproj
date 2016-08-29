@@ -91,6 +91,8 @@
   <ItemGroup>
     <Content Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ResizeArray.fs" />
+    <Compile Include="PerformanceArray.fs" />
     <Compile Include="SIMDArray.fs" />
   </ItemGroup>
   <ItemGroup>

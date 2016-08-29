@@ -193,8 +193,8 @@ let inline reduce
     (sf: ^State -> ^T -> ^State )
     (combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
-    fold vf sf combiner Unchecked.defaultof< ^State> array
-
+    fold vf sf combiner Unchecked.defaultof< ^State> array    
+    
 
 /// <summary>
 /// A convenience function to call FoldBack with an acc of 0

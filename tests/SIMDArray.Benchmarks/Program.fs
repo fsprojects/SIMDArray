@@ -37,6 +37,28 @@ let empty = [||]
 let inline indexNotFound() = raise (KeyNotFoundException())
 
                     
+let partition f (array: _[]) = 
+            checkNonNull "array" array
+            let res = Array.zeroCreateUnchecked array.Length        
+            let mutable upCount = 0
+            let mutable downCount = array.Length-1    
+            for x in array do                
+                if f x then 
+                    res.[upCount] <- x
+                    upCount <- upCount + 1
+                else
+                    res.[downCount] <- x
+                    downCount <- downCount - 1
+                
+            let res1 = Array.subUnchecked 0 upCount res
+            let res2 = Array.zeroCreateUnchecked (array.Length - upCount)    
+        
+            downCount <- array.Length-1
+            for i = 0 to res2.Length-1 do
+                res2.[i] <- res.[downCount]        
+                downCount <- downCount - 1
+        
+            res1 , res2
 
 
 
@@ -63,18 +85,17 @@ type CoreBenchmark () =
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (1000,100000,1000000)>]     
+    [<Params (1000000)>]     
     member val public Length = 0 with get, set
 
-    [<Params (10000,25000,50000,75000,100000,2000000)>]     
+    [<Params (10,1000000,10000000)>]     
     member val public Density = 0 with get, set
 
-   
-
+      
     [<Setup>]
     member self.SetupData () =  
        
-       let r = Random(self.Length+self.Density)
+       let r = Random(self.Length)
        //list <- List.init self.Length (fun i -> (1.0,2.0))
 
        //array <- Array.init self.Length (fun i -> 2)
@@ -93,13 +114,15 @@ type CoreBenchmark () =
         //for concat
         //array <- Array.init self.Length (fun i -> [|1;2;3;4;5;|])
         
-      
+              
+    [<Benchmark(Baseline=true)>]
+    member self.distinct () =                    
+        Array.distinct array
 
-    
-    
     [<Benchmark>]
-    member self.distinct2 () =                    
-        ()
+    member self.distinctUnordered () =                        
+        Array.Performance.distinctUnordered array
+
 
       
     
