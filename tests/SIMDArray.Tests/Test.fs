@@ -77,6 +77,24 @@ let ``Performance.filter`` () =
             )
 
 [<Test>]
+let ``SIMD.forAll`` () =
+    quickCheck <|
+    fun (xs: int []) (n :int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        lazy(
+            Array.forall(fun x -> x < n) xs = Array.SIMD.forall (fun x -> Vector.LessThanAll(x,Vector<int>(n))) (fun x -> x < n) xs
+            )
+[<Test>]
+let ``SIMD.forAll2`` () =
+    quickCheck <|
+    fun (xs: int []) (n :int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        let xs2 = Array.map (fun x -> x + 1) xs
+        lazy(
+            Array.forall2(fun x y -> x+y < n) xs xs2 = Array.SIMD.forall2 (fun x y -> Vector.LessThanAll(x+y,Vector<int>(n))) (fun x y -> x+y < n) xs xs2
+            )
+
+[<Test>]
 let ``SIMD.find`` () =
     quickCheck <|
     fun (xs: int []) ->
