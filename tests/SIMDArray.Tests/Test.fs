@@ -88,8 +88,7 @@ let ``SIMD.findIndex`` () =
 let ``SIMD.findBack`` () =
     quickCheck <|
     fun (xs: int []) ->
-        (xs.Length > 0 && xs <> [||]) ==>
-        
+        (xs.Length > 0 && xs <> [||]) ==>        
         lazy(
             let n = Array.max xs
             Array.findBack (fun x -> x = n) xs = Array.SIMD.findBack (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
@@ -99,12 +98,48 @@ let ``SIMD.findBack`` () =
 let ``SIMD.findIndexBack`` () =
     quickCheck <|
     fun (xs: int []) ->
-        (xs.Length > 0 && xs <> [||]) ==>
-        
+        (xs.Length > 0 && xs <> [||]) ==>        
         lazy(
             let n = Array.max xs
             Array.findIndexBack (fun x -> x = n) xs = Array.SIMD.findIndexBack (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
             )
+
+[<Test>]
+let ``SIMD.tryFind`` () =
+    quickCheck <|
+    fun (xs: int []) (n : int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        lazy(            
+            Array.tryFind (fun x -> x = n) xs = Array.SIMD.tryFind (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
+let ``SIMD.tryFindIndex`` () =
+    quickCheck <|
+    fun (xs: int []) (n:int) ->
+        (xs.Length > 0 && xs <> [||]) ==>        
+        lazy(            
+            Array.tryFindIndex (fun x -> x = n) xs = Array.SIMD.tryFindIndex (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
+let ``SIMD.tryFindBack`` () =
+    quickCheck <|
+    fun (xs: int []) (n:int)->
+        (xs.Length > 0 && xs <> [||]) ==>        
+        lazy(            
+            Array.tryFindBack (fun x -> x = n) xs = Array.SIMD.tryFindBack (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
+let ``SIMD.tryFindIndexBack`` () =
+    quickCheck <|
+    fun (xs: int []) (n:int)->
+        (xs.Length > 0 && xs <> [||]) ==>        
+        lazy(            
+            Array.tryFindIndexBack (fun x -> x = n) xs = Array.SIMD.tryFindIndexBack (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
 
 [<Test>]
 let ``SIMD.iter`` () =

@@ -1094,28 +1094,25 @@ let inline tryFindIndexBack
     checkNonNull array    
 
     let count = Vector< ^T>.Count
-    let mutable found = false        
-        
+   
     let mutable i = array.Length-count
-    while i >= 0 && not found do
-        found <- vf (Vector< ^T>(array,i))
+    while i >= 0 && not (vf (Vector< ^T>(array,i))) do
         i <- i - count
     
-    if found then
-        i <- i + count
+    if i >= 0 then
         let v = Vector< ^T>(array,i)
+        i <- i + count - 1
         let mutable j = count-1
-        while j >= 0 && not found do
-            found <- sf v.[j]
+        while j >= 0 && not (sf v.[j]) do
             j <- j - 1                                    
-        Some(i + j + 1)
+            i <- i - 1
+        Some i
     else    
         i <- i + count - 1
-        while i >= 0 && not found do
-            found <- sf array.[i]                 
+        while i >= 0 && not (sf array.[i]) do          
             i <- i - 1
-        if found then 
-            Some(i+1)
+        if i >= 0 then 
+            Some i
         else
             None
 
