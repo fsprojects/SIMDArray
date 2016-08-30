@@ -288,9 +288,9 @@ let inline foldBack2
     (vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
     (sf : ^State -> ^T -> ^U -> ^State)
     (combiner : ^State -> ^State -> ^State)
-    (acc : ^State)
     (array1: ^T[])
-    (array2: ^U[]) : ^State =
+    (array2: ^U[])
+    (acc : ^State) : ^State =
 
     checkNonNull array1
     checkNonNull array2

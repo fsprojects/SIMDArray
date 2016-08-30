@@ -363,6 +363,30 @@ let ``SIMD.fold = Array.fold`` () =
         (array.Length > 0 && array <> [||]) ==>
         lazy (Array.SIMD.fold (+) (+) (+) 0 array = Array.fold (+) 0 array)
 
+[<Test>]                  
+let ``SIMD.foldBack = Array.foldBack`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMD.foldBack (+) (+) (+) array 0 = Array.foldBack (+) array 0)
+
+[<Test>]                  
+let ``SIMD.fold2 = Array.fold2`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        let array2 = Array.map (fun x -> x*x) array
+        lazy (Array.SIMD.fold2 (fun acc x y -> acc + x + y) (fun acc x y -> acc+x+y) (+) 0 array array2 = Array.fold2 (fun acc x y -> acc+x+y) 0 array array2)
+
+[<Test>]                  
+let ``SIMD.foldBack2 = Array.foldBack2`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        let array2 = Array.map (fun x -> x*x) array
+        lazy (Array.SIMD.foldBack2 (fun acc x y -> acc + x + y) (fun acc x y -> acc+x+y) (+) array array2 0 = Array.foldBack2 (fun acc x y -> acc+x+y) array array2 0)
+
+
 
 [<Test>]                  
 let ``SIMD.contains = Array.contains`` () =
