@@ -995,6 +995,7 @@ let inline findIndexBack
     
     if i >= 0 then
         let v = Vector< ^T>(array,i)
+        i <- i + count - 1
         let mutable j = count-1
         while j >= 0 && not (sf v.[j]) do
             j <- j - 1                                    

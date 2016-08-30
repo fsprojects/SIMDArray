@@ -17,7 +17,7 @@ let inline private checkNonNull arg =
 
 
 /// <summary>
-/// Like Array.partition but results do not maintain order, thus slightly faster
+/// Like Array.partition but results do not maintain order, thus slightly faster.
 /// </summary>
 /// <param name="f"></param>
 /// <param name="array"></param>
