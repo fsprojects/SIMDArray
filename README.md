@@ -1,33 +1,48 @@
 # SIMDArray FSharp
-SIMD enhanced Array operations for F#
+SIMD and other Performance enhanced Array operations for F#
 
 ## Example Usage
 
 ``` F#
-open SIMDArray
-
 //Faster map
 let array = [| 1 .. 1000 |]
 let squaredArray = array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)  
 
-// Map needs one lambda to map the Vector<T>, and one to handle any leftover
-// elements if array is not divisible by Vector<T>.Count. In the case of 
-// simple arithmetic operations they can often be the same as shown here.
-// If you arrange your arrays such that they will never have leftovers, 
-// just pass a nop like (fun x -> x), it will never get executed.
+// Map and many other functions need one lambda to map the Vector<T>, 
+// and one to handle any leftover elements if array is not divisible by 
+// Vector<T>.Count. In the case of simple arithmetic operations they can
+// often be the same as shown here. If you arrange your arrays such that 
+// they will never have leftovers, or don't care how leftovers are treated 
+// just pass a nop like so:
+
+open SIMDArrayUtils
+
+let array = [|1;2;3;4;5;6;7;8|]
+let squaredArray = array |> Array.SIMD.map (fun x -> x*x) nop
 
 
+// Some functions can be used just like the existing array functions such as:
 //Faster create and sum
 let newArray = Array.SIMD.create 1000 5 //create a new array of length 1000 filled with 5
 let sum = Array.SIMD.sum newArray
+
+// The Performance module has functions that are faster and/or use less memory
+// via other means than SIMD. Usually by relaxing ordering constraints or adding
+// constraints to predicates
+
+let distinctElemnts = Array.Performance.distinctUnordered someArray
+let filteredElements = Array.Performance.fitlerLessThan 5 someArray
+let filteredElements = Array.Performance.fitlerSimplePredicate (fun x -> x*x < 100) someArray
 
 ```
 
 ## Notes
 
-Only 64 bit builds are supported.  Performance improvements will vary depending on your CPU architecture, width of Vector type, and the operations
-you apply.  For small arrays the core libs may be faster due to increased fixed overhead for SIMD versions of the operations. To test
-performance be sure to use Release builds with optimizations turned on.
+Only 64 bit builds are supported.  Mono is not currently supported. Performance improvements will vary depending on your CPU architecture, width of Vector type, and the operations you apply.  For small arrays the core libs may be faster due SIMD overhead.
+When measuring performance be sure to use Release builds with optimizations turned on.
+
+Floating point addition is not associative, so results with SIMD operations will not be identical, though often
+they will be more accurate, such as in the case of sum, or average.
 
 ## Performance Comparison vs Standrd Array Functions
 
