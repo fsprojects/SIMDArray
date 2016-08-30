@@ -22,7 +22,7 @@ let squaredArray = array |> Array.SIMD.map (fun x -> x*x) nop
 
 
 // Some functions can be used just like the existing array functions such as:
-//Faster create and sum
+// Faster create and sum
 let newArray = Array.SIMD.create 1000 5 //create a new array of length 1000 filled with 5
 let sum = Array.SIMD.sum newArray
 
