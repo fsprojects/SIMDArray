@@ -10,7 +10,7 @@ open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
-
+open SIMDArrayUtils
 
 
 #if MONO
@@ -123,14 +123,16 @@ type CoreBenchmark () =
    
 
     [<Benchmark>]
-    member self.skipWhile () =                        
-        Array.skipWhile (fun x -> x < 50000) array
-        Array.take
+    member self.piter () =                        
+        let mutable sum = 0
+        Array.Parallel.iter (fun x -> sum <- x*x+x) array        
                                            
 
     [<Benchmark(Baseline=true)>]
-    member self.simdSkipWhile () =    
-        Array.SIMD.skipWhile (fun x -> Vector.LessThanAll(x,Vector<int>(50000))) (fun x -> x < 50000) array
+    member self.psimditer () =    
+        let mutable sum = Vector<int>(0)
+        let mutable scalarsum = 0
+        Array.SIMDParallel.iter (fun x -> sum <- x * x + x) (fun x -> scalarsum <- x*x+x) array        
         
           
 

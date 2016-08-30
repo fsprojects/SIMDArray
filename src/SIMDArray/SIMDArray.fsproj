@@ -95,6 +95,7 @@
     <Compile Include="PerformanceArray.fs" />
     <Compile Include="SIMDArray.fs" />
     <Compile Include="SIMDArrayUtils.fs" />
+    <Compile Include="SIMDArrayParallel.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
