@@ -61,6 +61,20 @@ let config =
 let quickCheck prop = Check.One(config, prop)
 let sickCheck fn = Check.One(config, Prop.forAll arrayArb fn)
 
+[<Test>]
+let ``Performance.filter`` () =
+    quickCheck <|
+    fun (xs: int[]) (n : int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        lazy(            
+             Array.filter (fun x -> x = n) xs = Array.Performance.filterEqual n xs &&
+             Array.filter (fun x -> x < n) xs = Array.Performance.filterLessThan n xs &&
+             Array.filter (fun x -> x > n) xs = Array.Performance.filterGreaterThan n xs &&
+             Array.filter (fun x -> x <= n) xs = Array.Performance.filterLEq n xs &&
+             Array.filter (fun x -> x >= n) xs = Array.Performance.filterGEq n xs &&
+             Array.filter (fun x -> x*2 = n) xs = Array.Performance.filterSimplePredicate (fun x -> x*2 = n) xs &&
+             Array.where (fun x -> x*2 = n) xs = Array.Performance.whereSimplePredicate (fun x -> x*2 = n) xs
+            )
 
 [<Test>]
 let ``SIMD.find`` () =
