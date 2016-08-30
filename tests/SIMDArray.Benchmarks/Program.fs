@@ -138,7 +138,13 @@ type CoreBenchmark () =
 let main argv =              
     
   
-    
+    let a = [|1;2;3;4;5;6;7;8|]
+
+    let r1 = Array.skipWhile (fun x -> x < 4) a
+    let r2 = Array.SIMD.skipWhile (fun x -> Vector.LessThanAny(x,Vector<int>(4)))  (fun x -> x < 4) a
+
+    printf "r1:%A\n" r1
+    printf "r2:%A\n" r2
 
      (*
     let r = Random(1)

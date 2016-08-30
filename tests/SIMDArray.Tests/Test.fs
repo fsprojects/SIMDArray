@@ -76,6 +76,7 @@ let ``Performance.filter`` () =
              Array.where (fun x -> x*2 = n) xs = Array.Performance.whereSimplePredicate (fun x -> x*2 = n) xs
             )
 
+        
 [<Test>]
 let ``SIMD.forAll`` () =
     quickCheck <|
@@ -83,6 +84,16 @@ let ``SIMD.forAll`` () =
         (xs.Length > 0 && xs <> [||]) ==>       
         lazy(
             Array.forall(fun x -> x < n) xs = Array.SIMD.forall (fun x -> Vector.LessThanAll(x,Vector<int>(n))) (fun x -> x < n) xs
+            )
+
+[<Test>]
+let ``SIMD.forAll2`` () =
+    quickCheck <|
+    fun (xs: int []) (n :int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        let xs2 = Array.map (fun x -> x + 1) xs
+        lazy(
+            Array.forall2(fun x y -> x+y < n) xs xs2 = Array.SIMD.forall2 (fun x y -> Vector.LessThanAll(x+y,Vector<int>(n))) (fun x y -> x+y < n) xs xs2
             )
 
 [<Test>]
@@ -101,17 +112,8 @@ let ``SIMD.takeWhile`` () =
         lazy(
             Array.takeWhile(fun x -> x < n) xs = Array.SIMD.takeWhile (fun x -> Vector.LessThanAll(x,Vector<int>(n))) (fun x -> x < n) xs
             )
+            
 
-
-[<Test>]
-let ``SIMD.forAll2`` () =
-    quickCheck <|
-    fun (xs: int []) (n :int) ->
-        (xs.Length > 0 && xs <> [||]) ==>       
-        let xs2 = Array.map (fun x -> x + 1) xs
-        lazy(
-            Array.forall2(fun x y -> x+y < n) xs xs2 = Array.SIMD.forall2 (fun x y -> Vector.LessThanAll(x+y,Vector<int>(n))) (fun x y -> x+y < n) xs xs2
-            )
 
 [<Test>]
 let ``SIMD.tryPick`` () =
@@ -133,6 +135,7 @@ let ``SIMD.pick`` () =
             let n = Array.max xs
             Array.pick (fun x -> if x = n then Some n else None) xs = Array.SIMD.pick (fun x -> if Vector.EqualsAny(Vector<int>(n),x) then Some n else None) (fun x -> if x = n then Some n else None) xs
             )
+
 
 [<Test>]
 let ``SIMD.find`` () =
@@ -292,7 +295,7 @@ let ``SIMD.init = Array.init`` () =
     quickCheck <|
     fun (len: int) ->
         (len >= 0 ) ==>
-        let A (len:int) = Array.SIMD.init len (fun i -> Vector<int>(5))
+        let A (len:int) = Array.SIMD.init len (fun i -> Vector<int>(5)) (fun i -> 5)
         let B (len:int) = Array.init len (fun i -> 5)
         (lazy test <@ A len = B len  @>)   |@ "init len" 
 
