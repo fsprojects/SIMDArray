@@ -10,6 +10,7 @@ open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
+open SIMDArrayUtils
 
 
 #if MONO
@@ -131,8 +132,7 @@ type CoreBenchmark () =
     member self.simdSkipWhile () =    
         Array.SIMD.skipWhile (fun x -> Vector.LessThanAll(x,Vector<int>(50000))) (fun x -> x < 50000) array
         
-      
-    
+          
 
 [<EntryPoint>]
 let main argv =              
@@ -140,8 +140,9 @@ let main argv =
   
     let a = [|1;2;3;4;5;6;7;8|]
 
-    let r1 = Array.skipWhile (fun x -> x < 4) a
-    let r2 = Array.SIMD.skipWhile (fun x -> Vector.LessThanAny(x,Vector<int>(4)))  (fun x -> x < 4) a
+
+    let r1 = Array.map (fun x -> x*x) a
+    let r2 = Array.SIMD.map (fun x-> x*x) nop a
 
     printf "r1:%A\n" r1
     printf "r2:%A\n" r2
