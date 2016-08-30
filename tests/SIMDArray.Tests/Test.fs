@@ -63,6 +63,50 @@ let sickCheck fn = Check.One(config, Prop.forAll arrayArb fn)
 
 
 [<Test>]
+let ``SIMD.find`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+       
+        lazy(
+            let n = Array.max xs
+            Array.find (fun x -> x = n) xs = Array.SIMD.find (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
+let ``SIMD.findIndex`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        
+        lazy(
+            let n = Array.max xs
+            Array.findIndex (fun x -> x = n) xs = Array.SIMD.findIndex (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
+let ``SIMD.findBack`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        
+        lazy(
+            let n = Array.max xs
+            Array.findBack (fun x -> x = n) xs = Array.SIMD.findBack (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
+let ``SIMD.findIndexBack`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        
+        lazy(
+            let n = Array.max xs
+            Array.findIndexBack (fun x -> x = n) xs = Array.SIMD.findIndexBack (fun x -> Vector.EqualsAny(Vector<int>(n),x)) (fun x -> x = n) xs
+            )
+
+[<Test>]
 let ``SIMD.iter`` () =
     quickCheck <|
     fun (xs: int []) ->

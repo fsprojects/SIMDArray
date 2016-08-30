@@ -939,28 +939,23 @@ let inline findIndex
     checkNonNull array    
 
     let count = Vector< ^T>.Count
-    let mutable found = false    
-    
-        
+
     let mutable i = 0
-    while i <= array.Length-count && not found do
-        found <- vf (Vector< ^T>(array,i))
+    while i <= array.Length-count && not (vf (Vector< ^T>(array,i))) do
         i <- i + count
     
-    if found then
-        i <- i - count
+    if i <= array.Length-count then
         let v = Vector< ^T>(array,i)
         let mutable j = 0
-        while j < count-1 && not found do
-            found <- sf v.[j]
-            j <- j + 1                                    
-        i + j - 1                    
+        while j < count && not (sf v.[j]) do
+            j <- j + 1    
+            i <- i + 1    
+        i                                          
     else    
-        while i < array.Length && not found do
-            found <- sf array.[i]                 
+        while i < array.Length && not (sf array.[i]) do
             i <- i + 1
-        if found then 
-            i-1
+        if i < array.Length then
+            i
         else
             raise (System.Collections.Generic.KeyNotFoundException())
 
@@ -993,29 +988,24 @@ let inline findIndexBack
     checkNonNull array    
 
     let count = Vector< ^T>.Count
-    let mutable found = false    
-    
-        
+   
     let mutable i = array.Length-count
-    while i >= 0 && not found do
-        found <- vf (Vector< ^T>(array,i))
+    while i >= 0 && not (vf (Vector< ^T>(array,i))) do
         i <- i - count
     
-    if found then
-        i <- i + count
+    if i >= 0 then
         let v = Vector< ^T>(array,i)
         let mutable j = count-1
-        while j > 0 && not found do
-            found <- sf v.[j]
+        while j >= 0 && not (sf v.[j]) do
             j <- j - 1                                    
-        i + j + 1                    
+            i <- i - 1
+        i
     else    
         i <- i + count - 1
-        while i >= 0 && not found do
-            found <- sf array.[i]                 
+        while i >= 0 && not (sf array.[i]) do          
             i <- i - 1
-        if found then 
-            i+1
+        if i >= 0 then 
+            i
         else
             raise (System.Collections.Generic.KeyNotFoundException())
 
@@ -1050,30 +1040,26 @@ let inline tryFindIndex
     checkNonNull array    
 
     let count = Vector< ^T>.Count
-    let mutable found = false    
-    
-        
+
     let mutable i = 0
-    while i <= array.Length-count && not found do
-        found <- vf (Vector< ^T>(array,i))
+    while i <= array.Length-count && not (vf (Vector< ^T>(array,i))) do
         i <- i + count
     
-    if found then
-        i <- i - count
+    if i <= array.Length-count then
         let v = Vector< ^T>(array,i)
         let mutable j = 0
-        while j < count-1 && not found do
-            found <- sf v.[j]
-            j <- j + 1                                    
-        Some(i + j - 1)
+        while j < count && not (sf v.[j]) do
+            j <- j + 1    
+            i <- i + 1    
+        Some i                                          
     else    
-        while i < array.Length && not found do
-            found <- sf array.[i]                 
+        while i < array.Length && not (sf array.[i]) do
             i <- i + 1
-        if found then 
-            Some(i-1)
+        if i < array.Length then
+            Some i
         else
             None
+
 
 
 /// <summary>
