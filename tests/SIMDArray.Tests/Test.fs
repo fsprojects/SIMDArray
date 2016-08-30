@@ -84,6 +84,25 @@ let ``SIMD.forAll`` () =
         lazy(
             Array.forall(fun x -> x < n) xs = Array.SIMD.forall (fun x -> Vector.LessThanAll(x,Vector<int>(n))) (fun x -> x < n) xs
             )
+
+[<Test>]
+let ``SIMD.skipWhile`` () =
+    quickCheck <|
+    fun (xs: int []) (n :int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        lazy(
+            Array.skipWhile(fun x -> x < n) xs = Array.SIMD.skipWhile (fun x -> Vector.LessThanAll(x,Vector<int>(n))) (fun x -> x < n) xs
+            )
+[<Test>]
+let ``SIMD.takeWhile`` () =
+    quickCheck <|
+    fun (xs: int []) (n :int) ->
+        (xs.Length > 0 && xs <> [||]) ==>       
+        lazy(
+            Array.takeWhile(fun x -> x < n) xs = Array.SIMD.takeWhile (fun x -> Vector.LessThanAll(x,Vector<int>(n))) (fun x -> x < n) xs
+            )
+
+
 [<Test>]
 let ``SIMD.forAll2`` () =
     quickCheck <|
@@ -259,6 +278,16 @@ let ``SIMD.create = Array.create`` () =
         (lazy test <@ A len value = B len value @>)   |@ "create len value" 
 
 [<Test>]                  
+let ``SIMD.replicate = Array.replicate`` () =
+    quickCheck <|
+    fun (len: int) (value: int) ->
+        (len >= 0 ) ==>
+        let A (len:int) (value:int) = Array.SIMD.replicate len value
+        let B (len:int) (value:int) = Array.replicate len value        
+        (lazy test <@ A len value = B len value @>)   |@ "create len value" 
+
+
+[<Test>]                  
 let ``SIMD.init = Array.init`` () =
     quickCheck <|
     fun (len: int) ->
@@ -388,12 +417,28 @@ let ``SIMD.sum = Array.sum`` () =
         (array.Length > 0 && array <> [||]) ==>
         lazy (Array.SIMD.sum array = Array.sum array)
 
+
+[<Test>]                  
+let ``SIMD.sumBy = Array.sumBy`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMD.sumBy (fun x -> x*x) (fun x -> x*x) array = Array.sumBy (fun x -> x*x) array)
+
 [<Test>]                  
 let ``SIMD.reduce = Array.reduce`` () =
     quickCheck <|
     fun (array: int []) ->
         (array.Length > 0 && array <> [||]) ==>
         lazy (Array.SIMD.reduce (+) (+) (+) array = Array.reduce (+) array)
+
+[<Test>]                  
+let ``SIMD.reduceBack = Array.reduceBack`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMD.reduceBack (+) (+) (+) array = Array.reduceBack (+) array)
+
 
 [<Test>]                  
 let ``SIMD.fold = Array.fold`` () =
