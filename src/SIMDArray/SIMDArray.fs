@@ -7,13 +7,7 @@ open Microsoft.FSharp.Core
 open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Core.Operators
-
-let inline private checkNonNull arg =
-    match box arg with
-    | null -> nullArg "array"
-    | _ -> ()
-
-
+open SIMDArrayUtils
     
 /// <summary>
 /// First does skipWhile one vector at a time using vf. If vf returns false

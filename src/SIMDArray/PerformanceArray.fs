@@ -7,14 +7,7 @@ open Microsoft.FSharp.Core
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Core.Operators
 open System.Collections.Generic
-open System.Runtime.InteropServices
-
-
-let inline private checkNonNull arg =
-    match box arg with
-    | null -> nullArg "array"
-    | _ -> ()
-
+open SIMDArrayUtils
 
 /// <summary>
 /// Like Array.partition but results do not maintain order, thus slightly faster.

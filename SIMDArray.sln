@@ -39,8 +39,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SIMDArray.Benchmarks", "tes
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SIMDArray.Tests", "tests\SIMDArray.Tests\SIMDArray.Tests.fsproj", "{01B550A9-F5AC-49AB-9B62-2838119339F9}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ResizeArrayExtensions", "ResizeArrayExtensions\ResizeArrayExtensions.fsproj", "{61E478E2-34AD-4FF5-A966-2760BD954AE5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,18 +85,6 @@ Global
 		{01B550A9-F5AC-49AB-9B62-2838119339F9}.Release|x64.Build.0 = Release|x64
 		{01B550A9-F5AC-49AB-9B62-2838119339F9}.Release|x86.ActiveCfg = Release|x86
 		{01B550A9-F5AC-49AB-9B62-2838119339F9}.Release|x86.Build.0 = Release|x86
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Debug|x64.Build.0 = Debug|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Debug|x86.Build.0 = Debug|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Release|x64.ActiveCfg = Release|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Release|x64.Build.0 = Release|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Release|x86.ActiveCfg = Release|Any CPU
-		{61E478E2-34AD-4FF5-A966-2760BD954AE5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

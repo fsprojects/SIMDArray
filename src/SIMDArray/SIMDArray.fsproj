@@ -91,11 +91,11 @@
   <ItemGroup>
     <Content Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="ResizeArray.fs" />
+    <Compile Include="SIMDArrayUtils.fs" />
     <Compile Include="PerformanceArray.fs" />
     <Compile Include="SIMDArray.fs" />
-    <Compile Include="SIMDArrayUtils.fs" />
-    <Compile Include="SIMDArrayParallel.fs" />
+    <Compile Include="SIMDParallelUtil.fs" />
+    <Compile Include="SIMDArrayParrallel.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

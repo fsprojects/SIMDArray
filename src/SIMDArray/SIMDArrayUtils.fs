@@ -10,4 +10,8 @@
 /// </summary>
 let inline nop _ = Unchecked.defaultof<_>
 
+let inline checkNonNull arg =
+    match box arg with
+    | null -> nullArg "array"
+    | _ -> ()
 

@@ -120,6 +120,7 @@ type CoreBenchmark () =
         //array <- Array.init self.Length (fun i -> [|1;2;3;4;5;|])
         
                
+                 
    
 
     [<Benchmark>]
@@ -129,25 +130,23 @@ type CoreBenchmark () =
                                            
 
     [<Benchmark(Baseline=true)>]
-    member self.psimditer () =    
+    member self.psimditer () =            
         let mutable sum = Vector<int>(0)
-        let mutable scalarsum = 0
-        Array.SIMDParallel.iter (fun x -> sum <- x * x + x) (fun x -> scalarsum <- x*x+x) array        
+        Array.SIMDParallel.iter (fun x -> sum <- x*x+x) array
         
+          
           
 
 [<EntryPoint>]
 let main argv =              
     
   
-    let a = [|1;2;3;4;5;6;7;8|]
-
-
-    let r1 = Array.map (fun x -> x*x) a
-    let r2 = Array.SIMD.map (fun x-> x*x) nop a
-
-    printf "r1:%A\n" r1
-    printf "r2:%A\n" r2
+   let a = Array.init 100000 (fun i -> 1)
+   let mutable sum = Vector<int>(0)
+   Array.SIMDParallel.iter (fun x -> sum <- sum+x) a
+   for i = 0 to 7 do
+    printf "%A," sum.[i]
+   0
 
      (*
     let r = Random(1)
@@ -166,13 +165,14 @@ let main argv =
     let result = array |> filterOldPlusPlus (fun x-> x < 100)
     printf "*******\n"*)
    
-                 
+    (*             
     let switch = 
         BenchmarkSwitcher [|
             typeof<CoreBenchmark>
         |] 
 
     switch.Run [|"CoreBenchmark"|] |> ignore
-    0
+    *)
+   
 
 
