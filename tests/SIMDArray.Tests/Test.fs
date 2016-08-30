@@ -95,6 +95,27 @@ let ``SIMD.forAll2`` () =
             )
 
 [<Test>]
+let ``SIMD.tryPick`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+       
+        lazy(
+            let n = Array.max xs
+            Array.tryPick (fun x -> if x = n then Some n else None) xs = Array.SIMD.tryPick (fun x -> if Vector.EqualsAny(Vector<int>(n),x) then Some n else None) (fun x -> if x = n then Some n else None) xs
+            )
+[<Test>]
+let ``SIMD.pick`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+       
+        lazy(
+            let n = Array.max xs
+            Array.pick (fun x -> if x = n then Some n else None) xs = Array.SIMD.pick (fun x -> if Vector.EqualsAny(Vector<int>(n),x) then Some n else None) (fun x -> if x = n then Some n else None) xs
+            )
+
+[<Test>]
 let ``SIMD.find`` () =
     quickCheck <|
     fun (xs: int []) ->

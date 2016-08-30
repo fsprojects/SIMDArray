@@ -866,14 +866,13 @@ let inline mapInPlace
         i <- i + 1
   
 /// <summary>
-/// 
+/// Like the standard pick, but a vector at a time
 /// </summary>
 /// <param name="vf">Takes a Vector 'T and returns an option</param>
 /// <param name="sf">Takes a 'T and returns an option</param>
 /// <param name="array"></param>
 let inline pick
-    (vf : ^T Vector -> ^U Option) (sf: ^T -> ^U Option) (array: ^T[]) : ^U =
-
+    (vf : ^T Vector -> ^U Option) (sf: ^T -> ^U Option) (array: ^T[]) : ^U =    
     checkNonNull array    
 
     let count = Vector< ^T>.Count
@@ -885,6 +884,7 @@ let inline pick
         match vf (Vector< ^T>(array,i)) with
         | Some x -> result <- x; found <- true
         | None -> ()
+        i <- i + count
     
     if found then        
         result        
@@ -893,13 +893,14 @@ let inline pick
             match sf array.[i] with
             | Some x -> result <- x; found <- true
             | None -> ()
+            i <- i + 1
         if found then 
             result
         else
             raise (System.Collections.Generic.KeyNotFoundException())
 
 /// <summary>
-/// 
+/// Like the standard tryPick, but a vector at a time   
 /// </summary>
 /// <param name="vf">Takes a Vector 'T and returns an option</param>
 /// <param name="sf">Takes a 'T and returns an option</param>
@@ -915,13 +916,14 @@ let inline tryPick
     let mutable i = 0
     while i <= array.Length-count && result.IsNone do
         result <- vf (Vector< ^T>(array,i)) 
-        
+        i <- i + count
     
     if result.IsSome then        
         result        
     else    
         while i < array.Length && result.IsNone do
             result <- sf array.[i]
+            i <- i + 1
         result
             
 /// <summary>
