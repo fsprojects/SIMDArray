@@ -1441,14 +1441,17 @@ let inline min (array :^T[]) : ^T =
 /// <param name="comparer">compares Vector chunks of each array</param>
 /// <param name="array1"></param>
 /// <param name="array2"></param>
-let inline compareWith (comparer : Vector< ^T> -> Vector< ^T> -> int)                        
+let inline compareWith (vf : Vector< ^T> -> Vector< ^U> -> int)     
+                       (sf : ^T -> ^U -> int)                   
                        (array1: ^T[])
-                       (array2: ^T[]) =
+                       (array2: ^U[]) =
 
     checkNonNull array1
     checkNonNull array2
         
     let count = Vector< ^T>.Count
+    if count <> Vector< ^U>.Count then invalidArg "array" "Inputs must all have same Vector width."
+    
     let length1 = array1.Length
     let length2 = array2.Length
     let minLength = System.Math.Min(length1,length2)
@@ -1458,12 +1461,18 @@ let inline compareWith (comparer : Vector< ^T> -> Vector< ^T> -> int)
             
     
     while i < minLength-count && result = 0 do        
-        result <- comparer (Vector< ^T>(array1,i)) (Vector< ^T>(array2,i))
+        result <- vf (Vector< ^T>(array1,i)) (Vector< ^U>(array2,i))
         i <- i + count
     
     if result <> 0 then         
         result
-    elif length1 = length2 then 0            
-    elif length1 < length2 then -1
-    else 1              
+    else
+        while i < minLength && result = 0 do
+            result <- sf array1.[i] array2.[i]
+            i <- i + 1
+        if result <> 0 then
+            result
+        elif length1 = length2 then 0            
+        elif length1 < length2 then -1
+        else 1              
 

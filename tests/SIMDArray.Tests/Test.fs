@@ -8,6 +8,13 @@ open NUnit
 open NUnit.Framework
 open Swensen.Unquote
 
+//horizontal ops
+let inline horizontal (f : ^T -> ^T -> ^T) (v :Vector< ^T>) : ^T =
+    let mutable acc = Unchecked.defaultof< ^T>
+    for i = 0 to Vector< ^T>.Count-1 do
+        acc <- f acc v.[i]
+    acc
+        
 
 let inline compareNums a b =
     let fa = float a
@@ -53,6 +60,52 @@ let config =
 
 let quickCheck prop = Check.One(config, prop)
 let sickCheck fn = Check.One(config, Prop.forAll arrayArb fn)
+
+
+[<Test>]
+let ``SIMD.iter`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let mutable vsum = Vector<int>(0)
+        let mutable leftovers = 0
+        Array.SIMD.iter (fun x -> vsum <- vsum + x) (fun x -> leftovers <- leftovers + x)  xs
+        leftovers <- leftovers + (horizontal (+) vsum)
+        lazy (leftovers = Array.sum xs)
+
+[<Test>]
+let ``SIMD.iteri`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let mutable vsum = Vector<int>(0)
+        let mutable leftovers = 0
+        Array.SIMD.iteri (fun _ x -> vsum <- vsum + x) (fun _ x -> leftovers <- leftovers + x)  xs
+        leftovers <- leftovers + (horizontal (+) vsum)
+        lazy (leftovers = Array.sum xs)
+
+
+[<Test>]
+let ``SIMD.iter2`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let mutable vsum = Vector<int>(0)
+        let mutable leftovers = 0
+        Array.SIMD.iter2 (fun x y -> vsum <- vsum + x + y) (fun x y -> leftovers <- leftovers + x + y)  xs xs
+        leftovers <- leftovers + (horizontal (+) vsum)
+        lazy (leftovers = Array.sum xs * 2)
+
+[<Test>]
+let ``SIMD.iteri2`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let mutable vsum = Vector<int>(0)
+        let mutable leftovers = 0
+        Array.SIMD.iteri2 (fun _ x y -> vsum <- vsum + x + y) (fun _ x y -> leftovers <- leftovers + x + y)  xs xs
+        leftovers <- leftovers + (horizontal (+) vsum)
+        lazy (leftovers = Array.sum xs * 2)
 
 [<Test>]                  
 let ``SIMD.clear = Array.clear`` () =
@@ -188,7 +241,13 @@ let ``SIMD.mapi2 = Array.mapi2`` () =
         (lazy test <@ multA xs xs2 = multB xs xs2 @>)   |@ "mapi2 x * y" .&.
         (lazy test <@ minusA xs xs2 = minusB xs xs2 @>) |@ "mapi2 x - y" 
 
-  
+[<Test>]
+let ``SIMDcompareWith = Array.compareWith`` () =
+    quickCheck <|
+    fun (array1 : int[]) (array2 : int[]) ->
+        (array1.Length > 0 && array1 <> [||] && array2.Length > 0 && array2 <> [||]) ==>
+        lazy (Array.SIMD.compareWith (fun x y -> if Vector.EqualsAny(x,y) then 1 else 0) (fun x y -> if x = y then 1 else 0 ) array1 array2 = Array.compareWith (fun x y -> if x = y then 1 else 0) array1 array2   )
+        
 
 [<Test>]                  
 let ``SIMD.sum = Array.sum`` () =
@@ -226,19 +285,31 @@ let ``SIMD.exists = Array.exists`` () =
         (array.Length > 0 && array <> [||]) ==>
         lazy (Array.SIMD.exists (fun x -> Vector.EqualsAny(Vector<int>(value),x)) (fun x -> x = value) array = Array.exists (fun x -> x = value) array)
 
+[<Test>]                  
+let ``SIMD.exists2 = Array.exists2`` () =
+    quickCheck <|
+    fun (array: int []) (value:int) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMD.exists2 (fun x y-> Vector.EqualsAny(Vector<int>(value),x+y)) (fun x y -> x+y = value) array array = Array.exists2 (fun x y -> x+y = value) array array)
+
 
 [<Test>]                  
 let ``SIMD.average = Array.average`` () =
     quickCheck <|
-    fun (array: float []) ->
-        (array.Length > 0 && array <> [||]) ==>
-        lazy ((compareNums (Array.SIMD.average array) (Array.average array)))
+    fun () -> 
+        lazy ((compareNums (Array.SIMD.average [|1.0;2.0;3.0;4.0;5.0;6.0;7.0;8.0;9.0|]) (Array.average [|1.0;2.0;3.0;4.0;5.0;6.0;7.0;8.0;9.0|])))
+
+[<Test>]                  
+let ``SIMD.averageBy = Array.averageBy`` () =
+    quickCheck <|
+    fun () -> 
+        lazy ((compareNums (Array.SIMD.averageBy (fun x -> x*x) (fun x -> x*x) [|1.0;2.0;3.0;4.0;5.0;6.0;7.0;8.0;9.0|]) (Array.averageBy (fun x -> x*x) [|1.0;2.0;3.0;4.0;5.0;6.0;7.0;8.0;9.0|])))
 
 
 [<Test>]                  
 let ``SIMD.max = Array.max`` () =
     quickCheck <|
-    fun (array: float []) ->
+    fun (array: int []) ->
         (array.Length > 0 && array <> [||]) ==>
         lazy ((compareNums (Array.SIMD.max array) (Array.max array)))
 

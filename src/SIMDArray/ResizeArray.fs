@@ -37,3 +37,15 @@ let inline map f (array: ResizeArray<_>) =
 
     res
 
+let unfold<'T,'State> (f:'State -> ('T*'State) option) (s:'State) =
+    let res = ResizeArray<_>()
+    let rec loop state =
+        match f state with
+        | None -> ()
+        | Some (x,s') ->
+            res.Add(x)
+            loop s'
+    loop s
+    res
+
+
