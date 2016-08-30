@@ -10,7 +10,7 @@ open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
-open SIMDArrayUtils
+
 
 
 #if MONO
