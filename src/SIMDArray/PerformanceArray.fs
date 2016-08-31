@@ -9,6 +9,7 @@ open Microsoft.FSharp.Core.Operators
 open System.Collections.Generic
 open SIMDArrayUtils
 
+
 /// <summary>
 /// Like Array.partition but results do not maintain order, thus slightly faster.
 /// </summary>

@@ -35,6 +35,7 @@ let inline private applyTaskAggregate fromInc toExc stride acc f : ^T =
             i <- i + stride
         acc
 
+
 let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) (f : int -> unit) =
             
     let numStrides = (toExclusive-fromInclusive)/stride
@@ -63,8 +64,7 @@ let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) (f 
         Task.WaitAll(taskArray)
 
 
-let inline ForStrideAggreagate (fromInclusive : int) (toExclusive :int) (stride : int) (acc: ^T) (f : int -> ^T -> ^T) combiner =
-            
+let inline ForStrideAggreagate (fromInclusive : int) (toExclusive :int) (stride : int) (acc: ^T) (f : int -> ^T -> ^T) combiner =      
     let numStrides = (toExclusive-fromInclusive)/stride
     if numStrides > 0 then
         let numTasks = Math.Min(Environment.ProcessorCount,numStrides)
@@ -94,3 +94,4 @@ let inline ForStrideAggreagate (fromInclusive : int) (toExclusive :int) (stride 
         result
     else
         acc
+

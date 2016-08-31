@@ -103,7 +103,7 @@ type CoreBenchmark () =
        //array <- Array.create self.Length 10 
        //array2 <- Array.init self.Length (fun i -> 3)
         
-       array <- Array.create self.Length 2.0f
+       array <- Array.create self.Length 2
 //       resizeArray <- ResizeArray<int>(self.Length)
        //for i = 0 to self.Length-1 do
         //resizeArray.Add(array.[i])
@@ -124,22 +124,13 @@ type CoreBenchmark () =
    
    
     
-    [<Benchmark(Baseline=true)>]
-    member self.sum () =                                
-       // Array.map (fun x->x*(x*x+x+x/5.0f)) array        
-       Array.sum array
-                                             
-
-    [<Benchmark>]
-    member self.SIMDsum () =                                
-        //Array.SIMD.map (fun x->x*(x*x+x+x/Vector<float32>(5.0f))) (fun x->x*(x*x+x+x/5.0f)) array            
-        Array.SIMD.sum array
     
     
 
     [<Benchmark>]
-    member self.SIMDParallelsum () =                                
-        Array.SIMDParallel.sum array            
+    member self.ForSum () =                                
+       ()
+
 
           
           
@@ -148,12 +139,7 @@ type CoreBenchmark () =
 let main argv =              
     
 
-    let a = [|1|]
-
-    let sum = Array.SIMDParallel.sum a
-
-    printf "sum:%A" sum
-
+   
 
      (*
     let r = Random(1)
