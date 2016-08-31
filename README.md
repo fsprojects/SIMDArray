@@ -5,6 +5,7 @@ SIMD and other Performance enhanced Array operations for F#
 
 ``` F#
 //Faster map
+
 let array = [| 1 .. 1000 |]
 let squaredArray = array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)  
 
@@ -21,21 +22,22 @@ let array = [|1;2;3;4;5;6;7;8|]
 let squaredArray = array |> Array.SIMD.map (fun x -> x*x) nop
 
 
-// Some functions can be used just like the existing array functions such as:
-// Faster create and sum
+// Some functions can be used just like the existing array functions but run faster
+// such as create and sum:
+
 let newArray = Array.SIMD.create 1000 5 //create a new array of length 1000 filled with 5
 let sum = Array.SIMD.sum newArray
 
 // The Performance module has functions that are faster and/or use less memory
 // via other means than SIMD. Usually by relaxing ordering constraints or adding
-// constraints to predicates
+// constraints to predicates:
 
 let distinctElemnts = Array.Performance.distinctUnordered someArray
 let filteredElements = Array.Performance.fitlerLessThan 5 someArray
 let filteredElements = Array.Performance.fitlerSimplePredicate (fun x -> x*x < 100) someArray
 Array.Performance.mapInPlace (fun x-> x*x) someArray
 
-// The SIMDParallel module has parallelized versions of some of the SIMD operations
+// The SIMDParallel module has parallelized versions of some of the SIMD operations:
 
 let sum = Array.SIMDParallel.sum array
 let map = Array.SIMDParallel.map (fun x -> x*x) array
