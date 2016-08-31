@@ -55,9 +55,9 @@ Parallel.ForStride 0 array.Length (Vector< ^T>.Count)
 // Using:
 // let inline ForStrideAggreagate (fromInclusive : int) (toExclusive :int) (stride : int) (acc: ^T) (f : int -> ^T -> ^T) combiner =
 // You can sum or otherwise aggregate the elements of an array a Vector at a time, starting from an initial acc
-result : Vector< ^T> <- Parallel.ForStrideAggreagate 0 array.Length (Vector< ^T>.Count) Vector< ^T>(0)
-							(fun i acc -> acc + (Vector< ^T>(array,i)))  
-							(fun x acc -> x + acc)  //combines the results from each task into a final Vector that is returned
+let result = Parallel.ForStrideAggreagate 0 array.Length (Vector< ^T>.Count) Vector< ^T>(0)
+					(fun i acc -> acc + (Vector< ^T>(array,i)))  
+					(fun x acc -> x + acc)  //combines the results from each task into a final Vector that is returned
 
 
 ```
