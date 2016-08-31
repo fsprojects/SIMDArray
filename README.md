@@ -65,6 +65,7 @@ they will be more accurate, such as in the case of sum, or average.
 
 ## Performance Comparison vs Standrd Array Functions
 
+* [VS Core Lib Parallel](#parallel)
 * [VS Core Lib 32bit Floats](#core32)
 * [VS Core Lib 64bit Floats](#core64)
 * [VS MathNET.Numerics 32bit Floats](#mathnet)
@@ -85,6 +86,14 @@ Type=SIMDBenchmark  Mode=Throughput  Platform=X64
 Jit=RyuJit  GarbageCollection=Concurrent Workstation  
 
 ```
+### Sum 1 million 32bit ints, ParallelSIMD vs SIMD vs Core Lib <a name="parallel></a>
+		  Method |  Length |      Median |     StdDev | Scaled | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
+---------------- |-------- |------------ |----------- |------- |------ |------ |------ |------------------- |
+             sum | 1000000 | 979.9477 us | 15.4036 us |   1.00 |     - |     - |  1.00 |          14,967.09 |
+         SIMDsum | 1000000 | 163.5663 us |  2.7872 us |   0.17 |     - |     - |  0.17 |           1,960.97 |
+ SIMDParallelsum | 1000000 |  82.3069 us |  6.4637 us |   0.08 |  3.74 |     - |  0.04 |           1,674.94 |
+
+
 
 ### With 32bit Floats Vs Core Lib. Map function `(fun x -> x*x)`<a name="core32"></a>
 
