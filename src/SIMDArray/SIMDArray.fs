@@ -550,7 +550,6 @@ let inline averageBy
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 
 
-
 /// <summary>
 /// Identical to the standard map function, but you must provide
 /// A Vector mapping function.
@@ -559,7 +558,6 @@ let inline averageBy
 /// does not have to be the same type but must be the same width</param>
 /// <param name="sf">A function to handle the leftover scalar elements if array is not divisible by Vector.count</param>
 /// <param name="array">The source array</param>
-
 let inline map
     (vf : ^T Vector -> ^U Vector) (sf : ^T -> ^U) (array : ^T[]) : ^U[] =
 
@@ -580,8 +578,6 @@ let inline map
         i <- i + 1
 
     result
-
-
 
 /// <summary>
 /// Identical to the standard map2 function, but you must provide
@@ -701,7 +697,6 @@ let inline mapi2
 /// <param name="f">A function that takes the current index and it's Vector and returns a Vector. The returned vector
 /// does not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
-
 let inline mapi
     (vf : int -> ^T Vector -> ^U Vector) 
     (sf: int -> ^T -> ^U)

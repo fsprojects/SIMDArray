@@ -62,6 +62,29 @@ let quickCheck prop = Check.One(config, prop)
 let sickCheck fn = Check.One(config, Prop.forAll arrayArb fn)
 
 [<Test>]
+let ``SIMDParallel.sum`` () =
+    quickCheck <|
+    fun (array: int []) ->
+        (array.Length > 0 && array <> [||]) ==>
+        lazy (Array.SIMDParallel.sum array = Array.sum array)
+
+[<Test>]                  
+let ``SIMDParallel.map = Array.map`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let plusA   xs = xs |> Array.SIMDParallel.map (fun x -> x+x) (fun x -> x+x)
+        let plusB   xs = xs |> Array.map (fun x -> x+x)
+        let multA   xs = xs |> Array.SIMDParallel.map (fun x -> x*x) (fun x -> x*x)
+        let multB   xs = xs |> Array.map (fun x -> x*x)
+        let minusA  xs = xs |> Array.SIMDParallel.map (fun x -> x-x) (fun x -> x-x)
+        let minusB  xs = xs |> Array.map (fun x -> x-x)
+        (lazy test <@ plusA xs = plusB xs @>)   |@ "map x + x" .&.
+        (lazy test <@ multA xs = multB xs @>)   |@ "map x * x" .&.
+        (lazy test <@ minusA xs = minusB xs @>) |@ "map x - x" 
+
+
+[<Test>]
 let ``Performance.filter`` () =
     quickCheck <|
     fun (xs: int[]) (n : int) ->
@@ -293,10 +316,10 @@ let ``SIMD.replicate = Array.replicate`` () =
 [<Test>]                  
 let ``SIMD.init = Array.init`` () =
     quickCheck <|
-    fun (len: int) ->
+    fun (len: int) (n : int) ->
         (len >= 0 ) ==>
-        let A (len:int) = Array.SIMD.init len (fun i -> Vector<int>(5)) (fun i -> 5)
-        let B (len:int) = Array.init len (fun i -> 5)
+        let A (len:int) = Array.SIMD.init len (fun i -> Vector<int>(n)) (fun i -> n)
+        let B (len:int) = Array.init len (fun i -> n)
         (lazy test <@ A len = B len  @>)   |@ "init len" 
 
 

@@ -148,6 +148,11 @@ type CoreBenchmark () =
 let main argv =              
     
 
+    let a = [|1|]
+
+    let sum = Array.SIMDParallel.sum a
+
+    printf "sum:%A" sum
 
 
      (*
