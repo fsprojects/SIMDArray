@@ -63,7 +63,7 @@ When measuring performance be sure to use Release builds with optimizations turn
 Floating point addition is not associative, so results with SIMD operations will not be identical, though often
 they will be more accurate, such as in the case of sum, or average.
 
-## Performance Comparison vs Standrd Array Functions
+## Performance Comparison vs Standard Array Functions
 
 * [VS Core Lib Parallel](#parallel)
 * [VS Core Lib 32bit Floats](#core32)
