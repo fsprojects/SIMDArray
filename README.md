@@ -87,7 +87,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
 
 ```
 
-### Sum 1 million 32bit ints, ParallelSIMD vs SIMD vs Core Lib <a name="parallel></a>
+### Sum 1 million 32bit ints, ParallelSIMD vs SIMD vs Core Lib <a name="parallel"></a>
 
 		  Method |  Length |      Median |     StdDev | Scaled | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
 ---------------- |-------- |------------ |----------- |------- |------ |------ |------ |------------------- |
