@@ -123,26 +123,23 @@ type CoreBenchmark () =
                  
    
    
-    [<Benchmark>]
-    member self.Parallelmap () =                                
-        Array.Parallel.map (fun x-> x*x+x) array          
-
+    
     [<Benchmark(Baseline=true)>]
-    member self.map () =                                
+    member self.sum () =                                
        // Array.map (fun x->x*(x*x+x+x/5.0f)) array        
-       Array.map (fun x-> x*x+x) array
+       Array.sum array
                                              
 
     [<Benchmark>]
-    member self.SIMDmap () =                                
+    member self.SIMDsum () =                                
         //Array.SIMD.map (fun x->x*(x*x+x+x/Vector<float32>(5.0f))) (fun x->x*(x*x+x+x/5.0f)) array            
-        Array.SIMD.map (fun x-> x*x+x) (fun x-> x*x+x) array
+        Array.SIMD.sum array
     
     
 
     [<Benchmark>]
-    member self.SIMDParallelmap () =                                
-        Array.SIMDParallel.map (fun x-> x*x+x) (fun x-> x*x+x) array            
+    member self.SIMDParallelsum () =                                
+        Array.SIMDParallel.sum array            
 
           
           
@@ -150,7 +147,8 @@ type CoreBenchmark () =
 [<EntryPoint>]
 let main argv =              
     
-    
+
+
 
      (*
     let r = Random(1)
