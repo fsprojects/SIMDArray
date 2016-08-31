@@ -15,7 +15,7 @@ let inline iter vf sf (array : ^T[]) =
     checkNonNull array
     let count = Vector< ^T>.Count
     let len = array.Length
-    Parallel.ForStride 0 (len-count+1) count (fun i -> vf (Vector< ^T>(array,i)))
+    ForStride 0 (len-count+1) count (fun i -> vf (Vector< ^T>(array,i)))
                                                                
     let mutable i = len-len%count
     while i < array.Length do
@@ -32,7 +32,7 @@ let inline iteri vf sf (array : ^T[]) =
     checkNonNull array
     let count = Vector< ^T>.Count
     let len = array.Length
-    Parallel.ForStride 0 (len-count+1) count (fun i -> vf i (Vector< ^T>(array,i)))
+    ForStride 0 (len-count+1) count (fun i -> vf i (Vector< ^T>(array,i)))
                                                                
     let mutable i = len-len%count
     while i < array.Length do
@@ -56,7 +56,7 @@ let inline map
     let len = array.Length
     let result = Array.zeroCreate array.Length
         
-    Parallel.ForStride 0 len count 
+    ForStride 0 len count 
         (fun i -> (vf (Vector< ^T>(array,i ))).CopyTo(result,i))
                     
     let mutable i = len-len%count
@@ -83,7 +83,7 @@ let inline mapi
     let len = array.Length
     let result = Array.zeroCreate array.Length
         
-    Parallel.ForStride 0 len count 
+    ForStride 0 len count 
         (fun i -> (vf i (Vector< ^T>(array,i ))).CopyTo(result,i))
                     
     let mutable i = len-len%count
@@ -120,7 +120,7 @@ let inline fold
     
     let mutable state = Vector< ^State> acc
     
-    state <- Parallel.ForStrideAggreagate 0 len count state
+    state <- ForStrideAggreagate 0 len count state
                 (fun i acc -> vf acc (Vector< ^T>(array,i)))
                 (fun x acc -> vcombiner acc x)
 
@@ -149,7 +149,7 @@ let inline sum (array:^T[]) : ^T =
     let count = Vector< ^T>.Count
     let len = array.Length
         
-    state <- Parallel.ForStrideAggreagate 0 len count state
+    state <- ForStrideAggreagate 0 len count state
                 (fun i acc -> acc + (Vector< ^T>(array,i)))
                 (fun x acc -> x + acc)
 
@@ -180,7 +180,7 @@ let inline sumBy
     let count = Vector< ^T>.Count
     let len = array.Length
         
-    state <- Parallel.ForStrideAggreagate 0 len count state
+    state <- ForStrideAggreagate 0 len count state
                 (fun i acc -> acc + vf (Vector< ^T>(array,i)))
                 (fun x acc -> x + acc)
     

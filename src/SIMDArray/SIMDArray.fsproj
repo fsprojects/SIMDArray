@@ -30,6 +30,7 @@
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <WarningLevel>3</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
@@ -94,7 +95,6 @@
     <Compile Include="SIMDArrayUtils.fs" />
     <Compile Include="PerformanceArray.fs" />
     <Compile Include="SIMDArray.fs" />
-    <Compile Include="SIMDParallelUtil.fs" />
     <Compile Include="SIMDArrayParrallel.fs" />
   </ItemGroup>
   <ItemGroup>
