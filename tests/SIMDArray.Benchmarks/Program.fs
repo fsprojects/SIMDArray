@@ -125,14 +125,16 @@ type CoreBenchmark () =
 
     [<Benchmark>]
     member self.piter () =                        
-        let mutable sum = 0
-        Array.Parallel.iter (fun x -> sum <- x*x+x) array        
+        ()
+        //let mutable sum = 0
+        //Array.Parallel.iter (fun x -> sum <- x*x+x) array        
                                            
 
     [<Benchmark(Baseline=true)>]
     member self.psimditer () =            
-        let mutable sum = Vector<int>(0)
-        Array.SIMDParallel.iter (fun x -> sum <- x*x+x) array
+        ()
+        //let mutable sum = Vector<int>(0)
+        //Array.SIMDParallel.iter (fun x -> sum <- x*x+x) array
         
           
           
@@ -143,7 +145,8 @@ let main argv =
   
    let a = Array.init 100000 (fun i -> 1)
    let mutable sum = Vector<int>(0)
-   Array.SIMDParallel.iter (fun x -> sum <- sum+x) a
+   let mutable ssum = 0
+   Array.SIMDParallel.iter (fun x -> sum <- sum+x) (fun x -> ssum <- ssum+x) a
    for i = 0 to 7 do
     printf "%A," sum.[i]
    0

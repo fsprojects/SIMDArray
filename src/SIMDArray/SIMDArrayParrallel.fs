@@ -6,9 +6,13 @@ open SIMDArrayUtils
 open System.Numerics
 
  
-let inline iter vf (array : ^T[]) =
+let inline iter vf sf (array : ^T[]) =
     checkNonNull array
     let count = Vector< ^T>.Count
-    Parallel.ForStride 0 (array.Length-count+1) count (fun i -> let v = Vector< ^T>(array,i)
-                                                                vf v                                                                
-                                                      )
+    let len = array.Length
+    Parallel.ForStride 0 (len-count+1) count (fun i -> vf (Vector< ^T>(array,i)))
+                                                               
+    let mutable i = len-len%count
+    while i < array.Length do
+        sf array.[i] 
+        i <- i + 1                                     

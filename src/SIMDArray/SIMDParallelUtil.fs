@@ -2,10 +2,11 @@
 module Parallel
 
 open System.Threading.Tasks
+open System.Threading
 open System
 
-
 let inline private applyTask fromInc toExc stride f = 
+        printf "fromIncA:%A toExcA:%A stride:%A\n" fromInc toExc stride
         let mutable i = fromInc
         while i < toExc do
             f i
@@ -15,30 +16,27 @@ let inline private applyTask fromInc toExc stride f =
 let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) (f : int -> unit) =
     
     let len = toExclusive - fromInclusive 
-    let numTasks = Environment.ProcessorCount
-    let chunkSize = 
-        if len / numTasks >= 1 then
-            len / numTasks
-        else 
-            1
+    let numCores = Environment.ProcessorCount //logical cores    
+    let numStrides = len/stride
+    let stridesPerCore = numStrides/numCores
+    let elementsPerCore = stridesPerCore * stride;
+    let mutable remainderStrides = numStrides - (stridesPerCore*numCores)
     
-    let remainder = len - chunkSize*numTasks
-
-    //printf "len:%A numTasks:%A chunkSize:%A remainder:%A\n" len numTasks chunkSize remainder
-
-    let mutable i = 0
-    
-    let taskArray : Task[] = Array.create (numTasks+1) null
-
-    while i < numTasks do
-        let index = i * chunkSize
-        taskArray.[i] <- Task.Factory.StartNew( fun () -> applyTask index (index+chunkSize) stride f)
-        i <- i + 1
+//    printf "len:%A numCores:%A numStrides:%A stridesPerCore:%A elementsPerCore:%A remainderStrides:%A\n" len numCores numStrides stridesPerCore elementsPerCore remainderStrides
         
+    let taskArray : Task[] = Array.create (numCores) null
+    let mutable index = 0
+    for i = 0 to taskArray.Length-1 do        
+        let toExc =
+            if remainderStrides = 0 then
+                index + elementsPerCore
+            else
+                remainderStrides <- remainderStrides - 1
+                index + elementsPerCore + stride
+        let fromInc = index;
+        //printf "index:%A toExc:%A\n" index toExc
+        taskArray.[i] <- Task.Factory.StartNew( fun () -> applyTask fromInc toExc stride f)        
+        index <- toExc
         
-
-    if remainder <> 0 then
-        let index = i*chunkSize
-        taskArray.[i] <- Task.Factory.StartNew( fun () -> applyTask index (index+remainder) stride f)
-        
+                
     Task.WaitAll(taskArray)
