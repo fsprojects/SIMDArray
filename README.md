@@ -86,7 +86,9 @@ Type=SIMDBenchmark  Mode=Throughput  Platform=X64
 Jit=RyuJit  GarbageCollection=Concurrent Workstation  
 
 ```
+
 ### Sum 1 million 32bit ints, ParallelSIMD vs SIMD vs Core Lib <a name="parallel></a>
+
 		  Method |  Length |      Median |     StdDev | Scaled | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
 ---------------- |-------- |------------ |----------- |------- |------ |------ |------ |------------------- |
              sum | 1000000 | 979.9477 us | 15.4036 us |   1.00 |     - |     - |  1.00 |          14,967.09 |
