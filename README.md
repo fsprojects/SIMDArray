@@ -46,11 +46,15 @@ let map = Array.SIMDParallel.map (fun x -> x*x) array
 // with a stride length efficiently. They also have much less overhead. You can use them to roll your own 
 // parallel SIMD functions, or any parallel operation that needs a stride length > 1
 
-// Map each Vector in array and store it in result
+// Using:
+// let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) (f : int -> unit) =
+// You can map each Vector in an array and store it in result
 Parallel.ForStride 0 array.Length (Vector< ^T>.Count) 
         (fun i -> (vf (Vector< ^T>(array,i ))).CopyTo(result,i))
 
-// Sum the elements of array a Vector at a time, starting from 0
+// Using:
+// let inline ForStrideAggreagate (fromInclusive : int) (toExclusive :int) (stride : int) (acc: ^T) (f : int -> ^T -> ^T) combiner =
+// You can sum or otherwise aggregate the elements of an array a Vector at a time, starting from an initial acc
 result : Vector< ^T> <- Parallel.ForStrideAggreagate 0 array.Length (Vector< ^T>.Count) Vector< ^T>(0)
 							(fun i acc -> acc + (Vector< ^T>(array,i)))  
 							(fun x acc -> x + acc)  //combines the results from each task into a final Vector that is returned
