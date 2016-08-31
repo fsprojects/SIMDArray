@@ -6,7 +6,7 @@ open System.Threading
 open System
 
 let inline private applyTask fromInc toExc stride f = 
-        printf "fromIncA:%A toExcA:%A stride:%A\n" fromInc toExc stride
+        
         let mutable i = fromInc
         while i < toExc do
             f i
