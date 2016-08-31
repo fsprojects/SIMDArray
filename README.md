@@ -34,6 +34,25 @@ let distinctElemnts = Array.Performance.distinctUnordered someArray
 let filteredElements = Array.Performance.fitlerLessThan 5 someArray
 let filteredElements = Array.Performance.fitlerSimplePredicate (fun x -> x*x < 100) someArray
 
+// The SIMDParallel module has parallelized versions of some of the SIMD operations
+
+let sum = Array.SIMDParallel.sum array
+let map = Array.SIMDParallel.map (fun x -> x*x) array
+
+// Two extensions are added to System.Threading.Tasks.Parallel, to enable Parallel.For loops
+// with a stride length efficiently. They also have much less overhead. You can use them to roll your own 
+// parallel SIMD functions, or any parallel operation that needs a stride length > 1
+
+// Map each Vector in array and store it in result
+Parallel.ForStride 0 array.Length (Vector< ^T>.Count) 
+        (fun i -> (vf (Vector< ^T>(array,i ))).CopyTo(result,i))
+
+// Sum the elements of array a Vector at a time, starting from 0
+result : Vector< ^T> <- Parallel.ForStrideAggreagate 0 array.Length (Vector< ^T>.Count) Vector< ^T>(0)
+							(fun i acc -> acc + (Vector< ^T>(array,i)))  
+							(fun x acc -> x + acc)  //combines the results from each task into a final Vector that is returned
+
+
 ```
 
 ## Notes
