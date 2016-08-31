@@ -88,7 +88,7 @@ type CoreBenchmark () =
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (100000)>]     
+    [<Params (1000000)>]     
     member val public Length = 0 with get, set
 
    
@@ -96,14 +96,14 @@ type CoreBenchmark () =
     [<Setup>]
     member self.SetupData () =  
        
-       let r = Random(self.Length)
+       //let r = Random(self.Length)
        //list <- List.init self.Length (fun i -> (1.0,2.0))
 
        //array <- Array.init self.Length (fun i -> 2)
        //array <- Array.create self.Length 10 
        //array2 <- Array.init self.Length (fun i -> 3)
         
-       array <- Array.init self.Length (fun i -> i)
+       array <- Array.create self.Length 2.0f
 //       resizeArray <- ResizeArray<int>(self.Length)
        //for i = 0 to self.Length-1 do
         //resizeArray.Add(array.[i])
@@ -122,34 +122,35 @@ type CoreBenchmark () =
                
                  
    
-
+   
     [<Benchmark>]
-    member self.piter () =                        
-        ()
-        //let mutable sum = 0
-        //Array.Parallel.iter (fun x -> sum <- x*x+x) array        
-                                           
+    member self.Parallelmap () =                                
+        Array.Parallel.map (fun x-> x*x+x) array          
 
     [<Benchmark(Baseline=true)>]
-    member self.psimditer () =            
-        ()
-        //let mutable sum = Vector<int>(0)
-        //Array.SIMDParallel.iter (fun x -> sum <- x*x+x) array
-        
+    member self.map () =                                
+       // Array.map (fun x->x*(x*x+x+x/5.0f)) array        
+       Array.map (fun x-> x*x+x) array
+                                             
+
+    [<Benchmark>]
+    member self.SIMDmap () =                                
+        //Array.SIMD.map (fun x->x*(x*x+x+x/Vector<float32>(5.0f))) (fun x->x*(x*x+x+x/5.0f)) array            
+        Array.SIMD.map (fun x-> x*x+x) (fun x-> x*x+x) array
+    
+    
+
+    [<Benchmark>]
+    member self.SIMDParallelmap () =                                
+        Array.SIMDParallel.map (fun x-> x*x+x) (fun x-> x*x+x) array            
+
           
           
 
 [<EntryPoint>]
 let main argv =              
     
-  
-   let a = Array.init 100000 (fun i -> 1)
-   let mutable sum = Vector<int>(0)
-   let mutable ssum = 0
-   Array.SIMDParallel.iter (fun x -> sum <- sum+x) (fun x -> ssum <- ssum+x) a
-   for i = 0 to 7 do
-    printf "%A," sum.[i]
-   0
+    
 
      (*
     let r = Random(1)
@@ -168,14 +169,14 @@ let main argv =
     let result = array |> filterOldPlusPlus (fun x-> x < 100)
     printf "*******\n"*)
    
-    (*             
+             
     let switch = 
         BenchmarkSwitcher [|
             typeof<CoreBenchmark>
         |] 
 
     switch.Run [|"CoreBenchmark"|] |> ignore
-    *)
+    0
    
 
 
