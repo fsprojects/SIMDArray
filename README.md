@@ -32,7 +32,7 @@ let sum = Array.SIMD.sum newArray
 // via other means than SIMD. Usually by relaxing ordering constraints or adding
 // constraints to predicates:
 
-let distinctElemnts = Array.Performance.distinctUnordered someArray
+let distinctElements = Array.Performance.distinctUnordered someArray
 let filteredElements = Array.Performance.fitlerLessThan 5 someArray
 let filteredElements = Array.Performance.fitlerSimplePredicate (fun x -> x*x < 100) someArray
 Array.Performance.mapInPlace (fun x-> x*x) someArray
