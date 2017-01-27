@@ -120,7 +120,7 @@ let inline fold
     
     let mutable state = Vector< ^State> acc
     
-    state <- ForStrideAggreagate 0 len count state
+    state <- ForStrideAggregate 0 len count state
                 (fun i acc -> vf acc (Vector< ^T>(array,i)))
                 (fun x acc -> vcombiner acc x)
 
@@ -149,9 +149,9 @@ let inline sum (array:^T[]) : ^T =
     let count = Vector< ^T>.Count
     let len = array.Length
         
-    state <- ForStrideAggreagate 0 len count state
+    state <- ForStrideAggregate 0 len count state
                 (fun i acc -> acc + (Vector< ^T>(array,i)))
-                (fun x acc -> x + acc)
+                (+)
 
     let mutable result = Unchecked.defaultof< ^T>
     let mutable i = len-len%count
@@ -180,9 +180,9 @@ let inline sumBy
     let count = Vector< ^T>.Count
     let len = array.Length
         
-    state <- ForStrideAggreagate 0 len count state
+    state <- ForStrideAggregate 0 len count state
                 (fun i acc -> acc + vf (Vector< ^T>(array,i)))
-                (fun x acc -> x + acc)
+                (+)
     
     let mutable result = Unchecked.defaultof< ^U>    
     let mutable i = array.Length-array.Length%count

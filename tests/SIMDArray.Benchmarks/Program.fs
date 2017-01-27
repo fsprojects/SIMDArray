@@ -36,7 +36,7 @@ let inline checkNonNull argName arg =
 
 let empty = [||]
 
-let inline indexNotFound() = raise (KeyNotFoundException())
+let inline indexNotFound() = raise (Exception())
 
                     
 let partition f (array: _[]) = 
@@ -88,7 +88,7 @@ type CoreBenchmark () =
     //let mutable mathnetVector = vector [1.0f]
     //let mutable mathnetVector2 = vector [1.0f]
 
-    [<Params (1000000)>]     
+    [<Params (100,1000,1000000)>]     
     member val public Length = 0 with get, set
 
    
@@ -119,17 +119,13 @@ type CoreBenchmark () =
         //for concat
         //array <- Array.init self.Length (fun i -> [|1;2;3;4;5;|])
         
-               
-                 
-   
-   
-    
-    
-    
-
+                                                  
     [<Benchmark>]
     member self.ForSum () =                                
-       ()
+       array |> Array.map (fun x -> x*x)
+    [<Benchmark>]
+    member self.ForSumSIMD () =                                
+       array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)
 
 
           
