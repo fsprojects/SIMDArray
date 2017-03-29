@@ -1,3 +1,5 @@
+![Build Status](https://ci.appveyor.com/api/projects/status/github/fsprojects/SIMDArray "Build Status")
+
 # SIMDArray FSharp
 SIMD and other Performance enhanced Array operations for F#
 
