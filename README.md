@@ -98,7 +98,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
 
 ### Sum 1 million 32bit ints, ParallelSIMD vs SIMD vs Core Lib <a name="parallel"></a>
 
-		  Method |  Length |      Median |     StdDev | Scaled | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
+|		  Method |  Length |      Median |     StdDev | Scaled | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
 ---------------- |-------- |------------ |----------- |------- |------ |------ |------ |------------------- |
              sum | 1000000 | 979.9477 us | 15.4036 us |   1.00 |     - |     - |  1.00 |          14,967.09 |
          SIMDsum | 1000000 | 163.5663 us |  2.7872 us |   0.17 |     - |     - |  0.17 |           1,960.97 |
@@ -108,7 +108,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
 
 ### With 32bit Floats Vs Core Lib. Map function `(fun x -> x*x)`<a name="core32"></a>
 
-       Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
+|       Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
 ------------- |-------- |------------------ |--------------- |------ |------ |------- |------------------- |
  **SIMDContains** |      **10** |        **32.3354 ns** |      **0.0933 ns** |  **0.04** |     **-** |      **-** |              **22.80** |
      Contains |      10 |        13.0234 ns |      0.6457 ns |     - |     - |      - |               0.00 |
@@ -145,7 +145,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
 
 ### With 64bit Floats vs Core Lib. Map function `(fun x -> x*x+x)`<a name="core64"></a>
 
-       Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
+|       Method |  Length |            Median |         StdDev | Gen 0 | Gen 1 |  Gen 2 | Bytes Allocated/Op |
 ------------- |-------- |------------------ |--------------- |------ |------ |------- |------------------- |
  **SIMDContains** |    **1000** |       **842.2604 ns** |     **36.6615 ns** |     **-** |     **-** |      **-** |               **0.13** |
      Contains |    1000 |     1,338.2032 ns |     21.7835 ns |     - |     - |      - |               0.13 |
@@ -175,7 +175,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
 
 ### With 32bit Floats vs MathNET.Numerics managed. Map function `(fun x -> x*x+x)` <a name="mathnet"></a>
 
-            Method |  Length |          Median |         StdDev | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
+|            Method |  Length |          Median |         StdDev | Gen 0 | Gen 1 | Gen 2 | Bytes Allocated/Op |
 ------------------ |-------- |---------------- |--------------- |------ |------ |------ |------------------- |
     **SIMDMapInPlace** |     **100** |      **46.5269 ns** |      **4.9229 ns** |  **0.08** |     **-** |     **-** |              **22.54** |
  MathNETMapInPlace |     100 |     354.0866 ns |      7.5375 ns |  0.36 |     - |     - |              99.59 |
@@ -195,7 +195,7 @@ Jit=RyuJit  GarbageCollection=Concurrent Workstation
         MathNETSum | 1000000 | 967,761.7422 ns | 17,557.1206 ns |     - |     - |  2.00 |          29,450.93 |
 
 ### With 32bit Floats vs MathNET.Numerics MKL Native. Adding two arrays <a name="mathnetnative"></a>
-     Method |  Length |            Median |          StdDev | Gen 0 | Gen 1 |    Gen 2 | Bytes Allocated/Op |
+|     Method |  Length |            Median |          StdDev | Gen 0 | Gen 1 |    Gen 2 | Bytes Allocated/Op |
 ----------- |-------- |------------------ |---------------- |------ |------ |--------- |------------------- |
    **SIMDMap2** |     **100** |        **92.1515 ns** |       **3.0304 ns** |  **2.70** |     **-** |        **-** |             **212.76** |
  MathNETAdd |     100 |       156.7522 ns |       7.3969 ns |  2.92 |     - |        - |             230.42 |
