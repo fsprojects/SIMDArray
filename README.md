@@ -66,7 +66,7 @@ let result = Parallel.ForStrideAggreagate 0 array.Length (Vector< ^T>.Count) Vec
 
 ## Notes
 
-Only 64 bit builds are supported.  Mono is not currently supported. Performance improvements will vary depending on your CPU architecture, width of Vector type, and the operations you apply.  For small arrays the core libs may be faster due SIMD overhead.
+Only 64 bit builds are supported.  Mono should work with 5.0+, but I have not yet tested it. Performance improvements will vary depending on your CPU architecture, width of Vector type, and the operations you apply.  For small arrays the core libs may be faster due SIMD overhead.
 When measuring performance be sure to use Release builds with optimizations turned on.
 
 Floating point addition is not associative, so results with SIMD operations will not be identical, though often
