@@ -14,14 +14,12 @@ let inline horizontal (f : ^T -> ^T -> ^T) (v :Vector< ^T>) : ^T =
     for i = 0 to Vector< ^T>.Count-1 do
         acc <- f acc v.[i]
     acc
-        
 
 let inline compareNums a b =
     let fa = float a
     let fb = float b
-    a.Equals b || float(a - b) < 0.00001 || float(b -  a) < 0.00001 ||
+    a.Equals b || abs(float(a - b)) < 0.00001 ||
     Double.IsNaN fa && Double.IsInfinity fb || Double.IsNaN fb && Double.IsInfinity fa
-
 
 let inline areEqual (xs: 'T []) (ys: 'T []) =
     match xs, ys with
@@ -50,16 +48,15 @@ let arrayArb<'a> =
     Gen.arrayOf Arb.generate<'a> 
     |> between 1 10000 |> Arb.fromGen
 
-
-let testCount = 10000
-let config = 
-    { Config.Quick with 
+let config testCount = 
+    { Config.QuickThrowOnFailure with 
         MaxTest = testCount
         StartSize = 1
     }
 
-let quickCheck prop = Check.One(config, prop)
-let sickCheck fn = Check.One(config, Prop.forAll arrayArb fn)
+let quickCheck prop = Check.One(config 10000, prop)
+let quickerCheck prop = Check.One(config 1000, prop)
+let sickCheck fn = Check.One(config 10000, Prop.forAll arrayArb fn)
 
 [<Test>]
 let ``SIMDParallel.sum`` () =
@@ -296,7 +293,7 @@ let ``SIMD.clear = Array.clear`` () =
 
 [<Test>]                  
 let ``SIMD.create = Array.create`` () =
-    quickCheck <|
+    quickerCheck <|
     fun (len: int) (value: int) ->
         (len >= 0 ) ==>
         let A (len:int) (value:int) = Array.SIMD.create len value
@@ -305,7 +302,7 @@ let ``SIMD.create = Array.create`` () =
 
 [<Test>]                  
 let ``SIMD.replicate = Array.replicate`` () =
-    quickCheck <|
+    quickerCheck <|
     fun (len: int) (value: int) ->
         (len >= 0 ) ==>
         let A (len:int) (value:int) = Array.SIMD.replicate len value
@@ -315,7 +312,7 @@ let ``SIMD.replicate = Array.replicate`` () =
 
 [<Test>]                  
 let ``SIMD.init = Array.init`` () =
-    quickCheck <|
+    quickerCheck <|
     fun (len: int) (n : int) ->
         (len >= 0 ) ==>
         let A (len:int) = Array.SIMD.init len (fun i -> Vector<int>(n)) (fun i -> n)
@@ -545,7 +542,19 @@ let ``SIMD.maxBy = Array.maxBy`` () =
     quickCheck <|
     fun (array: int []) ->
         (array.Length > 0 && array <> [||]) ==>
-        lazy ((compareNums (Array.SIMD.maxBy (fun x -> x+x) (fun x -> x+x)array) (Array.maxBy (fun x -> x+x) array)))
+        lazy ((compareNums (Array.SIMD.maxBy (fun x -> x+x) (fun x -> x+x) array) (Array.maxBy (fun x -> x+x) array)))
+
+[<Test>]                  
+let ``SIMD.maxBy`` () =
+    let xs = [| -5..-1 |]
+    Assert.AreEqual(-5, xs |> Array.maxBy (fun x -> -x))
+    Assert.AreEqual(-5, xs |> Array.SIMD.maxBy (fun v -> -v) (fun x -> -x))
+
+[<Test>]                  
+let ``SIMD.minBy`` () =
+    let xs = [| -5..-1 |]
+    Assert.AreEqual(-1, xs |> Array.minBy (fun x -> -x))
+    Assert.AreEqual(-1, xs |> Array.SIMD.minBy (fun v -> -v) (fun x -> -x))
 
 [<Test>]                  
 let ``SIMD.minBy = Array.minBy`` () =
@@ -561,13 +570,7 @@ let ``SIMD.min = Array.min`` () =
     fun (array: float []) ->
         (array.Length > 0 && array <> [||]) ==>
         lazy (compareNums (Array.SIMD.min array) (Array.min array))
-
-[<Test>]                  
-let ``SIMD.dot`` () =
-    let xs  = [|1..100|]
-    let xs2 = [|2..101|]
-    Assert.AreEqual((Array.fold2 (fun a x y -> a + x*y) 0 xs xs2), (Array.SIMD.dot xs xs2))
-
+    
 [<Test>]                  
 let ``SIMD.dot = multiply and sum`` () =
     quickCheck <|
