@@ -19,9 +19,8 @@ let inline horizontal (f : ^T -> ^T -> ^T) (v :Vector< ^T>) : ^T =
 let inline compareNums a b =
     let fa = float a
     let fb = float b
-    a.Equals b || float(a - b) < 0.00001 || float(b -  a) < 0.00001 ||
+    a.Equals b || abs(float(a - b)) < 0.00001 ||
     Double.IsNaN fa && Double.IsInfinity fb || Double.IsNaN fb && Double.IsInfinity fa
-
 
 let inline areEqual (xs: 'T []) (ys: 'T []) =
     match xs, ys with
@@ -53,7 +52,7 @@ let arrayArb<'a> =
 
 let testCount = 10000
 let config = 
-    { Config.Quick with 
+    { Config.QuickThrowOnFailure with 
         MaxTest = testCount
         StartSize = 1
     }
@@ -561,13 +560,7 @@ let ``SIMD.min = Array.min`` () =
     fun (array: float []) ->
         (array.Length > 0 && array <> [||]) ==>
         lazy (compareNums (Array.SIMD.min array) (Array.min array))
-
-[<Test>]                  
-let ``SIMD.dot`` () =
-    let xs  = [|1..100|]
-    let xs2 = [|2..101|]
-    Assert.AreEqual((Array.fold2 (fun a x y -> a + x*y) 0 xs xs2), (Array.SIMD.dot xs xs2))
-
+    
 [<Test>]                  
 let ``SIMD.dot = multiply and sum`` () =
     quickCheck <|
