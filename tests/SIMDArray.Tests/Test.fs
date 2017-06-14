@@ -562,6 +562,20 @@ let ``SIMD.min = Array.min`` () =
         (array.Length > 0 && array <> [||]) ==>
         lazy (compareNums (Array.SIMD.min array) (Array.min array))
 
+[<Test>]                  
+let ``SIMD.dot`` () =
+    let xs  = [|1..100|]
+    let xs2 = [|2..101|]
+    Assert.AreEqual((Array.fold2 (fun a x y -> a + x*y) 0 xs xs2), (Array.SIMD.dot xs xs2))
+
+[<Test>]                  
+let ``SIMD.dot = multiply and sum`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let xs2 = Array.init xs.Length id
+        lazy ((compareNums (Array.SIMD.dot xs xs2) (Array.fold2 (fun a x y -> a + x*y) 0 xs xs2)))
+
 
 
 

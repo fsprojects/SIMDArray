@@ -1473,3 +1473,32 @@ let inline compareWith (vf : Vector< ^T> -> Vector< ^U> -> int)
         elif length1 < length2 then -1
         else 1              
 
+/// <summary>
+/// Returns the dot product of two arrays
+/// </summary>
+/// <param name="array1">The first array</param>
+/// <param name="array2">The second array. Both arrays must be the same length.</param>
+let inline dot
+    (array1 : ^T[]) 
+    (array2 : ^T[]) : ^T =
+
+    checkNonNull array1
+    checkNonNull array2
+
+    let count = Vector< ^T>.Count    
+    
+    let len = array1.Length        
+    if len <> array2.Length then invalidArg "array2" "Arrays must have same length"
+
+    let mutable result = Unchecked.defaultof< ^T>    
+    let mutable i = 0    
+    while i <= array1.Length - count do
+        result <- result + Vector.Dot(Vector< ^T>(array1, i), Vector< ^T>(array2, i))
+        i <- i + count
+    
+    i <- array1.Length - array1.Length % count
+    while i < array1.Length do
+        result <- result + (array1.[i] * array2.[i])
+        i <- i + 1
+
+    result
