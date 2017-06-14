@@ -104,6 +104,7 @@ type CoreBenchmark () =
        //array2 <- Array.init self.Length (fun i -> 3)
         
        array <- Array.create self.Length 2
+       array2 <- Array.create self.Length 2
 //       resizeArray <- ResizeArray<int>(self.Length)
        //for i = 0 to self.Length-1 do
         //resizeArray.Add(array.[i])
@@ -127,9 +128,13 @@ type CoreBenchmark () =
     member self.ForSumSIMD () =                                
        array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)
 
+    [<Benchmark>]
+    member self.Dot () =                                
+       array |> Array.fold2 (fun a x y -> a + x*y) 0 array2
 
-          
-          
+    [<Benchmark>]
+    member self.DotSIMD () =                                
+       array |> Array.SIMD.dot array2
 
 [<EntryPoint>]
 let main argv =              
