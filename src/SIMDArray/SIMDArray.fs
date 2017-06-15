@@ -1337,7 +1337,7 @@ let inline max (array :^T[]) : ^T =
     if len = 0 then invalidArg "array" "The input array was empty."
     let mutable max = array.[0]
     let count = Vector< ^T>.Count    
-    let minValue = MinValue.Invoke()
+    let minValue : ^T = MinValue.Invoke()
 
     let mutable i = 0
     let mutable maxV = Vector< ^T>(minValue)
@@ -1371,7 +1371,7 @@ let inline maxBy
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."    
     let count = Vector< ^T>.Count
-    let minValue = MinValue.Invoke()
+    let minValue : ^T = MinValue.Invoke()
 
     let mutable max  = Vector< ^T>()
     let mutable maxV = Vector< ^T>(minValue)
@@ -1421,7 +1421,7 @@ let inline minBy
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."    
     let count = Vector< ^T>.Count    
-    let maxValue = MaxValue.Invoke()
+    let maxValue : ^T = MaxValue.Invoke()
 
     let mutable min  = Vector< ^T>()
     let mutable minV = Vector< ^T>(maxValue)
@@ -1469,7 +1469,7 @@ let inline min (array :^T[]) : ^T =
     if len = 0 then invalidArg "array" "empty array"
     let mutable min = array.[0]
     let count = Vector< ^T>.Count
-    let maxValue = MaxValue.Invoke()
+    let maxValue : ^T = MaxValue.Invoke()
     
     let mutable i = 0
     let mutable minV = Vector< ^T>(maxValue)
