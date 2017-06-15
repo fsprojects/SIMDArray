@@ -1304,11 +1304,11 @@ let inline max (array :^T[]) : ^T =
     if len = 0 then invalidArg "array" "The input array was empty."
     let mutable max = array.[0]
     let count = Vector< ^T>.Count    
+    let minValue = typeof< ^T>.GetField("MinValue").GetValue() |> unbox< ^T>
 
     let mutable i = 0
+    let mutable maxV = Vector< ^T>(minValue)
     if len >= count then
-        let mutable maxV = Vector< ^T>(array,0)
-        i <- i + count
         while i <= len-count do
            let v = Vector< ^T>(array,i)
            maxV <- Vector.Max(v,maxV)
@@ -1328,39 +1328,49 @@ let inline max (array :^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline maxBy 
-    (vf: Vector< ^T> -> Vector< ^U>) 
-    (sf: ^T -> ^U)
-    (array :^T[]) : ^U =
+    (vf: Vector< ^T> -> Vector< ^T>) 
+    (sf: ^T -> ^T)
+    (array :^T[]) : ^T =
     
     checkNonNull array
 
     let len = array.Length
     if len = 0 then invalidArg "array" "The input array was empty."    
     let count = Vector< ^T>.Count
-    
-    let minValue = typeof< ^U>.GetField("MinValue").GetValue() |> unbox< ^U>
-    let mutable max = minValue 
-    let mutable maxV =  Vector< ^U>(minValue)
+    let minValue = typeof< ^T>.GetField("MinValue").GetValue() |> unbox< ^T>
+
+    let mutable max  = Vector< ^T>()
+    let mutable maxV = Vector< ^T>(minValue)
     let mutable i = 0
     if len >= count then
-        maxV  <- vf (Vector< ^T>(array,0))
-        max <- maxV.[0]
+        max  <- Vector< ^T>(array,0)
+        maxV <- vf (max)
         i <- i + count
         while i <= len-count do
-            let v = vf (Vector< ^T>(array,i))
-            maxV <- Vector.Max(v,maxV)
+            let newIn = Vector< ^T>(array,i)
+            let v = vf (newIn)
+            let greater = Vector.GreaterThan (v, maxV)
+            maxV <- Vector.ConditionalSelect (greater, v, maxV)
+            max  <- Vector.ConditionalSelect (greater, newIn, max)
             i <- i + count                
-    
-    for j=0 to Vector< ^U>.Count-1 do
-        if maxV.[j] > max then max <- maxV.[j]
+
+    let mutable maxIn    = Unchecked.defaultof< ^T>
+    let mutable maxValue = minValue
+    for j=0 to Vector< ^T>.Count-1 do
+        if maxV.[j] > maxValue then 
+            maxValue <- maxV.[j]
+            maxIn    <- max.[j]
 
     i <- len-len%count
     while i < array.Length do
-        let x = sf array.[i]
-        if x > max then max <- x
+        let xIn = array.[i]
+        let x = sf (xIn)
+        if x > maxValue then 
+            maxValue <- x
+            maxIn    <- xIn
         i <- i + 1
     
-    max
+    maxIn
 
         
 /// <summary>
@@ -1378,28 +1388,39 @@ let inline minBy
     if len = 0 then invalidArg "array" "The input array was empty."    
     let count = Vector< ^T>.Count    
     let maxValue = typeof< ^U>.GetField("MaxValue").GetValue() |> unbox< ^U>
-    let mutable min = maxValue 
-    let mutable minV =  Vector< ^U>(maxValue)
+
+    let mutable min  = Vector< ^T>()
+    let mutable minV = Vector< ^T>(maxValue)
     let mutable i = 0
     if len >= count then
-        minV  <- vf (Vector< ^T>(array,0))
-        min <- minV.[0]
+        min  <- Vector< ^T>(array,0)
+        minV <- vf (min)
         i <- i + count
         while i <= len-count do
-            let v = vf (Vector< ^T>(array,i))
-            minV <- Vector.Min(v,minV)
-            i <- i + count        
-    
-    for j=0 to Vector< ^U>.Count-1 do
-        if minV.[j] < min then min <- minV.[j]
+            let newIn = Vector< ^T>(array,i)
+            let v = vf (newIn)
+            let less = Vector.LessThan (v, minV)
+            minV <- Vector.ConditionalSelect (less, v, minV)
+            min  <- Vector.ConditionalSelect (less, newIn, min)
+            i <- i + count                
+
+    let mutable minIn    = Unchecked.defaultof< ^T>
+    let mutable minValue = maxValue
+    for j=0 to Vector< ^T>.Count-1 do
+        if minV.[j] < minValue then 
+            minValue <- minV.[j]
+            minIn    <- min.[j]
 
     i <- len-len%count
     while i < array.Length do
-        let x = sf array.[i]
-        if x < min then min <- x
+        let xIn = array.[i]
+        let x = sf (xIn)
+        if x < minValue then 
+            minValue <- x
+            minIn    <- xIn
         i <- i + 1
     
-    min
+    minIn
 
 
 /// <summary>
@@ -1414,14 +1435,14 @@ let inline min (array :^T[]) : ^T =
     if len = 0 then invalidArg "array" "empty array"
     let mutable min = array.[0]
     let count = Vector< ^T>.Count
+    let maxValue = typeof< ^T>.GetField("MaxValue").GetValue() |> unbox< ^T>
     
     let mutable i = 0
+    let mutable minV = Vector< ^T>(maxValue)
     if len >= count then
-        let mutable minV = Vector< ^T>(array,0)
-        i <- i + count
         while i <= len-count do
             let v = Vector< ^T>(array,i)
-            minV <- Vector.Min(v,minV)
+            minV <- Vector.Min (v, minV)
             i <- i + count
 
         for j=0 to count-1 do
