@@ -88,3 +88,37 @@ let inline ForStrideAggregate (fromInclusive : int) (toExclusive :int) (stride :
     else
         acc
 
+// Avoid reflection costs on min and max functions
+type MinValue =
+    static member MinValue (_:byte          , _:MinValue) = System.Byte.MinValue
+    static member MinValue (_:sbyte         , _:MinValue) = System.SByte.MinValue
+    static member MinValue (_:float         , _:MinValue) = System.Double.MinValue
+    static member MinValue (_:int16         , _:MinValue) = System.Int16.MinValue
+    static member MinValue (_:int           , _:MinValue) = System.Int32.MinValue
+    static member MinValue (_:int64         , _:MinValue) = System.Int64.MinValue
+    static member MinValue (_:float32       , _:MinValue) = System.Single.MinValue
+    static member MinValue (_:uint16        , _:MinValue) = System.UInt16.MinValue
+    static member MinValue (_:uint32        , _:MinValue) = System.UInt32.MinValue
+    static member MinValue (_:uint64        , _:MinValue) = System.UInt64.MinValue
+
+    static member inline Invoke() =
+        let inline call_2 (a:^a, b:^b) = ((^a or ^b) : (static member MinValue: _*_ -> _) b, a)
+        let inline call (a:'a) = call_2 (a, Unchecked.defaultof<'r>) :'r
+        call Unchecked.defaultof<MinValue>
+
+type MaxValue =
+    static member MaxValue (_:byte          , _:MaxValue) = System.Byte.MaxValue
+    static member MaxValue (_:sbyte         , _:MaxValue) = System.SByte.MaxValue
+    static member MaxValue (_:float         , _:MaxValue) = System.Double.MaxValue
+    static member MaxValue (_:int16         , _:MaxValue) = System.Int16.MaxValue
+    static member MaxValue (_:int           , _:MaxValue) = System.Int32.MaxValue
+    static member MaxValue (_:int64         , _:MaxValue) = System.Int64.MaxValue
+    static member MaxValue (_:float32       , _:MaxValue) = System.Single.MaxValue
+    static member MaxValue (_:uint16        , _:MaxValue) = System.UInt16.MaxValue
+    static member MaxValue (_:uint32        , _:MaxValue) = System.UInt32.MaxValue
+    static member MaxValue (_:uint64        , _:MaxValue) = System.UInt64.MaxValue
+
+    static member inline Invoke() =
+        let inline call_2 (a:^a, b:^b) = ((^a or ^b) : (static member MaxValue: _*_ -> _) b, a)
+        let inline call (a:'a) = call_2 (a, Unchecked.defaultof<'r>) :'r
+        call Unchecked.defaultof<MaxValue>
