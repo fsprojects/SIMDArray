@@ -55,7 +55,7 @@ let config testCount =
     }
 
 let quickCheck prop = Check.One(config 10000, prop)
-let quickerCheck prop = Check.One(config 1000, prop)
+let quickerCheck prop = Check.One(config 900, prop)
 let sickCheck fn = Check.One(config 10000, Prop.forAll arrayArb fn)
 
 [<Test>]
@@ -96,7 +96,6 @@ let ``Performance.filter`` () =
              Array.where (fun x -> x*2 = n) xs = Array.Performance.whereSimplePredicate (fun x -> x*2 = n) xs
             )
 
-        
 [<Test>]
 let ``SIMD.forAll`` () =
     quickCheck <|
@@ -156,6 +155,19 @@ let ``SIMD.pick`` () =
             Array.pick (fun x -> if x = n then Some n else None) xs = Array.SIMD.pick (fun x -> if Vector.EqualsAny(Vector<int>(n),x) then Some n else None) (fun x -> if x = n then Some n else None) xs
             )
 
+[<Test>]
+let ``SIMD.min with initial NaN`` () = 
+    let data = [|14.0; nan; 1.0; 0.0|]
+    let min     = data |> Array.min
+    let simdMin = data |> Array.SIMD.min
+    Assert.AreEqual(min, simdMin)
+
+[<Test>]
+let ``SIMD.max with initial NaN`` () = 
+    let data = [|14.0; nan; 1.0; 17.0|]
+    let max     = data |> Array.max
+    let simdMax = data |> Array.SIMD.max
+    Assert.AreEqual(max, simdMax)
 
 [<Test>]
 let ``SIMD.find`` () =
@@ -543,12 +555,6 @@ let ``SIMD.maxBy = Array.maxBy`` () =
     fun (array: int []) ->
         (array.Length > 0 && array <> [||]) ==>
         lazy ((compareNums (Array.SIMD.maxBy (fun x -> x+x) (fun x -> x+x) array) (Array.maxBy (fun x -> x+x) array)))
-
-[<Test>]                  
-let ``SIMD.maxBy`` () =
-    let xs = [| -5..-1 |]
-    Assert.AreEqual(-5, xs |> Array.maxBy (fun x -> -x))
-    Assert.AreEqual(-5, xs |> Array.SIMD.maxBy (fun v -> -v) (fun x -> -x))
 
 [<Test>]                  
 let ``SIMD.minBy`` () =
