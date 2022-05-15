@@ -2,18 +2,15 @@
 <package >
   <metadata>
     <id>SIMDArray</id>
-    <version>0.5.1-alpha</version>
+    <version>1.0.0</version>
     <title>SIMDArray</title>
     <authors>Jack Mott</authors>
     <owners>Jack Mott</owners>    
-    <projectUrl>https://github.com/jackmott/SIMDArray</projectUrl>    
+    <projectUrl>https://github.com/fsprojetcs/SIMDArray</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>SIMD enhanced Array operations for F#</description>
-    <releaseNotes>Initial Alpha Build</releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <releaseNotes>New NetStandard build</releaseNotes>
+    <copyright>Copyright 2022</copyright>
     <tags>F# SIMD</tags>
-    <dependencies>
-      <dependency id="System.Numerics.Vectors" version="4.1.1"></dependency> 
-    </dependencies>
   </metadata>
 </package>

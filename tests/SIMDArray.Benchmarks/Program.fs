@@ -11,14 +11,8 @@ open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
 open SIMDArrayUtils
-
-
-#if MONO
-#else
 open BenchmarkDotNet.Diagnostics.Windows
 open System.Collections.Generic
-
-#endif
                 
 module Array =
     let inline zeroCreateUnchecked (count:int) = 
@@ -69,13 +63,9 @@ type CoreConfig () =
     do               
         //base.Add (Job.RyuJitX64.WithTargetCount(Count(100)))
         base.Add Job.RyuJitX64
-        
-        #if MONO
-        #else
-        base.Add(new MemoryDiagnoser())
-        #endif
+        //base.Add(new MemoryDiagnoser())
 
-[<Config (typeof<CoreConfig>)>]
+[<MemoryDiagnoser>]
 type CoreBenchmark () =    
 
     let mutable list = []
