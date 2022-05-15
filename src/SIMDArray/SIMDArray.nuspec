@@ -4,7 +4,7 @@
     <id>SIMDArray</id>
     <version>1.0.0</version>
     <title>SIMDArray</title>
-    <authors>Jack Mott</authors>
+    <authors>Jack Mott, delneg</authors>
     <owners>Jack Mott</owners>    
     <projectUrl>https://github.com/fsprojetcs/SIMDArray</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
