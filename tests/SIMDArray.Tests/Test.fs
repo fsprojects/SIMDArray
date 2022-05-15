@@ -4,9 +4,9 @@ open System.Numerics
 open System
 open System.Diagnostics
 open FsCheck
-open NUnit                  
 open NUnit.Framework
 open Swensen.Unquote
+open Nessos.Streams
 
 //horizontal ops
 let inline horizontal (f : ^T -> ^T -> ^T) (v :Vector< ^T>) : ^T =
@@ -38,17 +38,16 @@ let inline areEqual (xs: 'T []) (ys: 'T []) =
             i <- i + 1
         result
 
-open FsCheck.Gen
 
 let inline lenAbove num = Gen.where (fun a -> (^a:(member Length:int)a) > num)
 let inline lenBelow num = Gen.where (fun a -> (^a:(member Length:int)a) < num)
 let inline between a b = lenAbove a >> lenBelow b
 
-let arrayArb<'a> =  
+let arrayArb<'a> =
     Gen.arrayOf Arb.generate<'a> 
     |> between 1 10000 |> Arb.fromGen
 
-let config testCount = 
+let config testCount =
     { Config.QuickThrowOnFailure with 
         MaxTest = testCount
         StartSize = 1
