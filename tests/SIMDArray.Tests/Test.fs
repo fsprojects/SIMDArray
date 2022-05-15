@@ -2,11 +2,9 @@
 
 open System.Numerics
 open System
-open System.Diagnostics
 open FsCheck
 open NUnit.Framework
 open Swensen.Unquote
-open Nessos.Streams
 
 //horizontal ops
 let inline horizontal (f : ^T -> ^T -> ^T) (v :Vector< ^T>) : ^T =
