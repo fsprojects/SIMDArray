@@ -58,13 +58,6 @@ let partition f (array: _[]) =
 
 
 
-type CoreConfig () =
-    inherit ManualConfig()
-    do               
-        //base.Add (Job.RyuJitX64.WithTargetCount(Count(100)))
-        base.Add Job.RyuJitX64
-        //base.Add(new MemoryDiagnoser())
-
 [<MemoryDiagnoser>]
 type CoreBenchmark () =    
 
@@ -83,7 +76,7 @@ type CoreBenchmark () =
 
    
       
-    [<Setup>]
+    [<GlobalSetup>]
     member self.SetupData () =  
        
        //let r = Random(self.Length)
@@ -165,14 +158,9 @@ let main argv =
     let result = array |> filterOldPlusPlus (fun x-> x < 100)
     printf "*******\n"*)
    
-             
-    let switch = 
-        BenchmarkSwitcher [|
-            typeof<CoreBenchmark>
-        |] 
-
-    switch.Run [|"CoreBenchmark"|] |> ignore
+    let _ = BenchmarkRunner.Run<CoreBenchmark>()
     0
    
 
 
+    

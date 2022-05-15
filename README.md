@@ -72,6 +72,34 @@ When measuring performance be sure to use Release builds with optimizations turn
 Floating point addition is not associative, so results with SIMD operations will not be identical, though often
 they will be more accurate, such as in the case of sum, or average.
 
+## Upd: .NET 7.0 Basic Tests
+```
+// * Summary *
+
+BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19044.1526 (21H2)
+AMD Ryzen 7 3800X, 1 CPU, 16 logical and 8 physical cores
+.NET SDK=7.0.100-preview.3.22179.4
+  [Host]     : .NET 7.0.0 (7.0.22.17504), X64 RyuJIT DEBUG
+  DefaultJob : .NET 7.0.0 (7.0.22.17504), X64 RyuJIT
+
+
+|    Method |  Length |          Mean |        Error |       StdDev | Allocated |
+|---------- |-------- |--------------:|-------------:|-------------:|----------:|
+|       Max |     100 |      54.71 ns |     0.155 ns |     0.137 ns |         - |
+|   MaxSIMD |     100 |      14.05 ns |     0.167 ns |     0.156 ns |         - |
+|     MaxBy |     100 |      54.80 ns |     0.066 ns |     0.062 ns |         - |
+| MaxBySIMD |     100 |      19.13 ns |     0.050 ns |     0.047 ns |         - |
+|       Max |    1000 |     489.10 ns |     1.344 ns |     1.192 ns |         - |
+|   MaxSIMD |    1000 |      44.07 ns |     0.169 ns |     0.158 ns |         - |
+|     MaxBy |    1000 |     491.93 ns |     2.946 ns |     2.460 ns |         - |
+| MaxBySIMD |    1000 |     139.47 ns |     0.721 ns |     0.674 ns |         - |
+|       Max | 1000000 | 483,111.68 ns | 1,739.203 ns | 1,541.758 ns |         - |
+|   MaxSIMD | 1000000 |  48,172.46 ns |   356.128 ns |   278.041 ns |         - |
+|     MaxBy | 1000000 | 488,051.81 ns |   905.715 ns |   802.893 ns |         - |
+| MaxBySIMD | 1000000 | 133,417.00 ns |   134.370 ns |   112.205 ns |         - |
+
+```
+
 ## Performance Comparison vs Standard Array Functions
 
 * [VS Core Lib Parallel](#parallel)
