@@ -1,4 +1,4 @@
-![Build Status](https://ci.appveyor.com/api/projects/status/github/fsprojects/SIMDArray "Build Status")
+[![Build & test for dotnet 3.1, 5.0, 6.0](https://github.com/fsprojects/SIMDArray/actions/workflows/test.yml/badge.svg)](https://github.com/fsprojects/SIMDArray/actions/workflows/test.yml)
 
 # SIMDArray FSharp
 SIMD and other Performance enhanced Array operations for F#
