@@ -11,14 +11,8 @@ open BenchmarkDotNet.Running
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Jobs
 open SIMDArrayUtils
-
-
-#if MONO
-#else
 open BenchmarkDotNet.Diagnostics.Windows
 open System.Collections.Generic
-
-#endif
                 
 module Array =
     let inline zeroCreateUnchecked (count:int) = 
@@ -64,18 +58,7 @@ let partition f (array: _[]) =
 
 
 
-type CoreConfig () =
-    inherit ManualConfig()
-    do               
-        //base.Add (Job.RyuJitX64.WithTargetCount(Count(100)))
-        base.Add Job.RyuJitX64
-        
-        #if MONO
-        #else
-        base.Add(new MemoryDiagnoser())
-        #endif
-
-[<Config (typeof<CoreConfig>)>]
+[<MemoryDiagnoser>]
 type CoreBenchmark () =    
 
     let mutable list = []
@@ -93,7 +76,7 @@ type CoreBenchmark () =
 
    
       
-    [<Setup>]
+    [<GlobalSetup>]
     member self.SetupData () =  
        
        //let r = Random(self.Length)
@@ -175,14 +158,9 @@ let main argv =
     let result = array |> filterOldPlusPlus (fun x-> x < 100)
     printf "*******\n"*)
    
-             
-    let switch = 
-        BenchmarkSwitcher [|
-            typeof<CoreBenchmark>
-        |] 
-
-    switch.Run [|"CoreBenchmark"|] |> ignore
+    let _ = BenchmarkRunner.Run<CoreBenchmark>()
     0
    
 
 
+    

@@ -1,9 +1,0 @@
-FSharp.Core
-System.Numerics.Vectors
-group Test
-FsCheck
-Streams
-Streams.CSharp
-NUnit
-NUnit.Runners
-Unquote

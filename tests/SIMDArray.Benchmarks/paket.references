@@ -1,8 +1,0 @@
-System.Numerics.Vectors
-BenchmarkDotNet.Diagnostics.Windows
-group Test
-BenchmarkDotnet
-System.Reflection.Metadata
-MathNET.Numerics
-MathNET.Numerics.FSharp
-MathNET.Numerics.MKL.Win-X64
