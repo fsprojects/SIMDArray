@@ -10,14 +10,14 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '6.0.x'
     - name: Install tools
       run: dotnet tool restore
-    - name: Build and Test 
+    - name: Build and Test
       run: dotnet test -c Release
     - name: Pack
       run: dotnet pack -c Release
-    - name: Build docs 
+    - name: Build docs
       run: dotnet fsdocs build --properties Configuration=Release
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
