@@ -102,7 +102,7 @@ let inline mapi
 /// </summary>
 /// <param name="f">The folding function</param>
 /// <param name="vcombiner">Function to combine the parallel Vector states when parallel process ends</param>
-/// <param name="scombiner">Function to combine the elements of the final SIMD vector/param>
+/// <param name="scombiner">Function to combine the elements of the final SIMD vector</param>
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold
