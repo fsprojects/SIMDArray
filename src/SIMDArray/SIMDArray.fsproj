@@ -8,6 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProjectGuid>aed427e4-ce8c-47fc-8918-2bac5d4d3d35</ProjectGuid>
+    <WarningLevel>5</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />

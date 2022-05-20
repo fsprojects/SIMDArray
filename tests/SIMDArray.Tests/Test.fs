@@ -344,6 +344,45 @@ let ``SIMD.map = Array.map`` () =
         (lazy test <@ multA xs = multB xs @>)   |@ "map x * x" .&.
         (lazy test <@ minusA xs = minusB xs @>) |@ "map x - x" 
 
+[<Test>]                  
+let ``SIMD.mapFold = Array.mapFold`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let inline funcIntMul acc x = x*x, acc + x
+        let inline funcIntMinus acc x = x-x, acc-x
+        
+        let multA   x = x |> Array.SIMD.mapFold funcIntMul funcIntMul (+) 0
+        let multB   x = x |> Array.mapFold funcIntMul 0
+        let minusA  x = x |> Array.SIMD.mapFold funcIntMinus funcIntMinus (+) 0
+        let minusB  x = x |> Array.mapFold funcIntMinus 0
+        
+        (lazy test <@ multA xs = multB xs @>)   |@ "mapFold x * x, acc + x" .&.
+        (lazy test <@ minusA xs = minusB xs @>) |@ "mapFold x - x, acc - x" 
+
+[<Test>]                  
+let ``SIMD.mapFoldBack = Array.mapFoldBack`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        let inline funcIntMul x acc = x*x, acc + x
+        let inline funcIntMinus x acc = x-x, acc-x
+        
+        let multA   x = Array.SIMD.mapFoldBack funcIntMul funcIntMul (+) x 0
+        let multB   x = Array.mapFoldBack funcIntMul x 0
+        let minusA  x = Array.SIMD.mapFoldBack funcIntMinus funcIntMinus (+) x 0
+        let minusB  x = Array.mapFoldBack funcIntMinus x 0
+        
+        (lazy test <@ multA xs = multB xs @>)   |@ "mapFoldBack x * x, acc + x" .&.
+        (lazy test <@ minusA xs = minusB xs @>) |@ "mapFoldBack x - x, acc - x" 
+
+
+[<Test>]                  
+let ``SIMD.fill = Array.fill`` () =
+    quickCheck <|
+    fun (xs: int []) ->
+        (xs.Length > 0 && xs <> [||]) ==>
+        lazy (Array.fill xs 0 1 10 = Array.SIMD.fill xs 0 1 10)
 
 [<Test>]                  
 let ``SIMD.mapInPlace = Array.map`` () =
