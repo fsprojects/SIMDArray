@@ -365,8 +365,8 @@ let ``SIMD.mapFoldBack = Array.mapFoldBack`` () =
     quickCheck <|
     fun (xs: int []) ->
         (xs.Length > 0 && xs <> [||]) ==>
-        let inline funcIntMul acc x = x*x, acc + x
-        let inline funcIntMinus acc x = x-x, acc-x
+        let inline funcIntMul x acc = x*x, acc + x
+        let inline funcIntMinus x acc = x-x, acc-x
         
         let multA   x = Array.SIMD.mapFoldBack funcIntMul funcIntMul (+) x 0
         let multB   x = Array.mapFoldBack funcIntMul x 0
