@@ -74,7 +74,7 @@ type CoreBenchmark () =
     [<Params (100,1000,1000000)>]     
     member val public Length = 0 with get, set
 
-   
+    member val public Half = Int32.MaxValue / 2
       
     [<GlobalSetup>]
     member self.SetupData () =  
@@ -151,6 +151,24 @@ type CoreBenchmark () =
     member self.FoldSIMD () =
         let inline fn acc x = x + acc
         (0, array) ||> Array.SIMD.fold fn fn (+)
+
+    [<Benchmark>]
+    member self.Partition () =
+        array |> Array.partition (fun x -> x > self.Half)
+
+    [<Benchmark>]
+    member self.PartitionPerformance () =
+        array |> Array.Performance.partitionUnordered (fun x -> x > self.Half)
+    
+    [<Benchmark>]
+    member self.Filter () =
+        array |> Array.filter (fun x -> x % 2 = 0)
+
+    [<Benchmark>]
+    member self.FilterPerformance() =
+        array |> Array.Performance.filterSimplePredicate (fun x -> x % 2 = 0)
+        
+        
 
 [<EntryPoint>]
 let main argv =              
