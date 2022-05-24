@@ -8,10 +8,20 @@
     <SchemaVersion>2.0</SchemaVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProjectGuid>aed427e4-ce8c-47fc-8918-2bac5d4d3d35</ProjectGuid>
+    <Authors>Jack Mott, delneg</Authors>
+    <Summary></Summary>
+    <Description>SIMD and other Performance enhanced Array operations for F#</Description>
+    <PackageProjectUrl>https://github.com/fsprojects/SIMDArray</PackageProjectUrl>
+    <PackageTags>F#;SIMD</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <RepositoryUrl>https://github.com/fsprojects/SIMDArray</RepositoryUrl>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EnableSourceLink>true</EnableSourceLink>
     <WarningLevel>5</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SIMDArrayUtils.fs" />
     <Compile Include="PerformanceArray.fs" />
     <Compile Include="SIMDArray.fs" />
