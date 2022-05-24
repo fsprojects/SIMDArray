@@ -74,20 +74,20 @@ type CoreBenchmark () =
     [<Params (100,1000,1000000)>]     
     member val public Length = 0 with get, set
 
-   
+    member val public Half = Int32.MaxValue / 2
       
     [<GlobalSetup>]
     member self.SetupData () =  
        
-       //let r = Random(self.Length)
+       let r = Random(self.Length)
        //list <- List.init self.Length (fun i -> (1.0,2.0))
 
-       //array <- Array.init self.Length (fun i -> 2)
+       array <- Array.init self.Length (fun i -> r.Next())
        //array <- Array.create self.Length 10 
-       //array2 <- Array.init self.Length (fun i -> 3)
+       array2 <- Array.init self.Length (fun i -> r.Next())
         
-       array <- Array.create self.Length 2
-       array2 <- Array.create self.Length 2
+//       array <- Array.create self.Length 
+//       array2 <- Array.create self.Length 2
 //       resizeArray <- ResizeArray<int>(self.Length)
        //for i = 0 to self.Length-1 do
         //resizeArray.Add(array.[i])
@@ -104,20 +104,20 @@ type CoreBenchmark () =
         //array <- Array.init self.Length (fun i -> [|1;2;3;4;5;|])
         
                                                   
-    //[<Benchmark>]
-    //member self.ForSum () =                                
-    //   array |> Array.map (fun x -> x*x)
-    //[<Benchmark>]
-    //member self.ForSumSIMD () =                                
-    //   array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)
+    [<Benchmark>]
+    member self.ForSum () =                                
+       array |> Array.map (fun x -> x*x)
+    [<Benchmark>]
+    member self.ForSumSIMD () =                                
+       array |> Array.SIMD.map (fun x -> x*x) (fun x -> x*x)
 
-    //[<Benchmark>]
-    //member self.Dot () =                                
-    //   array |> Array.fold2 (fun a x y -> a + x*y) 0 array2
+    [<Benchmark>]
+    member self.Dot () =                                
+       array |> Array.fold2 (fun a x y -> a + x*y) 0 array2
 
-    //[<Benchmark>]
-    //member self.DotSIMD () =                                
-    //   array |> Array.SIMD.dot array2
+    [<Benchmark>]
+    member self.DotSIMD () =                                
+       array |> Array.SIMD.dot array2
 
     [<Benchmark>]
     member self.Max () =
@@ -134,6 +134,41 @@ type CoreBenchmark () =
     [<Benchmark>]
     member self.MaxBySIMD () =
         array |> Array.SIMD.maxBy (fun x -> x*x) (fun x -> x*x)
+    
+    [<Benchmark>]
+    member self.Map () =
+        array |> Array.map (fun x -> x + 2*x)
+
+    [<Benchmark>]
+    member self.MapSIMD () =
+        array |> Array.SIMD.map (fun x -> x + 2*x) (fun x -> x + 2*x)
+        
+    [<Benchmark>]
+    member self.Fold () =
+        (0, array) ||> Array.fold (fun acc x -> x + acc)
+
+    [<Benchmark>]
+    member self.FoldSIMD () =
+        let inline fn acc x = x + acc
+        (0, array) ||> Array.SIMD.fold fn fn (+)
+
+    [<Benchmark>]
+    member self.Partition () =
+        array |> Array.partition (fun x -> x > self.Half)
+
+    [<Benchmark>]
+    member self.PartitionPerformance () =
+        array |> Array.Performance.partitionUnordered (fun x -> x > self.Half)
+    
+    [<Benchmark>]
+    member self.Filter () =
+        array |> Array.filter (fun x -> x % 2 = 0)
+
+    [<Benchmark>]
+    member self.FilterPerformance() =
+        array |> Array.Performance.filterSimplePredicate (fun x -> x % 2 = 0)
+        
+        
 
 [<EntryPoint>]
 let main argv =              

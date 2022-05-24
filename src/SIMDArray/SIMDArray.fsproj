@@ -19,6 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <EnableSourceLink>true</EnableSourceLink>
+    <WarningLevel>5</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SIMDArrayUtils.fs" />
