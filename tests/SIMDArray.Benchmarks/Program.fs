@@ -74,7 +74,7 @@ type CoreBenchmark () =
     [<Params (100,1000,1000000)>]     
     member val public Length = 0 with get, set
 
-   
+    member val public Half = Int32.MaxValue / 2
       
     [<GlobalSetup>]
     member self.SetupData () =  
@@ -134,6 +134,41 @@ type CoreBenchmark () =
     [<Benchmark>]
     member self.MaxBySIMD () =
         array |> Array.SIMD.maxBy (fun x -> x*x) (fun x -> x*x)
+    
+    [<Benchmark>]
+    member self.Map () =
+        array |> Array.map (fun x -> x + 2*x)
+
+    [<Benchmark>]
+    member self.MapSIMD () =
+        array |> Array.SIMD.map (fun x -> x + 2*x) (fun x -> x + 2*x)
+        
+    [<Benchmark>]
+    member self.Fold () =
+        (0, array) ||> Array.fold (fun acc x -> x + acc)
+
+    [<Benchmark>]
+    member self.FoldSIMD () =
+        let inline fn acc x = x + acc
+        (0, array) ||> Array.SIMD.fold fn fn (+)
+
+    [<Benchmark>]
+    member self.Partition () =
+        array |> Array.partition (fun x -> x > self.Half)
+
+    [<Benchmark>]
+    member self.PartitionPerformance () =
+        array |> Array.Performance.partitionUnordered (fun x -> x > self.Half)
+    
+    [<Benchmark>]
+    member self.Filter () =
+        array |> Array.filter (fun x -> x % 2 = 0)
+
+    [<Benchmark>]
+    member self.FilterPerformance() =
+        array |> Array.Performance.filterSimplePredicate (fun x -> x % 2 = 0)
+        
+        
 
 [<EntryPoint>]
 let main argv =              
