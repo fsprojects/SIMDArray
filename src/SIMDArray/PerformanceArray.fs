@@ -15,7 +15,7 @@ open SIMDArrayUtils
 /// </summary>
 /// <param name="f"></param>
 /// <param name="array"></param>
-let inline partitionUnordered f (array: _[]) = 
+let inline partitionUnordered ([<InlineIfLambda>] f: 'a -> bool) (array: _[]) = 
     checkNonNull array
     let res = Array.zeroCreate array.Length        
     let mutable upCount = 0
@@ -70,7 +70,7 @@ let inline distinctByUnordered keyf (array:'T[]) =
 /// </summary>
 /// <param name="f"></param>
 /// <param name="array"></param>
-let inline mapInPlace f (array :'T[]) =
+let inline mapInPlace ([<InlineIfLambda>] f: 'T -> 'T) (array :'T[]) =
     
     checkNonNull array
         
@@ -85,7 +85,7 @@ let inline mapInPlace f (array :'T[]) =
 /// </summary>
 /// <param name="f">Predicate to fitler with</param>
 /// <param name="array"></param>
-let inline filterSimplePredicate (f: ^T -> bool) (array: ^T[]) = 
+let inline filterSimplePredicate ([<InlineIfLambda>] f: ^T -> bool) (array: ^T[]) = 
     
     checkNonNull array
     if array.Length = 0 then invalidArg "array" "Array can not be empty."    
@@ -110,7 +110,7 @@ let inline filterSimplePredicate (f: ^T -> bool) (array: ^T[]) =
 /// </summary>
 /// <param name="f">Predicate to fitler with</param>
 /// <param name="array"></param>
-let inline whereSimplePredicate (f: ^T -> bool) (array: ^T[]) = 
+let inline whereSimplePredicate ([<InlineIfLambda>] f: ^T -> bool) (array: ^T[]) = 
     filterSimplePredicate f array
 
 

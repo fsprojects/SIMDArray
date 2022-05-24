@@ -11,7 +11,7 @@ open System.Numerics
 /// </summary>
 /// <param name="f">Accepts a Vector</param>
 /// <param name="array"></param>
-let inline iter vf sf (array : ^T[]) =
+let inline iter ([<InlineIfLambda>] vf: Vector< ^T> -> unit) ([<InlineIfLambda>] sf: ^T -> unit) (array : ^T[]) =
     checkNonNull array
     let count = Vector< ^T>.Count
     let len = array.Length
@@ -28,7 +28,7 @@ let inline iter vf sf (array : ^T[]) =
 /// </summary>
 /// <param name="f">Accepts the current index and associated Vector</param>
 /// <param name="array"></param>
-let inline iteri vf sf (array : ^T[]) =
+let inline iteri ([<InlineIfLambda>] vf: int -> Vector< ^T> -> unit) ([<InlineIfLambda>] sf: int ->  ^T -> unit) (array : ^T[]) =
     checkNonNull array
     let count = Vector< ^T>.Count
     let len = array.Length
@@ -48,7 +48,7 @@ let inline iteri vf sf (array : ^T[]) =
 /// <param name="sf">A function to handle the leftover scalar elements if array is not divisible by Vector.count</param>
 /// <param name="array">The source array</param>
 let inline map
-    (vf : ^T Vector -> ^U Vector) (sf : ^T -> ^U) (array : ^T[]) : ^U[] =
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Vector) ([<InlineIfLambda>] sf : ^T -> ^U) (array : ^T[]) : ^U[] =
 
     checkNonNull array
     let count = Vector< ^T>.Count
@@ -75,7 +75,7 @@ let inline map
 /// does not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 let inline mapi
-    (vf :int -> ^T Vector -> ^U Vector) (sf : int -> ^T -> ^U) (array : ^T[]) : ^U[] =
+    ([<InlineIfLambda>] vf :int -> ^T Vector -> ^U Vector) ([<InlineIfLambda>] sf : int -> ^T -> ^U) (array : ^T[]) : ^U[] =
 
     checkNonNull array
     let count = Vector< ^T>.Count
@@ -106,10 +106,10 @@ let inline mapi
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold
-    (vf: ^State Vector -> ^T Vector -> ^State Vector)
-    (sf : ^State -> ^T -> ^State)
-    (vcombiner : ^State Vector-> ^State Vector-> ^State Vector)
-    (scombiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf: ^State Vector -> ^T Vector -> ^State Vector)
+    ([<InlineIfLambda>] sf : ^State -> ^T -> ^State)
+    ([<InlineIfLambda>] vcombiner : ^State Vector-> ^State Vector-> ^State Vector)
+    ([<InlineIfLambda>] scombiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array: ^T[]) : ^State =
 
@@ -170,8 +170,8 @@ let inline sum (array:^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline sumBy 
-    (vf: Vector< ^T> -> Vector< ^U>) 
-    (sf : ^T -> ^U) 
+    ([<InlineIfLambda>] vf: Vector< ^T> -> Vector< ^U>) 
+    ([<InlineIfLambda>] sf : ^T -> ^U) 
     (array:^T[]) : ^U =
 
     checkNonNull array
@@ -211,7 +211,7 @@ let inline average (array:^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline averageBy 
-    (vf: Vector< ^T> -> Vector< ^U>) (sf: ^T -> ^U) (array:^T[]) : ^U =
+    ([<InlineIfLambda>] vf: Vector< ^T> -> Vector< ^U>) ([<InlineIfLambda>] sf: ^T -> ^U) (array:^T[]) : ^U =
     let sum = sumBy vf sf array
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 

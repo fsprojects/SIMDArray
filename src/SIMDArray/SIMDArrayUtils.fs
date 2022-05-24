@@ -19,13 +19,13 @@ let inline checkNonNull arg =
 open System.Threading.Tasks
 open System
 
-let inline private applyTask fromInc toExc stride f =        
+let inline private applyTask fromInc toExc stride ([<InlineIfLambda>] f: ^a -> unit) =        
         let mutable i = fromInc
         while i < toExc do
             f i
             i <- i + stride
 
-let inline private applyTaskAggregate fromInc toExc stride acc f : ^T =        
+let inline private applyTaskAggregate fromInc toExc stride acc ([<InlineIfLambda>] f: ^a -> ^T -> ^T) : ^T =        
         let mutable i = fromInc
         let mutable acc = acc
         while i < toExc do
@@ -34,7 +34,7 @@ let inline private applyTaskAggregate fromInc toExc stride acc f : ^T =
         acc
 
 
-let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) (f : int -> unit) =
+let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) ([<InlineIfLambda>] f : int -> unit) =
             
     let numStrides = (toExclusive-fromInclusive)/stride
     if numStrides > 0 then
@@ -60,7 +60,8 @@ let inline ForStride (fromInclusive : int) (toExclusive :int) (stride : int) (f 
         Task.WaitAll(taskArray)
 
 
-let inline ForStrideAggregate (fromInclusive : int) (toExclusive :int) (stride : int) (acc: ^T) (f : int -> ^T -> ^T) combiner =      
+let inline ForStrideAggregate (fromInclusive : int) (toExclusive :int) (stride : int) (acc: ^T)
+                              ([<InlineIfLambda>] f : int -> ^T -> ^T) ([<InlineIfLambda>] combiner: ^T -> ^T -> ^T) =      
     let numStrides = (toExclusive-fromInclusive)/stride
     if numStrides > 0 then
         let numTasks = Math.Min(Environment.ProcessorCount,numStrides)
