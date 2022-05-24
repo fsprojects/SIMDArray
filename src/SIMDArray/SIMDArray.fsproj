@@ -11,6 +11,9 @@
     <WarningLevel>5</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="6.0.4" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SIMDArrayUtils.fs" />
     <Compile Include="PerformanceArray.fs" />

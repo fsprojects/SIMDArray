@@ -17,7 +17,7 @@ open SIMDArrayUtils
 /// <param name="vf"></param>
 /// <param name="sf"></param>
 /// <param name="array"></param>
-let inline skipWhile (vf : Vector< ^T> -> bool) (sf : ^T -> bool) (array : ^T[]) : ^T[] =
+let inline skipWhile ([<InlineIfLambda>] vf : Vector< ^T> -> bool) ([<InlineIfLambda>] sf : ^T -> bool) (array : ^T[]) : ^T[] =
     checkNonNull array
     if array.Length <> 0 then
         let mutable i = 0
@@ -43,7 +43,7 @@ let inline skipWhile (vf : Vector< ^T> -> bool) (sf : ^T -> bool) (array : ^T[])
 /// <param name="vf"></param>
 /// <param name="sf"></param>
 /// <param name="array"></param>
-let inline takeWhile (vf : Vector< ^T> -> bool) (sf : ^T -> bool) (array : ^T[]) : ^T[] =
+let inline takeWhile ([<InlineIfLambda>] vf : Vector< ^T> -> bool) ([<InlineIfLambda>] sf : ^T -> bool) (array : ^T[]) : ^T[] =
     checkNonNull array
 
     if array.Length <> 0 then
@@ -72,9 +72,9 @@ let inline takeWhile (vf : Vector< ^T> -> bool) (sf : ^T -> bool) (array : ^T[])
 /// <param name="acc"></param>
 /// <param name="array"></param>
 let inline mapFold
-    (vf: ^State Vector -> ^T Vector -> ^U Vector * ^State Vector)
-    (sf : ^State -> ^T -> ^U * ^State)
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf: ^State Vector -> ^T Vector -> ^U Vector * ^State Vector)
+    ([<InlineIfLambda>] sf : ^State -> ^T -> ^U * ^State)
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array: ^T[]) : ^U[] * ^State =
     
@@ -114,9 +114,9 @@ let inline mapFold
 /// <param name="acc"></param>
 /// <param name="array"></param>
 let inline mapFoldBack
-    (vf:  ^T Vector -> ^State Vector -> ^U Vector * ^State Vector)
-    (sf : ^T -> ^State -> ^U * ^State)
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf:  ^T Vector -> ^State Vector -> ^U Vector * ^State Vector)
+    ([<InlineIfLambda>] sf : ^T -> ^State -> ^U * ^State)
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (array: ^T[])
     (acc : ^State) : ^U[] * ^State =
 
@@ -160,9 +160,9 @@ let inline mapFoldBack
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold
-    (vf: ^State Vector -> ^T Vector -> ^State Vector)
-    (sf : ^State -> ^T -> ^State)
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf: ^State Vector -> ^T Vector -> ^State Vector)
+    ([<InlineIfLambda>] sf : ^State -> ^T -> ^State)
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array: ^T[]) : ^State =
 
@@ -198,9 +198,9 @@ let inline fold
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline foldBack
-    (vf: ^State Vector -> ^T Vector -> ^State Vector)
-    (sf : ^State -> ^T -> ^State)
-    (combiner : ^State -> ^State -> ^State)    
+    ([<InlineIfLambda>] vf: ^State Vector -> ^T Vector -> ^State Vector)
+    ([<InlineIfLambda>] sf : ^State -> ^T -> ^State)
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)    
     (array: ^T[]) 
     (acc : ^State) : ^State  =
 
@@ -236,9 +236,9 @@ let inline foldBack
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline fold2
-    (vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
-    (sf : ^State -> ^T -> ^U -> ^State)
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
+    ([<InlineIfLambda>] sf : ^State -> ^T -> ^U -> ^State)
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (acc : ^State)
     (array1: ^T[])
     (array2: ^U[]) : ^State =
@@ -282,9 +282,9 @@ let inline fold2
 /// <param name="acc">Initial value to accumulate from</param>
 /// <param name="array">Source array</param>
 let inline foldBack2
-    (vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
-    (sf : ^State -> ^T -> ^U -> ^State)
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf : ^State Vector -> ^T Vector -> ^U Vector -> ^State Vector)   
+    ([<InlineIfLambda>] sf : ^State -> ^T -> ^U -> ^State)
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (array1: ^T[])
     (array2: ^U[])
     (acc : ^State) : ^State =
@@ -324,9 +324,9 @@ let inline foldBack2
 /// <param name="combiner">Function to combine the Vector elements at the end</param>
 /// <param name="array">Source array</param>
 let inline reduce
-    (vf: ^State Vector -> ^T Vector -> ^State Vector)
-    (sf: ^State -> ^T -> ^State )
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf: ^State Vector -> ^T Vector -> ^State Vector)
+    ([<InlineIfLambda>] sf: ^State -> ^T -> ^State )
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
     fold vf sf combiner Unchecked.defaultof< ^State> array    
     
@@ -338,9 +338,9 @@ let inline reduce
 /// <param name="combiner">Function to combine the Vector elements at the end</param>
 /// <param name="array">Source array</param>
 let inline reduceBack
-    (vf: ^State Vector -> ^T Vector -> ^State Vector)
-    (sf: ^State -> ^T -> ^State )
-    (combiner : ^State -> ^State -> ^State)
+    ([<InlineIfLambda>] vf: ^State Vector -> ^T Vector -> ^State Vector)
+    ([<InlineIfLambda>] sf: ^State -> ^T -> ^State )
+    ([<InlineIfLambda>] combiner : ^State -> ^State -> ^State)
     (array: ^T[]) : ^State =
     foldBack vf sf combiner  array Unchecked.defaultof< ^State>
 
@@ -452,7 +452,7 @@ let inline clear (array : ^T[]) (index : int) (length : int) : unit =
 /// </summary>
 /// <param name="count">How large to make the array</param>
 /// <param name="f">A function that accepts every Nth index and returns a Vector to be copied into the array</param>
-let inline init (count :int) (vf : int -> Vector< ^T>) (sf : int -> ^T) =
+let inline init (count :int) ([<InlineIfLambda>] vf : int -> Vector< ^T>) ([<InlineIfLambda>] sf : int -> ^T) =
     
     if count < 0 then invalidArg "count" "The input must be non-negative."
     
@@ -505,8 +505,8 @@ let inline sum (array:^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline sumBy 
-    (vf: Vector< ^T> -> Vector< ^U>) 
-    (sf : ^T -> ^U) 
+    ([<InlineIfLambda>] vf: Vector< ^T> -> Vector< ^U>) 
+    ([<InlineIfLambda>] sf : ^T -> ^U) 
     (array:^T[]) : ^U =
 
     checkNonNull array
@@ -546,7 +546,7 @@ let inline average (array:^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline averageBy 
-    (vf: Vector< ^T> -> Vector< ^U>) (sf: ^T -> ^U) (array:^T[]) : ^U =
+    ([<InlineIfLambda>] vf: Vector< ^T> -> Vector< ^U>) ([<InlineIfLambda>] sf: ^T -> ^U) (array:^T[]) : ^U =
     let sum = sumBy vf sf array
     LanguagePrimitives.DivideByInt< ^U> sum array.Length
 
@@ -560,7 +560,7 @@ let inline averageBy
 /// <param name="sf">A function to handle the leftover scalar elements if array is not divisible by Vector.count</param>
 /// <param name="array">The source array</param>
 let inline map
-    (vf : ^T Vector -> ^U Vector) (sf : ^T -> ^U) (array : ^T[]) : ^U[] =
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Vector) ([<InlineIfLambda>] sf : ^T -> ^U) (array : ^T[]) : ^U[] =
 
     checkNonNull array
     let count = Vector< ^T>.Count
@@ -588,8 +588,8 @@ let inline map
 /// returned vector do not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 let inline map2
-    (vf : ^T Vector -> ^U Vector -> ^V Vector) 
-    (sf : ^T -> ^U -> ^V)
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Vector -> ^V Vector) 
+    ([<InlineIfLambda>] sf : ^T -> ^U -> ^V)
     (array1 : ^T[]) 
     (array2 :^U[]) : ^V[] =
 
@@ -627,8 +627,8 @@ let inline map2
 
 
 let inline map3
-    (vf : ^T Vector -> ^U Vector -> ^V Vector -> ^W Vector) 
-    (sf : ^T -> ^U -> ^V -> ^W)
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Vector -> ^V Vector -> ^W Vector) 
+    ([<InlineIfLambda>] sf : ^T -> ^U -> ^V -> ^W)
     (array1 : ^T[]) (array2 :^U[]) (array3 :^V[]): ^W[] =
 
     checkNonNull array1
@@ -664,8 +664,8 @@ let inline map3
 /// <param name="array">The source array</param>
 
 let inline mapi2
-    (vf : int -> ^T Vector -> ^U Vector -> ^V Vector) 
-    (sf : int -> ^T -> ^U -> ^V)
+    ([<InlineIfLambda>] vf : int -> ^T Vector -> ^U Vector -> ^V Vector) 
+    ([<InlineIfLambda>] sf : int -> ^T -> ^U -> ^V)
     (array1 : ^T[]) (array2 :^U[]) : ^V[] =
 
     checkNonNull array1
@@ -699,8 +699,8 @@ let inline mapi2
 /// does not have to be the same type but must be the same width</param>
 /// <param name="array">The source array</param>
 let inline mapi
-    (vf : int -> ^T Vector -> ^U Vector) 
-    (sf: int -> ^T -> ^U)
+    ([<InlineIfLambda>] vf : int -> ^T Vector -> ^U Vector) 
+    ([<InlineIfLambda>] sf: int -> ^T -> ^U)
     (array : ^T[]) : ^U[] =
 
     checkNonNull array
@@ -728,8 +728,8 @@ let inline mapi
 /// <param name="f">Accepts a Vector</param>
 /// <param name="array"></param>
 let inline iter
-    (vf : Vector< ^T> -> unit) 
-    (sf : ^T -> unit) 
+    ([<InlineIfLambda>] vf : Vector< ^T> -> unit) 
+    ([<InlineIfLambda>] sf : ^T -> unit) 
     (array : ^T[]) : unit  =
 
     checkNonNull array
@@ -754,8 +754,8 @@ let inline iter
 /// <param name="f">Accepts two Vectors</param>
 /// <param name="array"></param>
 let inline iter2 
-    (vf : Vector< ^T> -> Vector< ^U> -> unit)
-    (sf : ^T -> ^U -> unit)
+    ([<InlineIfLambda>] vf : Vector< ^T> -> Vector< ^U> -> unit)
+    ([<InlineIfLambda>] sf : ^T -> ^U -> unit)
     (array1: ^T[]) (array2: ^U[]) : unit =
 
     checkNonNull array1
@@ -785,8 +785,8 @@ let inline iter2
 /// <param name="f">Accepts the current index and associated Vector</param>
 /// <param name="array"></param>
 let inline iteri
-    (vf : int -> Vector< ^T> -> unit)
-    (sf : int -> ^T -> unit)
+    ([<InlineIfLambda>] vf : int -> Vector< ^T> -> unit)
+    ([<InlineIfLambda>] sf : int -> ^T -> unit)
     (array : ^T[]) : unit  =
 
     checkNonNull array
@@ -812,8 +812,8 @@ let inline iteri
 /// <param name="f">Accepts two Vectors</param>
 /// <param name="array"></param>
 let inline iteri2 
-    (vf : int -> Vector< ^T> -> Vector< ^U> -> unit)
-    (sf : int -> ^T -> ^U -> unit)
+    ([<InlineIfLambda>] vf : int -> Vector< ^T> -> Vector< ^U> -> unit)
+    ([<InlineIfLambda>] sf : int -> ^T -> ^U -> unit)
     (array1: ^T[]) (array2: ^U[]) : unit =
 
     checkNonNull array1
@@ -844,8 +844,8 @@ let inline iteri2
 /// <param name="array"></param>
 
 let inline mapInPlace
-    ( vf : ^T Vector -> ^T Vector) 
-    ( sf : ^T -> ^T )
+    ([<InlineIfLambda>]  vf : ^T Vector -> ^T Vector) 
+    ([<InlineIfLambda>]  sf : ^T -> ^T )
     (array: ^T[]) : unit =
 
     checkNonNull array
@@ -870,7 +870,7 @@ let inline mapInPlace
 /// <param name="sf">Takes a 'T and returns an option</param>
 /// <param name="array"></param>
 let inline pick
-    (vf : ^T Vector -> ^U Option) (sf: ^T -> ^U Option) (array: ^T[]) : ^U =    
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Option) ([<InlineIfLambda>] sf: ^T -> ^U Option) (array: ^T[]) : ^U =    
     checkNonNull array    
 
     let count = Vector< ^T>.Count
@@ -906,7 +906,7 @@ let inline pick
 /// <param name="sf">Takes a 'T and returns an option</param>
 /// <param name="array"></param>
 let inline tryPick
-    (vf : ^T Vector -> ^U Option) (sf: ^T -> ^U Option) (array: ^T[]) : ^U Option =
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Option) ([<InlineIfLambda>] sf: ^T -> ^U Option) (array: ^T[]) : ^U Option =
 
     checkNonNull array    
 
@@ -937,7 +937,7 @@ let inline tryPick
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline findIndex
-    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int =
+    ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : int =
 
     checkNonNull array    
 
@@ -973,7 +973,7 @@ let inline findIndex
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline find
-    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T =
+    ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : ^T =
 
     array.[findIndex vf sf array]
 
@@ -987,7 +987,7 @@ let inline find
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline findIndexBack
-    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int =
+    ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : int =
 
     checkNonNull array    
 
@@ -1024,7 +1024,7 @@ let inline findIndexBack
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline findBack
-    (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T =
+    ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : ^T =
 
     array.[findIndexBack vf sf array]
 
@@ -1039,7 +1039,7 @@ let inline findBack
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline tryFindIndex
-     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int Option =
+     ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : int Option =
 
     checkNonNull array    
 
@@ -1077,7 +1077,7 @@ let inline tryFindIndex
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline tryFind
-     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T Option =
+     ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : ^T Option =
 
    match tryFindIndex vf sf array with
    | Some i -> Some array.[i]
@@ -1093,7 +1093,7 @@ let inline tryFind
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline tryFindIndexBack
-     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : int Option =
+     ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : int Option =
 
     checkNonNull array    
 
@@ -1131,7 +1131,7 @@ let inline tryFindIndexBack
 /// <param name="sf">Takes a 'T and returns true or false</param>
 /// <param name="array"></param>
 let inline tryFindBack
-     (vf : ^T Vector -> bool) (sf: ^T -> bool) (array: ^T[]) : ^T Option =
+     ([<InlineIfLambda>] vf : ^T Vector -> bool) ([<InlineIfLambda>] sf: ^T -> bool) (array: ^T[]) : ^T Option =
 
    match tryFindIndexBack vf sf array with
    | Some i -> Some array.[i]
@@ -1143,8 +1143,8 @@ let inline tryFindBack
 /// <param name="f">Takes a Vector and returns true or false to indicate existence</param>
 /// <param name="array"></param>
 let inline exists 
-    (vf : ^T Vector -> bool) 
-    (sf : ^T -> bool)
+    ([<InlineIfLambda>] vf : ^T Vector -> bool) 
+    ([<InlineIfLambda>] sf : ^T -> bool)
     (array: ^T[]) : bool =
     
     checkNonNull array
@@ -1173,8 +1173,8 @@ let inline exists
 /// <param name="f">Takes a Vector and returns true or false</param>
 /// <param name="array"></param>
 let inline forall 
-    (vf : ^T Vector -> bool) 
-    (sf : ^T -> bool)
+    ([<InlineIfLambda>] vf : ^T Vector -> bool) 
+    ([<InlineIfLambda>] sf : ^T -> bool)
     (array: ^T[]) : bool =
     
     checkNonNull array
@@ -1203,8 +1203,8 @@ let inline forall
 /// <param name="f">Takes two Vectors and returns true or false to indicate existence</param>
 /// <param name="array"></param>
 let inline exists2 
-    (vf : ^T Vector -> ^U Vector -> bool) 
-    (sf : ^T -> ^U -> bool)
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Vector -> bool) 
+    ([<InlineIfLambda>] sf : ^T -> ^U -> bool)
     (array1: ^T[]) (array2: ^U[]) : bool =
     
     checkNonNull array1
@@ -1236,8 +1236,8 @@ let inline exists2
 /// <param name="f">Takes two Vectors and returns true or false to indicate existence</param>
 /// <param name="array"></param>
 let inline forall2 
-    (vf : ^T Vector -> ^U Vector -> bool) 
-    (sf : ^T -> ^U -> bool)
+    ([<InlineIfLambda>] vf : ^T Vector -> ^U Vector -> bool) 
+    ([<InlineIfLambda>] sf : ^T -> ^U -> bool)
     (array1: ^T[]) 
     (array2: ^U[]) : bool =
     
@@ -1329,8 +1329,8 @@ let inline max (array :^T[]) : ^T =
 /// </summary>
 /// <param name="array"></param>
 let inline maxBy 
-    (vf: Vector< ^T> -> Vector< ^T>) 
-    (sf: ^T -> ^T)
+    ([<InlineIfLambda>] vf: Vector< ^T> -> Vector< ^T>) 
+    ([<InlineIfLambda>] sf: ^T -> ^T)
     (array :^T[]) : ^T =
     
     checkNonNull array
@@ -1379,8 +1379,8 @@ let inline maxBy
 /// </summary>
 /// <param name="array"></param>
 let inline minBy 
-    (vf: Vector< ^T> -> Vector< ^T>) 
-    (sf: ^T -> ^T)
+    ([<InlineIfLambda>] vf: Vector< ^T> -> Vector< ^T>) 
+    ([<InlineIfLambda>] sf: ^T -> ^T)
     (array :^T[]) : ^T =
 
     checkNonNull array
@@ -1461,8 +1461,8 @@ let inline min (array :^T[]) : ^T =
 /// <param name="comparer">compares Vector chunks of each array</param>
 /// <param name="array1"></param>
 /// <param name="array2"></param>
-let inline compareWith (vf : Vector< ^T> -> Vector< ^U> -> int)     
-                       (sf : ^T -> ^U -> int)                   
+let inline compareWith ([<InlineIfLambda>] vf : Vector< ^T> -> Vector< ^U> -> int)     
+                       ([<InlineIfLambda>] sf : ^T -> ^U -> int)                   
                        (array1: ^T[])
                        (array2: ^U[]) =
 
